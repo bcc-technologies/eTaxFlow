@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FacturaElectronica><Numero>F001-00000001</Numero><Cliente>Juan Pérez</Cliente><RNC>123456789</RNC><Direccion>Av. Independencia #123, Santo Domingo</Direccion><Items><Item><Descripcion>Laptop Lenovo</Descripcion><Cantidad>1</Cantidad><Precio>45000</Precio></Item><Item><Descripcion>Mouse inalámbrico</Descripcion><Cantidad>2</Cantidad><Precio>800</Precio></Item></Items><Impuestos><ITBIS>0.18</ITBIS></Impuestos><Total>54988.0</Total></FacturaElectronica>
