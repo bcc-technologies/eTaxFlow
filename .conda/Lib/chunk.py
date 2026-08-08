@@ -52,25 +52,27 @@ import warnings
 
 warnings._deprecated(__name__, remove=(3, 13))
 
+
 class Chunk:
     def __init__(self, file, align=True, bigendian=True, inclheader=False):
         import struct
+
         self.closed = False
-        self.align = align      # whether to align to word (2-byte) boundaries
+        self.align = align  # whether to align to word (2-byte) boundaries
         if bigendian:
-            strflag = '>'
+            strflag = ">"
         else:
-            strflag = '<'
+            strflag = "<"
         self.file = file
         self.chunkname = file.read(4)
         if len(self.chunkname) < 4:
             raise EOFError
         try:
-            self.chunksize = struct.unpack_from(strflag+'L', file.read(4))[0]
+            self.chunksize = struct.unpack_from(strflag + "L", file.read(4))[0]
         except struct.error:
             raise EOFError from None
         if inclheader:
-            self.chunksize = self.chunksize - 8 # subtract header
+            self.chunksize = self.chunksize - 8  # subtract header
         self.size_read = 0
         try:
             self.offset = self.file.tell()
@@ -132,16 +134,14 @@ class Chunk:
         if self.closed:
             raise ValueError("I/O operation on closed file")
         if self.size_read >= self.chunksize:
-            return b''
+            return b""
         if size < 0:
             size = self.chunksize - self.size_read
         if size > self.chunksize - self.size_read:
             size = self.chunksize - self.size_read
         data = self.file.read(size)
         self.size_read = self.size_read + len(data)
-        if self.size_read == self.chunksize and \
-           self.align and \
-           (self.chunksize & 1):
+        if self.size_read == self.chunksize and self.align and (self.chunksize & 1):
             dummy = self.file.read(1)
             self.size_read = self.size_read + len(dummy)
         return data

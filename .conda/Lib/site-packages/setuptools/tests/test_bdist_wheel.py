@@ -63,8 +63,7 @@ EXAMPLES = {
         **dict.fromkeys(DEFAULT_LICENSE_FILES | OTHER_IGNORED_FILES, ""),
     },
     "simple-dist": {
-        "setup.py": cleandoc(
-            """
+        "setup.py": cleandoc("""
             from setuptools import setup
 
             setup(
@@ -73,13 +72,11 @@ EXAMPLES = {
                 description="A testing distribution \N{SNOWMAN}",
                 extras_require={"voting": ["beaglevote"]},
             )
-            """
-        ),
+            """),
         "simpledist": "",
     },
     "complex-dist": {
-        "setup.py": cleandoc(
-            """
+        "setup.py": cleandoc("""
             from setuptools import setup
 
             setup(
@@ -101,13 +98,11 @@ EXAMPLES = {
                     ],
                 },
             )
-            """
-        ),
+            """),
         "complexdist": {"__init__.py": "def main(): return"},
     },
     "headers-dist": {
-        "setup.py": cleandoc(
-            """
+        "setup.py": cleandoc("""
             from setuptools import setup
 
             setup(
@@ -116,14 +111,12 @@ EXAMPLES = {
                 description="A distribution with headers",
                 headers=["header.h"],
             )
-            """
-        ),
+            """),
         "headersdist.py": "",
         "header.h": "",
     },
     "commasinfilenames-dist": {
-        "setup.py": cleandoc(
-            """
+        "setup.py": cleandoc("""
             from setuptools import setup
 
             setup(
@@ -134,8 +127,7 @@ EXAMPLES = {
                 include_package_data=True,
                 package_data={"mypackage.data": ["*"]},
             )
-            """
-        ),
+            """),
         "mypackage": {
             "__init__.py": "",
             "data": {"__init__.py": "", "1,2,3.txt": ""},
@@ -145,8 +137,7 @@ EXAMPLES = {
         },
     },
     "unicode-dist": {
-        "setup.py": cleandoc(
-            """
+        "setup.py": cleandoc("""
             from setuptools import setup
 
             setup(
@@ -156,31 +147,26 @@ EXAMPLES = {
                 packages=["unicodedist"],
                 zip_safe=True,
             )
-            """
-        ),
+            """),
         "unicodedist": {"__init__.py": "", "åäö_日本語.py": ""},
     },
     "utf8-metadata-dist": {
-        "setup.cfg": cleandoc(
-            """
+        "setup.cfg": cleandoc("""
             [metadata]
             name = utf8-metadata-dist
             version = 42
             author_email = "John X. Ãørçeč" <john@utf8.org>, Γαμα קּ 東 <gama@utf8.org>
             long_description = file: README.rst
-            """
-        ),
+            """),
         "README.rst": "UTF-8 描述 説明",
     },
     "licenses-dist": {
-        "setup.cfg": cleandoc(
-            """
+        "setup.cfg": cleandoc("""
             [metadata]
             name = licenses-dist
             version = 1.0
             license_files = **/LICENSE
-            """
-        ),
+            """),
         "LICENSE": "",
         "src": {
             "vendor": {"LICENSE": ""},
@@ -192,8 +178,7 @@ EXAMPLES = {
 if sys.platform != "win32":
     # ABI3 extensions don't really work on Windows
     EXAMPLES["abi3extension-dist"] = {
-        "setup.py": cleandoc(
-            """
+        "setup.py": cleandoc("""
             from setuptools import Extension, setup
 
             setup(
@@ -206,8 +191,7 @@ if sys.platform != "win32":
                     )
                 ],
             )
-            """
-        ),
+            """),
         "setup.cfg": "[bdist_wheel]\npy_limited_api=cp32",
         "extension.c": "#define Py_LIMITED_API 0x03020000\n#include <Python.h>",
     }
@@ -660,7 +644,7 @@ def test_dist_info_provided(dummy_dist, monkeypatch, tmp_path):
     # Check that all expected files are there.
     assert expected - files_found == set()
     # Make sure there is no accidental egg-info bleeding into the wheel.
-    assert not [path for path in files_found if 'egg-info' in str(path)]
+    assert not [path for path in files_found if "egg-info" in str(path)]
 
 
 def test_allow_grace_period_parent_directory_license(monkeypatch, tmp_path):
@@ -670,23 +654,19 @@ def test_allow_grace_period_parent_directory_license(monkeypatch, tmp_path):
         "LICENSE.txt": "parent license",  # <---- the license files are outside
         "NOTICE.txt": "parent notice",
         "python": {
-            "pyproject.toml": cleandoc(
-                """
+            "pyproject.toml": cleandoc("""
                 [project]
                 name = "test-proj"
                 dynamic = ["version"]      # <---- testing dynamic will not break
                 [tool.setuptools.dynamic]
                 version.file = "VERSION"
-                """
-            ),
-            "setup.cfg": cleandoc(
-                """
+                """),
+            "setup.cfg": cleandoc("""
                 [metadata]
                 license_files =
                   ../LICENSE.txt
                   ../NOTICE.txt
-                """
-            ),
+                """),
             "VERSION": "42",
         },
     }

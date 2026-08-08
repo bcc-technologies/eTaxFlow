@@ -19,15 +19,15 @@ class Dialog:
 
     def __init__(self, master=None, **options):
         if master is None:
-            master = options.get('parent')
+            master = options.get("parent")
         self.master = master
         self.options = options
 
     def _fixoptions(self):
-        pass # hook
+        pass  # hook
 
     def _fixresult(self, widget, result):
-        return result # hook
+        return result  # hook
 
     def show(self, **options):
 
@@ -41,7 +41,9 @@ class Dialog:
         if master is None:
             master = _get_temp_root()
         try:
-            self._test_callback(master)  # The function below is replaced for some tests.
+            self._test_callback(
+                master
+            )  # The function below is replaced for some tests.
             s = master.tk.call(self.command, *master._options(self.options))
             s = self._fixresult(master, s)
         finally:

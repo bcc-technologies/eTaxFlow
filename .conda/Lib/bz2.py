@@ -4,8 +4,14 @@ This module provides a file interface, classes for incremental
 (de)compression, and functions for one-shot (de)compression.
 """
 
-__all__ = ["BZ2File", "BZ2Compressor", "BZ2Decompressor",
-           "open", "compress", "decompress"]
+__all__ = [
+    "BZ2File",
+    "BZ2Compressor",
+    "BZ2Decompressor",
+    "open",
+    "compress",
+    "decompress",
+]
 
 __author__ = "Nadeem Vawda <nadeem.vawda@gmail.com>"
 
@@ -16,15 +22,13 @@ import _compression
 
 from _bz2 import BZ2Compressor, BZ2Decompressor
 
-
-_MODE_CLOSED   = 0
-_MODE_READ     = 1
+_MODE_CLOSED = 0
+_MODE_READ = 1
 # Value 2 no longer used
-_MODE_WRITE    = 3
+_MODE_WRITE = 3
 
 
 class BZ2File(_compression.BaseStream):
-
     """A file object providing transparent bzip2 (de)compression.
 
     A BZ2File can act as a wrapper for an existing file object, or refer
@@ -88,8 +92,9 @@ class BZ2File(_compression.BaseStream):
             raise TypeError("filename must be a str, bytes, file or PathLike object")
 
         if self._mode == _MODE_READ:
-            raw = _compression.DecompressReader(self._fp,
-                BZ2Decompressor, trailing_error=OSError)
+            raw = _compression.DecompressReader(
+                self._fp, BZ2Decompressor, trailing_error=OSError
+            )
             self._buffer = io.BufferedReader(raw)
         else:
             self._pos = 0
@@ -268,8 +273,9 @@ class BZ2File(_compression.BaseStream):
         return self._pos
 
 
-def open(filename, mode="rb", compresslevel=9,
-         encoding=None, errors=None, newline=None):
+def open(
+    filename, mode="rb", compresslevel=9, encoding=None, errors=None, newline=None
+):
     """Open a bzip2-compressed file in binary or text mode.
 
     The filename argument can be an actual filename (a str, bytes, or
@@ -338,7 +344,8 @@ def decompress(data):
                 raise  # Error on the first iteration; bail out.
         results.append(res)
         if not decomp.eof:
-            raise ValueError("Compressed data ended before the "
-                             "end-of-stream marker was reached")
+            raise ValueError(
+                "Compressed data ended before the " "end-of-stream marker was reached"
+            )
         data = decomp.unused_data
     return b"".join(results)

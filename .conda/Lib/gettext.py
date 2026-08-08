@@ -51,15 +51,26 @@ import os
 import re
 import sys
 
+__all__ = [
+    "NullTranslations",
+    "GNUTranslations",
+    "Catalog",
+    "bindtextdomain",
+    "find",
+    "translation",
+    "install",
+    "textdomain",
+    "dgettext",
+    "dngettext",
+    "gettext",
+    "ngettext",
+    "pgettext",
+    "dpgettext",
+    "npgettext",
+    "dnpgettext",
+]
 
-__all__ = ['NullTranslations', 'GNUTranslations', 'Catalog',
-           'bindtextdomain', 'find', 'translation', 'install',
-           'textdomain', 'dgettext', 'dngettext', 'gettext',
-           'ngettext', 'pgettext', 'dpgettext', 'npgettext',
-           'dnpgettext'
-           ]
-
-_default_localedir = os.path.join(sys.base_prefix, 'share', 'locale')
+_default_localedir = os.path.join(sys.base_prefix, "share", "locale")
 
 # Expression parsing for plural form selection.
 #
@@ -70,7 +81,8 @@ _default_localedir = os.path.join(sys.base_prefix, 'share', 'locale')
 # https://www.gnu.org/software/gettext/manual/gettext.html#Plural-forms
 # http://git.savannah.gnu.org/cgit/gettext.git/tree/gettext-runtime/intl/plural.y
 
-_token_pattern = re.compile(r"""
+_token_pattern = re.compile(
+    r"""
         (?P<WHITESPACES>[ \t]+)                    | # spaces and horizontal tabs
         (?P<NUMBER>[0-9]+\b)                       | # decimal integer
         (?P<NAME>n\b)                              | # only n is allowed
@@ -81,60 +93,62 @@ _token_pattern = re.compile(r"""
                                                      # unary and bitwise ops
                                                      # not allowed
         (?P<INVALID>\w+|.)                           # invalid token
-    """, re.VERBOSE|re.DOTALL)
+    """,
+    re.VERBOSE | re.DOTALL,
+)
 
 
 def _tokenize(plural):
     for mo in re.finditer(_token_pattern, plural):
         kind = mo.lastgroup
-        if kind == 'WHITESPACES':
+        if kind == "WHITESPACES":
             continue
         value = mo.group(kind)
-        if kind == 'INVALID':
-            raise ValueError('invalid token in plural form: %s' % value)
+        if kind == "INVALID":
+            raise ValueError("invalid token in plural form: %s" % value)
         yield value
-    yield ''
+    yield ""
 
 
 def _error(value):
     if value:
-        return ValueError('unexpected token in plural form: %s' % value)
+        return ValueError("unexpected token in plural form: %s" % value)
     else:
-        return ValueError('unexpected end of plural form')
+        return ValueError("unexpected end of plural form")
 
 
 _binary_ops = (
-    ('||',),
-    ('&&',),
-    ('==', '!='),
-    ('<', '>', '<=', '>='),
-    ('+', '-'),
-    ('*', '/', '%'),
+    ("||",),
+    ("&&",),
+    ("==", "!="),
+    ("<", ">", "<=", ">="),
+    ("+", "-"),
+    ("*", "/", "%"),
 )
 _binary_ops = {op: i for i, ops in enumerate(_binary_ops, 1) for op in ops}
-_c2py_ops = {'||': 'or', '&&': 'and', '/': '//'}
+_c2py_ops = {"||": "or", "&&": "and", "/": "//"}
 
 
 def _parse(tokens, priority=-1):
-    result = ''
+    result = ""
     nexttok = next(tokens)
-    while nexttok == '!':
-        result += 'not '
+    while nexttok == "!":
+        result += "not "
         nexttok = next(tokens)
 
-    if nexttok == '(':
+    if nexttok == "(":
         sub, nexttok = _parse(tokens)
-        result = '%s(%s)' % (result, sub)
-        if nexttok != ')':
-            raise ValueError('unbalanced parenthesis in plural form')
-    elif nexttok == 'n':
-        result = '%s%s' % (result, nexttok)
+        result = "%s(%s)" % (result, sub)
+        if nexttok != ")":
+            raise ValueError("unbalanced parenthesis in plural form")
+    elif nexttok == "n":
+        result = "%s%s" % (result, nexttok)
     else:
         try:
             value = int(nexttok, 10)
         except ValueError:
             raise _error(nexttok) from None
-        result = '%s%d' % (result, value)
+        result = "%s%d" % (result, value)
     nexttok = next(tokens)
 
     j = 100
@@ -144,23 +158,23 @@ def _parse(tokens, priority=-1):
             break
         # Break chained comparisons
         if i in (3, 4) and j in (3, 4):  # '==', '!=', '<', '>', '<=', '>='
-            result = '(%s)' % result
+            result = "(%s)" % result
         # Replace some C operators by their Python equivalents
         op = _c2py_ops.get(nexttok, nexttok)
         right, nexttok = _parse(tokens, i + 1)
-        result = '%s %s %s' % (result, op, right)
+        result = "%s %s %s" % (result, op, right)
         j = i
     if j == priority == 4:  # '<', '>', '<=', '>='
-        result = '(%s)' % result
+        result = "(%s)" % result
 
-    if nexttok == '?' and priority <= 0:
+    if nexttok == "?" and priority <= 0:
         if_true, nexttok = _parse(tokens, 0)
-        if nexttok != ':':
+        if nexttok != ":":
             raise _error(nexttok)
         if_false, nexttok = _parse(tokens)
-        result = '%s if %s else %s' % (if_true, result, if_false)
+        result = "%s if %s else %s" % (if_true, result, if_false)
         if priority == 0:
-            result = '(%s)' % result
+            result = "(%s)" % result
 
     return result, nexttok
 
@@ -169,19 +183,22 @@ def _as_int(n):
     try:
         round(n)
     except TypeError:
-        raise TypeError('Plural value must be an integer, got %s' %
-                        (n.__class__.__name__,)) from None
+        raise TypeError(
+            "Plural value must be an integer, got %s" % (n.__class__.__name__,)
+        ) from None
 
     import warnings
+
     frame = sys._getframe(1)
     stacklevel = 2
-    while frame.f_back is not None and frame.f_globals.get('__name__') == __name__:
+    while frame.f_back is not None and frame.f_globals.get("__name__") == __name__:
         stacklevel += 1
         frame = frame.f_back
-    warnings.warn('Plural value must be an integer, got %s' %
-                  (n.__class__.__name__,),
-                  DeprecationWarning,
-                  stacklevel)
+    warnings.warn(
+        "Plural value must be an integer, got %s" % (n.__class__.__name__,),
+        DeprecationWarning,
+        stacklevel,
+    )
     return n
 
 
@@ -191,7 +208,7 @@ def c2py(plural):
     """
 
     if len(plural) > 1000:
-        raise ValueError('plural form expression is too long')
+        raise ValueError("plural form expression is too long")
     try:
         result, nexttok = _parse(_tokenize(plural))
         if nexttok:
@@ -199,65 +216,72 @@ def c2py(plural):
 
         depth = 0
         for c in result:
-            if c == '(':
+            if c == "(":
                 depth += 1
                 if depth > 20:
                     # Python compiler limit is about 90.
                     # The most complex example has 2.
-                    raise ValueError('plural form expression is too complex')
-            elif c == ')':
+                    raise ValueError("plural form expression is too complex")
+            elif c == ")":
                 depth -= 1
 
-        ns = {'_as_int': _as_int, '__name__': __name__}
-        exec('''if True:
+        ns = {"_as_int": _as_int, "__name__": __name__}
+        exec(
+            """if True:
             def func(n):
                 if not isinstance(n, int):
                     n = _as_int(n)
                 return int(%s)
-            ''' % result, ns)
-        return ns['func']
+            """ % result,
+            ns,
+        )
+        return ns["func"]
     except RecursionError:
         # Recursion error can be raised in _parse() or exec().
-        raise ValueError('plural form expression is too complex')
+        raise ValueError("plural form expression is too complex")
 
 
 def _expand_lang(loc):
     import locale
+
     loc = locale.normalize(loc)
-    COMPONENT_CODESET   = 1 << 0
+    COMPONENT_CODESET = 1 << 0
     COMPONENT_TERRITORY = 1 << 1
-    COMPONENT_MODIFIER  = 1 << 2
+    COMPONENT_MODIFIER = 1 << 2
     # split up the locale into its base components
     mask = 0
-    pos = loc.find('@')
+    pos = loc.find("@")
     if pos >= 0:
         modifier = loc[pos:]
         loc = loc[:pos]
         mask |= COMPONENT_MODIFIER
     else:
-        modifier = ''
-    pos = loc.find('.')
+        modifier = ""
+    pos = loc.find(".")
     if pos >= 0:
         codeset = loc[pos:]
         loc = loc[:pos]
         mask |= COMPONENT_CODESET
     else:
-        codeset = ''
-    pos = loc.find('_')
+        codeset = ""
+    pos = loc.find("_")
     if pos >= 0:
         territory = loc[pos:]
         loc = loc[:pos]
         mask |= COMPONENT_TERRITORY
     else:
-        territory = ''
+        territory = ""
     language = loc
     ret = []
-    for i in range(mask+1):
+    for i in range(mask + 1):
         if not (i & ~mask):  # if all components for this combo exist ...
             val = language
-            if i & COMPONENT_TERRITORY: val += territory
-            if i & COMPONENT_CODESET:   val += codeset
-            if i & COMPONENT_MODIFIER:  val += modifier
+            if i & COMPONENT_TERRITORY:
+                val += territory
+            if i & COMPONENT_CODESET:
+                val += codeset
+            if i & COMPONENT_MODIFIER:
+                val += modifier
             ret.append(val)
     ret.reverse()
     return ret
@@ -314,17 +338,18 @@ class NullTranslations:
 
     def install(self, names=None):
         import builtins
-        builtins.__dict__['_'] = self.gettext
+
+        builtins.__dict__["_"] = self.gettext
         if names is not None:
-            allowed = {'gettext', 'ngettext', 'npgettext', 'pgettext'}
+            allowed = {"gettext", "ngettext", "npgettext", "pgettext"}
             for name in allowed & set(names):
                 builtins.__dict__[name] = getattr(self, name)
 
 
 class GNUTranslations(NullTranslations):
     # Magic number of .mo files
-    LE_MAGIC = 0x950412de
-    BE_MAGIC = 0xde120495
+    LE_MAGIC = 0x950412DE
+    BE_MAGIC = 0xDE120495
 
     # The encoding of a msgctxt and a msgid in a .mo file is
     # msgctxt + "\x04" + msgid (gettext version >= 0.15)
@@ -335,73 +360,74 @@ class GNUTranslations(NullTranslations):
 
     def _get_versions(self, version):
         """Returns a tuple of major version, minor version"""
-        return (version >> 16, version & 0xffff)
+        return (version >> 16, version & 0xFFFF)
 
     def _parse(self, fp):
         """Override this method to support alternative .mo formats."""
         # Delay struct import for speeding up gettext import when .mo files
         # are not used.
         from struct import unpack
-        filename = getattr(fp, 'name', '')
+
+        filename = getattr(fp, "name", "")
         # Parse the .mo file header, which consists of 5 little endian 32
         # bit words.
         self._catalog = catalog = {}
-        self.plural = lambda n: int(n != 1) # germanic plural by default
+        self.plural = lambda n: int(n != 1)  # germanic plural by default
         buf = fp.read()
         buflen = len(buf)
         # Are we big endian or little endian?
-        magic = unpack('<I', buf[:4])[0]
+        magic = unpack("<I", buf[:4])[0]
         if magic == self.LE_MAGIC:
-            version, msgcount, masteridx, transidx = unpack('<4I', buf[4:20])
-            ii = '<II'
+            version, msgcount, masteridx, transidx = unpack("<4I", buf[4:20])
+            ii = "<II"
         elif magic == self.BE_MAGIC:
-            version, msgcount, masteridx, transidx = unpack('>4I', buf[4:20])
-            ii = '>II'
+            version, msgcount, masteridx, transidx = unpack(">4I", buf[4:20])
+            ii = ">II"
         else:
-            raise OSError(0, 'Bad magic number', filename)
+            raise OSError(0, "Bad magic number", filename)
 
         major_version, minor_version = self._get_versions(version)
 
         if major_version not in self.VERSIONS:
-            raise OSError(0, 'Bad version number ' + str(major_version), filename)
+            raise OSError(0, "Bad version number " + str(major_version), filename)
 
         # Now put all messages from the .mo file buffer into the catalog
         # dictionary.
         for i in range(0, msgcount):
-            mlen, moff = unpack(ii, buf[masteridx:masteridx+8])
+            mlen, moff = unpack(ii, buf[masteridx : masteridx + 8])
             mend = moff + mlen
-            tlen, toff = unpack(ii, buf[transidx:transidx+8])
+            tlen, toff = unpack(ii, buf[transidx : transidx + 8])
             tend = toff + tlen
             if mend < buflen and tend < buflen:
                 msg = buf[moff:mend]
                 tmsg = buf[toff:tend]
             else:
-                raise OSError(0, 'File is corrupt', filename)
+                raise OSError(0, "File is corrupt", filename)
             # See if we're looking at GNU .mo conventions for metadata
             if mlen == 0:
                 # Catalog description
                 lastk = None
-                for b_item in tmsg.split(b'\n'):
+                for b_item in tmsg.split(b"\n"):
                     item = b_item.decode().strip()
                     if not item:
                         continue
                     # Skip over comment lines:
-                    if item.startswith('#-#-#-#-#') and item.endswith('#-#-#-#-#'):
+                    if item.startswith("#-#-#-#-#") and item.endswith("#-#-#-#-#"):
                         continue
                     k = v = None
-                    if ':' in item:
-                        k, v = item.split(':', 1)
+                    if ":" in item:
+                        k, v = item.split(":", 1)
                         k = k.strip().lower()
                         v = v.strip()
                         self._info[k] = v
                         lastk = k
                     elif lastk:
-                        self._info[lastk] += '\n' + item
-                    if k == 'content-type':
-                        self._charset = v.split('charset=')[1]
-                    elif k == 'plural-forms':
-                        v = v.split(';')
-                        plural = v[1].split('plural=')[1]
+                        self._info[lastk] += "\n" + item
+                    if k == "content-type":
+                        self._charset = v.split("charset=")[1]
+                    elif k == "plural-forms":
+                        v = v.split(";")
+                        plural = v[1].split("plural=")[1]
                         self.plural = c2py(plural)
             # Note: we unconditionally convert both msgids and msgstrs to
             # Unicode using the character encoding specified in the charset
@@ -412,11 +438,11 @@ class GNUTranslations(NullTranslations):
             # cause no problems since us-ascii should always be a subset of
             # the charset encoding.  We may want to fall back to 8-bit msgids
             # if the Unicode conversion fails.
-            charset = self._charset or 'ascii'
-            if b'\x00' in msg:
+            charset = self._charset or "ascii"
+            if b"\x00" in msg:
                 # Plural forms
-                msgid1, msgid2 = msg.split(b'\x00')
-                tmsg = tmsg.split(b'\x00')
+                msgid1, msgid2 = msg.split(b"\x00")
+                tmsg = tmsg.split(b"\x00")
                 msgid1 = str(msgid1, charset)
                 for i, x in enumerate(tmsg):
                     catalog[(msgid1, i)] = str(x, charset)
@@ -482,13 +508,13 @@ def find(domain, localedir=None, languages=None, all=False):
         localedir = _default_localedir
     if languages is None:
         languages = []
-        for envar in ('LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG'):
+        for envar in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
             val = os.environ.get(envar)
             if val:
-                languages = val.split(':')
+                languages = val.split(":")
                 break
-        if 'C' not in languages:
-            languages.append('C')
+        if "C" not in languages:
+            languages.append("C")
     # now normalize and expand the languages
     nelangs = []
     for lang in languages:
@@ -501,9 +527,9 @@ def find(domain, localedir=None, languages=None, all=False):
     else:
         result = None
     for lang in nelangs:
-        if lang == 'C':
+        if lang == "C":
             break
-        mofile = os.path.join(localedir, lang, 'LC_MESSAGES', '%s.mo' % domain)
+        mofile = os.path.join(localedir, lang, "LC_MESSAGES", "%s.mo" % domain)
         if os.path.exists(mofile):
             if all:
                 result.append(mofile)
@@ -516,8 +542,7 @@ def find(domain, localedir=None, languages=None, all=False):
 _translations = {}
 
 
-def translation(domain, localedir=None, languages=None,
-                class_=None, fallback=False):
+def translation(domain, localedir=None, languages=None, class_=None, fallback=False):
     if class_ is None:
         class_ = GNUTranslations
     mofiles = find(domain, localedir, languages, all=True)
@@ -525,8 +550,8 @@ def translation(domain, localedir=None, languages=None,
         if fallback:
             return NullTranslations()
         from errno import ENOENT
-        raise FileNotFoundError(ENOENT,
-                                'No translation file found for domain', domain)
+
+        raise FileNotFoundError(ENOENT, "No translation file found for domain", domain)
     # Avoid opening, reading, and parsing the .mo file after it's been done
     # once.
     result = None
@@ -534,7 +559,7 @@ def translation(domain, localedir=None, languages=None,
         key = (class_, os.path.abspath(mofile))
         t = _translations.get(key)
         if t is None:
-            with open(mofile, 'rb') as fp:
+            with open(mofile, "rb") as fp:
                 t = _translations.setdefault(key, class_(fp))
         # Copy the translation object to allow setting fallbacks and
         # output charset. All other instance data is shared with the
@@ -542,6 +567,7 @@ def translation(domain, localedir=None, languages=None,
         # Delay copy import for speeding up gettext import when .mo files
         # are not used.
         import copy
+
         t = copy.copy(t)
         if result is None:
             result = t
@@ -558,7 +584,7 @@ def install(domain, localedir=None, *, names=None):
 # a mapping b/w domains and locale directories
 _localedirs = {}
 # current global domain, `messages' used for compatibility w/ GNU gettext
-_current_domain = 'messages'
+_current_domain = "messages"
 
 
 def textdomain(domain=None):

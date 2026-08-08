@@ -9,16 +9,42 @@ container formats, as well as raw compressed data streams.
 """
 
 __all__ = [
-    "CHECK_NONE", "CHECK_CRC32", "CHECK_CRC64", "CHECK_SHA256",
-    "CHECK_ID_MAX", "CHECK_UNKNOWN",
-    "FILTER_LZMA1", "FILTER_LZMA2", "FILTER_DELTA", "FILTER_X86", "FILTER_IA64",
-    "FILTER_ARM", "FILTER_ARMTHUMB", "FILTER_POWERPC", "FILTER_SPARC",
-    "FORMAT_AUTO", "FORMAT_XZ", "FORMAT_ALONE", "FORMAT_RAW",
-    "MF_HC3", "MF_HC4", "MF_BT2", "MF_BT3", "MF_BT4",
-    "MODE_FAST", "MODE_NORMAL", "PRESET_DEFAULT", "PRESET_EXTREME",
-
-    "LZMACompressor", "LZMADecompressor", "LZMAFile", "LZMAError",
-    "open", "compress", "decompress", "is_check_supported",
+    "CHECK_NONE",
+    "CHECK_CRC32",
+    "CHECK_CRC64",
+    "CHECK_SHA256",
+    "CHECK_ID_MAX",
+    "CHECK_UNKNOWN",
+    "FILTER_LZMA1",
+    "FILTER_LZMA2",
+    "FILTER_DELTA",
+    "FILTER_X86",
+    "FILTER_IA64",
+    "FILTER_ARM",
+    "FILTER_ARMTHUMB",
+    "FILTER_POWERPC",
+    "FILTER_SPARC",
+    "FORMAT_AUTO",
+    "FORMAT_XZ",
+    "FORMAT_ALONE",
+    "FORMAT_RAW",
+    "MF_HC3",
+    "MF_HC4",
+    "MF_BT2",
+    "MF_BT3",
+    "MF_BT4",
+    "MODE_FAST",
+    "MODE_NORMAL",
+    "PRESET_DEFAULT",
+    "PRESET_EXTREME",
+    "LZMACompressor",
+    "LZMADecompressor",
+    "LZMAFile",
+    "LZMAError",
+    "open",
+    "compress",
+    "decompress",
+    "is_check_supported",
 ]
 
 import builtins
@@ -28,15 +54,13 @@ from _lzma import *
 from _lzma import _encode_filter_properties, _decode_filter_properties
 import _compression
 
-
-_MODE_CLOSED   = 0
-_MODE_READ     = 1
+_MODE_CLOSED = 0
+_MODE_READ = 1
 # Value 2 no longer used
-_MODE_WRITE    = 3
+_MODE_WRITE = 3
 
 
 class LZMAFile(_compression.BaseStream):
-
     """A file object providing transparent LZMA (de)compression.
 
     An LZMAFile can act as a wrapper for an existing file object, or
@@ -46,8 +70,16 @@ class LZMAFile(_compression.BaseStream):
     is returned as bytes, and data to be written must be given as bytes.
     """
 
-    def __init__(self, filename=None, mode="r", *,
-                 format=None, check=-1, preset=None, filters=None):
+    def __init__(
+        self,
+        filename=None,
+        mode="r",
+        *,
+        format=None,
+        check=-1,
+        preset=None,
+        filters=None
+    ):
         """Open an LZMA-compressed file in binary mode.
 
         filename can be either an actual file name (given as a str,
@@ -96,11 +128,15 @@ class LZMAFile(_compression.BaseStream):
 
         if mode in ("r", "rb"):
             if check != -1:
-                raise ValueError("Cannot specify an integrity check "
-                                 "when opening a file for reading")
+                raise ValueError(
+                    "Cannot specify an integrity check "
+                    "when opening a file for reading"
+                )
             if preset is not None:
-                raise ValueError("Cannot specify a preset compression "
-                                 "level when opening a file for reading")
+                raise ValueError(
+                    "Cannot specify a preset compression "
+                    "level when opening a file for reading"
+                )
             if format is None:
                 format = FORMAT_AUTO
             mode_code = _MODE_READ
@@ -108,8 +144,9 @@ class LZMAFile(_compression.BaseStream):
             if format is None:
                 format = FORMAT_XZ
             mode_code = _MODE_WRITE
-            self._compressor = LZMACompressor(format=format, check=check,
-                                              preset=preset, filters=filters)
+            self._compressor = LZMACompressor(
+                format=format, check=check, preset=preset, filters=filters
+            )
             self._pos = 0
         else:
             raise ValueError("Invalid mode: {!r}".format(mode))
@@ -127,8 +164,13 @@ class LZMAFile(_compression.BaseStream):
             raise TypeError("filename must be a str, bytes, file or PathLike object")
 
         if self._mode == _MODE_READ:
-            raw = _compression.DecompressReader(self._fp, LZMADecompressor,
-                trailing_error=LZMAError, format=format, filters=filters)
+            raw = _compression.DecompressReader(
+                self._fp,
+                LZMADecompressor,
+                trailing_error=LZMAError,
+                format=format,
+                filters=filters,
+            )
             self._buffer = io.BufferedReader(raw)
 
     def close(self):
@@ -268,9 +310,18 @@ class LZMAFile(_compression.BaseStream):
         return self._pos
 
 
-def open(filename, mode="rb", *,
-         format=None, check=-1, preset=None, filters=None,
-         encoding=None, errors=None, newline=None):
+def open(
+    filename,
+    mode="rb",
+    *,
+    format=None,
+    check=-1,
+    preset=None,
+    filters=None,
+    encoding=None,
+    errors=None,
+    newline=None
+):
     """Open an LZMA-compressed file in binary or text mode.
 
     filename can be either an actual file name (given as a str, bytes,
@@ -306,8 +357,9 @@ def open(filename, mode="rb", *,
             raise ValueError("Argument 'newline' not supported in binary mode")
 
     lz_mode = mode.replace("t", "")
-    binary_file = LZMAFile(filename, lz_mode, format=format, check=check,
-                           preset=preset, filters=filters)
+    binary_file = LZMAFile(
+        filename, lz_mode, format=format, check=check, preset=preset, filters=filters
+    )
 
     if "t" in mode:
         encoding = io.text_encoding(encoding)
@@ -348,8 +400,9 @@ def decompress(data, format=FORMAT_AUTO, memlimit=None, filters=None):
                 raise  # Error on the first iteration; bail out.
         results.append(res)
         if not decomp.eof:
-            raise LZMAError("Compressed data ended before the "
-                            "end-of-stream marker was reached")
+            raise LZMAError(
+                "Compressed data ended before the " "end-of-stream marker was reached"
+            )
         data = decomp.unused_data
         if not data:
             break

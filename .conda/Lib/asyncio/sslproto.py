@@ -5,6 +5,7 @@
 import collections
 import enum
 import warnings
+
 try:
     import ssl
 except ImportError:  # pragma: no cover
@@ -46,7 +47,7 @@ class AppProtocolState(enum.Enum):
 
 def _create_transport_context(server_side, server_hostname):
     if server_side:
-        raise ValueError('Server side SSL needs a valid SSLContext')
+        raise ValueError("Server side SSL needs a valid SSLContext")
 
     # Client side may pass ssl=True to use a default
     # context; in that case the sslcontext passed is None.
@@ -73,14 +74,12 @@ def add_flowcontrol_defaults(high, low, kb):
         lo = low
 
     if not hi >= lo >= 0:
-        raise ValueError('high (%r) must be >= low (%r) must be >= 0' %
-                         (hi, lo))
+        raise ValueError("high (%r) must be >= low (%r) must be >= 0" % (hi, lo))
 
     return hi, lo
 
 
-class _SSLProtocolTransport(transports._FlowControlMixin,
-                            transports.Transport):
+class _SSLProtocolTransport(transports._FlowControlMixin, transports.Transport):
 
     _start_tls_compatible = True
     _sendfile_compatible = constants._SendfileMode.FALLBACK
@@ -121,8 +120,9 @@ class _SSLProtocolTransport(transports._FlowControlMixin,
         if not self._closed:
             self._closed = True
             _warnings.warn(
-                "unclosed transport <asyncio._SSLProtocolTransport "
-                "object>", ResourceWarning)
+                "unclosed transport <asyncio._SSLProtocolTransport " "object>",
+                ResourceWarning,
+            )
 
     def is_reading(self):
         return not self._ssl_protocol._app_reading_paused
@@ -166,8 +166,10 @@ class _SSLProtocolTransport(transports._FlowControlMixin,
         self._ssl_protocol._control_app_writing()
 
     def get_write_buffer_limits(self):
-        return (self._ssl_protocol._outgoing_low_water,
-                self._ssl_protocol._outgoing_high_water)
+        return (
+            self._ssl_protocol._outgoing_low_water,
+            self._ssl_protocol._outgoing_high_water,
+        )
 
     def get_write_buffer_size(self):
         """Return the current size of the write buffers."""
@@ -196,8 +198,10 @@ class _SSLProtocolTransport(transports._FlowControlMixin,
         self._ssl_protocol._control_ssl_reading()
 
     def get_read_buffer_limits(self):
-        return (self._ssl_protocol._incoming_low_water,
-                self._ssl_protocol._incoming_high_water)
+        return (
+            self._ssl_protocol._incoming_low_water,
+            self._ssl_protocol._incoming_high_water,
+        )
 
     def get_read_buffer_size(self):
         """Return the current size of the read buffer."""
@@ -215,8 +219,9 @@ class _SSLProtocolTransport(transports._FlowControlMixin,
         to be sent out asynchronously.
         """
         if not isinstance(data, (bytes, bytearray, memoryview)):
-            raise TypeError(f"data: expecting a bytes-like instance, "
-                            f"got {type(data).__name__}")
+            raise TypeError(
+                f"data: expecting a bytes-like instance, " f"got {type(data).__name__}"
+            )
         if not data:
             return
         self._ssl_protocol._write_appdata((data,))
@@ -261,17 +266,24 @@ class _SSLProtocolTransport(transports._FlowControlMixin,
 
 
 class SSLProtocol(protocols.BufferedProtocol):
-    max_size = 256 * 1024   # Buffer size passed to read()
+    max_size = 256 * 1024  # Buffer size passed to read()
 
     _handshake_start_time = None
     _handshake_timeout_handle = None
     _shutdown_timeout_handle = None
 
-    def __init__(self, loop, app_protocol, sslcontext, waiter,
-                 server_side=False, server_hostname=None,
-                 call_connection_made=True,
-                 ssl_handshake_timeout=None,
-                 ssl_shutdown_timeout=None):
+    def __init__(
+        self,
+        loop,
+        app_protocol,
+        sslcontext,
+        waiter,
+        server_side=False,
+        server_hostname=None,
+        call_connection_made=True,
+        ssl_handshake_timeout=None,
+        ssl_shutdown_timeout=None,
+    ):
         if ssl is None:
             raise RuntimeError("stdlib ssl module not available")
 
@@ -283,17 +295,18 @@ class SSLProtocol(protocols.BufferedProtocol):
         elif ssl_handshake_timeout <= 0:
             raise ValueError(
                 f"ssl_handshake_timeout should be a positive number, "
-                f"got {ssl_handshake_timeout}")
+                f"got {ssl_handshake_timeout}"
+            )
         if ssl_shutdown_timeout is None:
             ssl_shutdown_timeout = constants.SSL_SHUTDOWN_TIMEOUT
         elif ssl_shutdown_timeout <= 0:
             raise ValueError(
                 f"ssl_shutdown_timeout should be a positive number, "
-                f"got {ssl_shutdown_timeout}")
+                f"got {ssl_shutdown_timeout}"
+            )
 
         if not sslcontext:
-            sslcontext = _create_transport_context(
-                server_side, server_hostname)
+            sslcontext = _create_transport_context(server_side, server_hostname)
 
         self._server_side = server_side
         if server_hostname and not server_side:
@@ -328,9 +341,11 @@ class SSLProtocol(protocols.BufferedProtocol):
         else:
             self._app_state = AppProtocolState.STATE_CON_MADE
         self._sslobj = self._sslcontext.wrap_bio(
-            self._incoming, self._outgoing,
+            self._incoming,
+            self._outgoing,
             server_side=self._server_side,
-            server_hostname=self._server_hostname)
+            server_hostname=self._server_hostname,
+        )
 
         # Flow Control
 
@@ -353,8 +368,9 @@ class SSLProtocol(protocols.BufferedProtocol):
     def _set_app_protocol(self, app_protocol):
         self._app_protocol = app_protocol
         # Make fast hasattr check first
-        if (hasattr(app_protocol, 'get_buffer') and
-                isinstance(app_protocol, protocols.BufferedProtocol)):
+        if hasattr(app_protocol, "get_buffer") and isinstance(
+            app_protocol, protocols.BufferedProtocol
+        ):
             self._app_protocol_get_buffer = app_protocol.get_buffer
             self._app_protocol_buffer_updated = app_protocol.buffer_updated
             self._app_protocol_is_buffer = True
@@ -374,7 +390,7 @@ class SSLProtocol(protocols.BufferedProtocol):
     def _get_app_transport(self):
         if self._app_transport is None:
             if self._app_transport_created:
-                raise RuntimeError('Creating _SSLProtocolTransport twice')
+                raise RuntimeError("Creating _SSLProtocolTransport twice")
             self._app_transport = _SSLProtocolTransport(self._loop, self)
             self._app_transport_created = True
         return self._app_transport
@@ -408,8 +424,8 @@ class SSLProtocol(protocols.BufferedProtocol):
 
         if self._state != SSLProtocolState.DO_HANDSHAKE:
             if (
-                self._app_state == AppProtocolState.STATE_CON_MADE or
-                self._app_state == AppProtocolState.STATE_EOF
+                self._app_state == AppProtocolState.STATE_CON_MADE
+                or self._app_state == AppProtocolState.STATE_EOF
             ):
                 self._app_state = AppProtocolState.STATE_CON_LOST
                 self._loop.call_soon(self._app_protocol.connection_lost, exc)
@@ -500,26 +516,26 @@ class SSLProtocol(protocols.BufferedProtocol):
             allowed = True
 
         elif (
-            self._state == SSLProtocolState.UNWRAPPED and
-            new_state == SSLProtocolState.DO_HANDSHAKE
+            self._state == SSLProtocolState.UNWRAPPED
+            and new_state == SSLProtocolState.DO_HANDSHAKE
         ):
             allowed = True
 
         elif (
-            self._state == SSLProtocolState.DO_HANDSHAKE and
-            new_state == SSLProtocolState.WRAPPED
+            self._state == SSLProtocolState.DO_HANDSHAKE
+            and new_state == SSLProtocolState.WRAPPED
         ):
             allowed = True
 
         elif (
-            self._state == SSLProtocolState.WRAPPED and
-            new_state == SSLProtocolState.FLUSHING
+            self._state == SSLProtocolState.WRAPPED
+            and new_state == SSLProtocolState.FLUSHING
         ):
             allowed = True
 
         elif (
-            self._state == SSLProtocolState.FLUSHING and
-            new_state == SSLProtocolState.SHUTDOWN
+            self._state == SSLProtocolState.FLUSHING
+            and new_state == SSLProtocolState.SHUTDOWN
         ):
             allowed = True
 
@@ -528,8 +544,8 @@ class SSLProtocol(protocols.BufferedProtocol):
 
         else:
             raise RuntimeError(
-                'cannot switch state from {} to {}'.format(
-                    self._state, new_state))
+                "cannot switch state from {} to {}".format(self._state, new_state)
+            )
 
     # Handshake flow
 
@@ -543,9 +559,9 @@ class SSLProtocol(protocols.BufferedProtocol):
         self._set_state(SSLProtocolState.DO_HANDSHAKE)
 
         # start handshake timeout count down
-        self._handshake_timeout_handle = \
-            self._loop.call_later(self._ssl_handshake_timeout,
-                                  lambda: self._check_handshake_timeout())
+        self._handshake_timeout_handle = self._loop.call_later(
+            self._ssl_handshake_timeout, lambda: self._check_handshake_timeout()
+        )
 
         self._do_handshake()
 
@@ -585,9 +601,9 @@ class SSLProtocol(protocols.BufferedProtocol):
             handshake_exc = None
             self._set_state(SSLProtocolState.UNWRAPPED)
             if isinstance(exc, ssl.CertificateError):
-                msg = 'SSL handshake failed on verifying the certificate'
+                msg = "SSL handshake failed on verifying the certificate"
             else:
-                msg = 'SSL handshake failed'
+                msg = "SSL handshake failed"
             self._fatal_error(exc, msg)
             self._wakeup_waiter(exc)
             return
@@ -597,10 +613,12 @@ class SSLProtocol(protocols.BufferedProtocol):
             logger.debug("%r: SSL handshake took %.1f ms", self, dt * 1e3)
 
         # Add extra info that becomes available after handshake.
-        self._extra.update(peercert=peercert,
-                           cipher=sslobj.cipher(),
-                           compression=sslobj.compression(),
-                           ssl_object=sslobj)
+        self._extra.update(
+            peercert=peercert,
+            cipher=sslobj.cipher(),
+            compression=sslobj.compression(),
+            ssl_object=sslobj,
+        )
         if self._app_state == AppProtocolState.STATE_INIT:
             self._app_state = AppProtocolState.STATE_CON_MADE
             self._app_protocol.connection_made(self._get_app_transport())
@@ -610,12 +628,10 @@ class SSLProtocol(protocols.BufferedProtocol):
     # Shutdown flow
 
     def _start_shutdown(self):
-        if (
-            self._state in (
-                SSLProtocolState.FLUSHING,
-                SSLProtocolState.SHUTDOWN,
-                SSLProtocolState.UNWRAPPED
-            )
+        if self._state in (
+            SSLProtocolState.FLUSHING,
+            SSLProtocolState.SHUTDOWN,
+            SSLProtocolState.UNWRAPPED,
         ):
             return
         if self._app_transport is not None:
@@ -625,20 +641,15 @@ class SSLProtocol(protocols.BufferedProtocol):
         else:
             self._set_state(SSLProtocolState.FLUSHING)
             self._shutdown_timeout_handle = self._loop.call_later(
-                self._ssl_shutdown_timeout,
-                lambda: self._check_shutdown_timeout()
+                self._ssl_shutdown_timeout, lambda: self._check_shutdown_timeout()
             )
             self._do_flush()
 
     def _check_shutdown_timeout(self):
-        if (
-            self._state in (
-                SSLProtocolState.FLUSHING,
-                SSLProtocolState.SHUTDOWN
-            )
-        ):
+        if self._state in (SSLProtocolState.FLUSHING, SSLProtocolState.SHUTDOWN):
             self._transport._force_close(
-                exceptions.TimeoutError('SSL shutdown timed out'))
+                exceptions.TimeoutError("SSL shutdown timed out")
+            )
 
     def _do_flush(self):
         self._do_read()
@@ -676,15 +687,13 @@ class SSLProtocol(protocols.BufferedProtocol):
     # Outgoing flow
 
     def _write_appdata(self, list_of_data):
-        if (
-            self._state in (
-                SSLProtocolState.FLUSHING,
-                SSLProtocolState.SHUTDOWN,
-                SSLProtocolState.UNWRAPPED
-            )
+        if self._state in (
+            SSLProtocolState.FLUSHING,
+            SSLProtocolState.SHUTDOWN,
+            SSLProtocolState.UNWRAPPED,
         ):
             if self._conn_lost >= constants.LOG_THRESHOLD_FOR_CONNLOST_WRITES:
-                logger.warning('SSL connection is closed')
+                logger.warning("SSL connection is closed")
             self._conn_lost += 1
             return
 
@@ -697,7 +706,7 @@ class SSLProtocol(protocols.BufferedProtocol):
                 self._do_write()
 
         except Exception as ex:
-            self._fatal_error(ex, 'Fatal error on SSL protocol')
+            self._fatal_error(ex, "Fatal error on SSL protocol")
 
     def _do_write(self):
         try:
@@ -725,11 +734,9 @@ class SSLProtocol(protocols.BufferedProtocol):
     # Incoming flow
 
     def _do_read(self):
-        if (
-            self._state not in (
-                SSLProtocolState.WRAPPED,
-                SSLProtocolState.FLUSHING,
-            )
+        if self._state not in (
+            SSLProtocolState.WRAPPED,
+            SSLProtocolState.FLUSHING,
         ):
             return
         try:
@@ -744,7 +751,7 @@ class SSLProtocol(protocols.BufferedProtocol):
                     self._process_outgoing()
             self._control_ssl_reading()
         except Exception as ex:
-            self._fatal_error(ex, 'Fatal error on SSL protocol')
+            self._fatal_error(ex, "Fatal error on SSL protocol")
 
     def _do_read__buffered(self):
         offset = 0
@@ -776,7 +783,7 @@ class SSLProtocol(protocols.BufferedProtocol):
             self._start_shutdown()
 
     def _do_read__copied(self):
-        chunk = b'1'
+        chunk = b"1"
         zero = True
         one = False
 
@@ -799,7 +806,7 @@ class SSLProtocol(protocols.BufferedProtocol):
         if one:
             self._app_protocol.data_received(first)
         elif not zero:
-            self._app_protocol.data_received(b''.join(data))
+            self._app_protocol.data_received(b"".join(data))
         if not chunk:
             # close_notify
             self._call_eof_received()
@@ -811,12 +818,14 @@ class SSLProtocol(protocols.BufferedProtocol):
                 self._app_state = AppProtocolState.STATE_EOF
                 keep_open = self._app_protocol.eof_received()
                 if keep_open:
-                    logger.warning('returning true from eof_received() '
-                                   'has no effect when using ssl')
+                    logger.warning(
+                        "returning true from eof_received() "
+                        "has no effect when using ssl"
+                    )
         except (KeyboardInterrupt, SystemExit):
             raise
         except BaseException as ex:
-            self._fatal_error(ex, 'Error calling eof_received()')
+            self._fatal_error(ex, "Error calling eof_received()")
 
     # Flow control for writes from APP socket
 
@@ -829,12 +838,14 @@ class SSLProtocol(protocols.BufferedProtocol):
             except (KeyboardInterrupt, SystemExit):
                 raise
             except BaseException as exc:
-                self._loop.call_exception_handler({
-                    'message': 'protocol.pause_writing() failed',
-                    'exception': exc,
-                    'transport': self._app_transport,
-                    'protocol': self,
-                })
+                self._loop.call_exception_handler(
+                    {
+                        "message": "protocol.pause_writing() failed",
+                        "exception": exc,
+                        "transport": self._app_transport,
+                        "protocol": self,
+                    }
+                )
         elif size <= self._outgoing_low_water and self._app_writing_paused:
             self._app_writing_paused = False
             try:
@@ -842,19 +853,22 @@ class SSLProtocol(protocols.BufferedProtocol):
             except (KeyboardInterrupt, SystemExit):
                 raise
             except BaseException as exc:
-                self._loop.call_exception_handler({
-                    'message': 'protocol.resume_writing() failed',
-                    'exception': exc,
-                    'transport': self._app_transport,
-                    'protocol': self,
-                })
+                self._loop.call_exception_handler(
+                    {
+                        "message": "protocol.resume_writing() failed",
+                        "exception": exc,
+                        "transport": self._app_transport,
+                        "protocol": self,
+                    }
+                )
 
     def _get_write_buffer_size(self):
         return self._outgoing.pending + self._write_buffer_size
 
     def _set_write_buffer_limits(self, high=None, low=None):
         high, low = add_flowcontrol_defaults(
-            high, low, constants.FLOW_CONTROL_HIGH_WATER_SSL_WRITE)
+            high, low, constants.FLOW_CONTROL_HIGH_WATER_SSL_WRITE
+        )
         self._outgoing_high_water = high
         self._outgoing_low_water = low
 
@@ -874,6 +888,7 @@ class SSLProtocol(protocols.BufferedProtocol):
                     self._do_flush()
                 elif self._state == SSLProtocolState.SHUTDOWN:
                     self._do_shutdown()
+
             self._loop.call_soon(resume)
 
     # Flow control for reads from SSL socket
@@ -889,7 +904,8 @@ class SSLProtocol(protocols.BufferedProtocol):
 
     def _set_read_buffer_limits(self, high=None, low=None):
         high, low = add_flowcontrol_defaults(
-            high, low, constants.FLOW_CONTROL_HIGH_WATER_SSL_READ)
+            high, low, constants.FLOW_CONTROL_HIGH_WATER_SSL_READ
+        )
         self._incoming_high_water = high
         self._incoming_low_water = low
 
@@ -913,7 +929,7 @@ class SSLProtocol(protocols.BufferedProtocol):
         self._ssl_writing_paused = False
         self._process_outgoing()
 
-    def _fatal_error(self, exc, message='Fatal error on transport'):
+    def _fatal_error(self, exc, message="Fatal error on transport"):
         if self._transport:
             self._transport._force_close(exc)
 
@@ -921,9 +937,11 @@ class SSLProtocol(protocols.BufferedProtocol):
             if self._loop.get_debug():
                 logger.debug("%r: %s", self, message, exc_info=True)
         elif not isinstance(exc, exceptions.CancelledError):
-            self._loop.call_exception_handler({
-                'message': message,
-                'exception': exc,
-                'transport': self._transport,
-                'protocol': self,
-            })
+            self._loop.call_exception_handler(
+                {
+                    "message": message,
+                    "exception": exc,
+                    "transport": self._transport,
+                    "protocol": self,
+                }
+            )

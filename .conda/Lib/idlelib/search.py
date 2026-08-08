@@ -1,13 +1,15 @@
 """Search dialog for Find, Find Again, and Find Selection
-   functionality.
+functionality.
 
-   Inherits from SearchDialogBase for GUI and uses searchengine
-   to prepare search pattern.
+Inherits from SearchDialogBase for GUI and uses searchengine
+to prepare search pattern.
 """
+
 from tkinter import TclError
 
 from idlelib import searchengine
 from idlelib.searchbase import SearchDialogBase
+
 
 def _setup(text):
     """Return the new or existing singleton SearchDialog instance.
@@ -24,6 +26,7 @@ def _setup(text):
         engine._searchdialog = SearchDialog(root, engine)
     return engine._searchdialog
 
+
 def find(text):
     """Open the search dialog.
 
@@ -35,6 +38,7 @@ def find(text):
     pat = text.get("sel.first", "sel.last")
     return _setup(text).open(text, pat)  # Open is inherited from SDBase.
 
+
 def find_again(text):
     """Repeat the search for the last pattern and preferences.
 
@@ -45,6 +49,7 @@ def find_again(text):
     dialog.
     """
     return _setup(text).find_again(text)
+
 
 def find_selection(text):
     """Search for the selected pattern in the text.
@@ -139,27 +144,29 @@ def _search_dialog(parent):  # htest #
 
     top = Toplevel(parent)
     top.title("Test SearchDialog")
-    x, y = map(int, parent.geometry().split('+')[1:])
+    x, y = map(int, parent.geometry().split("+")[1:])
     top.geometry("+%d+%d" % (x, y + 175))
 
     frame = Frame(top)
     frame.pack()
-    text = Text(frame, inactiveselectbackground='gray')
+    text = Text(frame, inactiveselectbackground="gray")
     text.pack()
-    text.insert("insert","This is a sample string.\n"*5)
+    text.insert("insert", "This is a sample string.\n" * 5)
 
     def show_find():
-        text.tag_add('sel', '1.0', 'end')
+        text.tag_add("sel", "1.0", "end")
         _setup(text).open(text)
-        text.tag_remove('sel', '1.0', 'end')
+        text.tag_remove("sel", "1.0", "end")
 
     button = Button(frame, text="Search (selection ignored)", command=show_find)
     button.pack()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_search', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_search", verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
+
     run(_search_dialog)

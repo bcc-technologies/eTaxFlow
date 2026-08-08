@@ -18,13 +18,13 @@ import threading
 from .context import reduction, assert_spawning
 from . import util
 
-__all__ = ['BufferWrapper']
+__all__ = ["BufferWrapper"]
 
 #
 # Inheritable class which wraps an mmap, and from which blocks can be allocated
 #
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
 
     import _winapi
 
@@ -38,14 +38,14 @@ if sys.platform == 'win32':
         def __init__(self, size):
             self.size = size
             for i in range(100):
-                name = 'pym-%d-%s' % (os.getpid(), next(self._rand))
+                name = "pym-%d-%s" % (os.getpid(), next(self._rand))
                 buf = mmap.mmap(-1, size, tagname=name)
                 if _winapi.GetLastError() == 0:
                     break
                 # We have reopened a preexisting mmap.
                 buf.close()
             else:
-                raise FileExistsError('Cannot find name for new mmap')
+                raise FileExistsError("Cannot find name for new mmap")
             self.name = name
             self.buffer = buf
             self._state = (self.size, self.name)
@@ -60,7 +60,7 @@ if sys.platform == 'win32':
             self.buffer = mmap.mmap(-1, self.size, tagname=self.name)
             # XXX Temporarily preventing buildbot failures while determining
             # XXX the correct long-term fix. See issue 23060
-            #assert _winapi.GetLastError() == _winapi.ERROR_ALREADY_EXISTS
+            # assert _winapi.GetLastError() == _winapi.ERROR_ALREADY_EXISTS
 
 else:
 
@@ -69,8 +69,8 @@ else:
         A shared memory area backed by a temporary file (POSIX).
         """
 
-        if sys.platform == 'linux':
-            _dir_candidates = ['/dev/shm']
+        if sys.platform == "linux":
+            _dir_candidates = ["/dev/shm"]
         else:
             _dir_candidates = []
 
@@ -81,8 +81,8 @@ else:
                 # Arena is created anew (if fd != -1, it means we're coming
                 # from rebuild_arena() below)
                 self.fd, name = tempfile.mkstemp(
-                     prefix='pym-%d-'%os.getpid(),
-                     dir=self._choose_dir(size))
+                    prefix="pym-%d-" % os.getpid(), dir=self._choose_dir(size)
+                )
                 os.unlink(name)
                 util.Finalize(self, os.close, (self.fd,))
                 os.ftruncate(self.fd, size)
@@ -99,8 +99,10 @@ else:
 
     def reduce_arena(a):
         if a.fd == -1:
-            raise ValueError('Arena is unpicklable because '
-                             'forking was enabled when it was created')
+            raise ValueError(
+                "Arena is unpicklable because "
+                "forking was enabled when it was created"
+            )
         return rebuild_arena, (a.size, reduction.DupFd(a.fd))
 
     def rebuild_arena(size, dupfd):
@@ -112,13 +114,14 @@ else:
 # Class allowing allocation of chunks of memory from arenas
 #
 
+
 class Heap(object):
 
     # Minimum malloc() alignment
     _alignment = 8
 
-    _DISCARD_FREE_SPACE_LARGER_THAN = 4 * 1024 ** 2  # 4 MB
-    _DOUBLE_ARENA_SIZE_UNTIL = 4 * 1024 ** 2
+    _DISCARD_FREE_SPACE_LARGER_THAN = 4 * 1024**2  # 4 MB
+    _DOUBLE_ARENA_SIZE_UNTIL = 4 * 1024**2
 
     def __init__(self, size=mmap.PAGESIZE):
         self._lastpid = os.getpid()
@@ -162,7 +165,7 @@ class Heap(object):
         # reach a large-ish size (roughly L3 cache-sized)
         if self._size < self._DOUBLE_ARENA_SIZE_UNTIL:
             self._size *= 2
-        util.info('allocating a new mmap of length %d', length)
+        util.info("allocating a new mmap of length %d", length)
         arena = Arena(length)
         self._arenas.append(arena)
         return (arena, 0, length)
@@ -197,14 +200,14 @@ class Heap(object):
             if not seq:
                 del self._len_to_seq[length], self._lengths[i]
 
-        (arena, start, stop) = block
+        arena, start, stop = block
         del self._start_to_block[(arena, start)]
         del self._stop_to_block[(arena, stop)]
         return block
 
     def _add_free_block(self, block):
         # make block available and try to merge with its neighbours in the arena
-        (arena, start, stop) = block
+        arena, start, stop = block
 
         try:
             prev_block = self._stop_to_block[(arena, start)]
@@ -234,7 +237,7 @@ class Heap(object):
 
     def _absorb(self, block):
         # deregister this block so it can be merged with a neighbour
-        (arena, start, stop) = block
+        arena, start, stop = block
         del self._start_to_block[(arena, start)]
         del self._stop_to_block[(arena, stop)]
 
@@ -278,7 +281,9 @@ class Heap(object):
         if os.getpid() != self._lastpid:
             raise ValueError(
                 "My pid ({0:n}) is not last pid {1:n}".format(
-                    os.getpid(),self._lastpid))
+                    os.getpid(), self._lastpid
+                )
+            )
         if not self._lock.acquire(False):
             # can't acquire the lock right now, add the block to the list of
             # pending blocks to free
@@ -300,13 +305,13 @@ class Heap(object):
         if sys.maxsize <= size:
             raise OverflowError("Size {0:n} too large".format(size))
         if os.getpid() != self._lastpid:
-            self.__init__()                     # reinitialize after fork
+            self.__init__()  # reinitialize after fork
         with self._lock:
             self._n_mallocs += 1
             # allow pending blocks to be marked available
             self._free_pending_blocks()
             size = self._roundup(max(size, 1), self._alignment)
-            (arena, start, stop) = self._malloc(size)
+            arena, start, stop = self._malloc(size)
             real_stop = start + size
             if real_stop < stop:
                 # if the returned block is larger than necessary, mark
@@ -315,9 +320,11 @@ class Heap(object):
             self._allocated_blocks[arena].add((start, real_stop))
             return (arena, start, real_stop)
 
+
 #
 # Class wrapping a block allocated out of a Heap -- can be inherited by child process
 #
+
 
 class BufferWrapper(object):
 
@@ -334,4 +341,4 @@ class BufferWrapper(object):
 
     def create_memoryview(self):
         (arena, start, stop), size = self._state
-        return memoryview(arena.buffer)[start:start+size]
+        return memoryview(arena.buffer)[start : start + size]

@@ -21,15 +21,15 @@ class install_data(Command):
 
     user_options = [
         (
-            'install-dir=',
-            'd',
+            "install-dir=",
+            "d",
             "base directory for installing data files [default: installation base dir]",
         ),
-        ('root=', None, "install everything relative to this alternate root directory"),
-        ('force', 'f', "force installation (overwrite existing files)"),
+        ("root=", None, "install everything relative to this alternate root directory"),
+        ("force", "f", "force installation (overwrite existing files)"),
     ]
 
-    boolean_options: ClassVar[list[str]] = ['force']
+    boolean_options: ClassVar[list[str]] = ["force"]
 
     def initialize_options(self):
         self.install_dir = None
@@ -41,10 +41,10 @@ class install_data(Command):
 
     def finalize_options(self) -> None:
         self.set_undefined_options(
-            'install',
-            ('install_data', 'install_dir'),
-            ('root', 'root'),
-            ('force', 'force'),
+            "install",
+            ("install_data", "install_dir"),
+            ("root", "root"),
+            ("force", "force"),
         )
 
     def run(self) -> None:
@@ -71,7 +71,7 @@ class install_data(Command):
             # Copy files, adding them to the list of output files.
             for data in f[1]:
                 data = convert_path(data)
-                (out, _) = self.copy_file(data, dir)
+                out, _ = self.copy_file(data, dir)
                 self.outfiles.append(out)
 
     @_copy.register(str)
@@ -84,7 +84,7 @@ class install_data(Command):
                 "setup script did not provide a directory for "
                 f"'{f}' -- installing right in '{self.install_dir}'"
             )
-        (out, _) = self.copy_file(f, self.install_dir)
+        out, _ = self.copy_file(f, self.install_dir)
         self.outfiles.append(out)
 
     def get_inputs(self):

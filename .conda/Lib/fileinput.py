@@ -69,14 +69,34 @@ import io
 import sys, os
 from types import GenericAlias
 
-__all__ = ["input", "close", "nextfile", "filename", "lineno", "filelineno",
-           "fileno", "isfirstline", "isstdin", "FileInput", "hook_compressed",
-           "hook_encoded"]
+__all__ = [
+    "input",
+    "close",
+    "nextfile",
+    "filename",
+    "lineno",
+    "filelineno",
+    "fileno",
+    "isfirstline",
+    "isstdin",
+    "FileInput",
+    "hook_compressed",
+    "hook_encoded",
+]
 
 _state = None
 
-def input(files=None, inplace=False, backup="", *, mode="r", openhook=None,
-          encoding=None, errors=None):
+
+def input(
+    files=None,
+    inplace=False,
+    backup="",
+    *,
+    mode="r",
+    openhook=None,
+    encoding=None,
+    errors=None
+):
     """Return an instance of the FileInput class, which can be iterated.
 
     The parameters are passed to the constructor of the FileInput class.
@@ -86,9 +106,17 @@ def input(files=None, inplace=False, backup="", *, mode="r", openhook=None,
     global _state
     if _state and _state._file:
         raise RuntimeError("input() already active")
-    _state = FileInput(files, inplace, backup, mode=mode, openhook=openhook,
-                       encoding=encoding, errors=errors)
+    _state = FileInput(
+        files,
+        inplace,
+        backup,
+        mode=mode,
+        openhook=openhook,
+        encoding=encoding,
+        errors=errors,
+    )
     return _state
+
 
 def close():
     """Close the sequence."""
@@ -97,6 +125,7 @@ def close():
     _state = None
     if state:
         state.close()
+
 
 def nextfile():
     """
@@ -112,6 +141,7 @@ def nextfile():
         raise RuntimeError("no active input()")
     return _state.nextfile()
 
+
 def filename():
     """
     Return the name of the file currently being read.
@@ -120,6 +150,7 @@ def filename():
     if not _state:
         raise RuntimeError("no active input()")
     return _state.filename()
+
 
 def lineno():
     """
@@ -131,6 +162,7 @@ def lineno():
         raise RuntimeError("no active input()")
     return _state.lineno()
 
+
 def filelineno():
     """
     Return the line number in the current file. Before the first line
@@ -141,6 +173,7 @@ def filelineno():
         raise RuntimeError("no active input()")
     return _state.filelineno()
 
+
 def fileno():
     """
     Return the file number of the current file. When no file is currently
@@ -149,6 +182,7 @@ def fileno():
     if not _state:
         raise RuntimeError("no active input()")
     return _state.fileno()
+
 
 def isfirstline():
     """
@@ -159,6 +193,7 @@ def isfirstline():
         raise RuntimeError("no active input()")
     return _state.isfirstline()
 
+
 def isstdin():
     """
     Returns true if the last line was read from sys.stdin,
@@ -167,6 +202,7 @@ def isstdin():
     if not _state:
         raise RuntimeError("no active input()")
     return _state.isstdin()
+
 
 class FileInput:
     """FileInput([files[, inplace[, backup]]], *, mode=None, openhook=None)
@@ -181,17 +217,26 @@ class FileInput:
     sequential order; random access and readline() cannot be mixed.
     """
 
-    def __init__(self, files=None, inplace=False, backup="", *,
-                 mode="r", openhook=None, encoding=None, errors=None):
+    def __init__(
+        self,
+        files=None,
+        inplace=False,
+        backup="",
+        *,
+        mode="r",
+        openhook=None,
+        encoding=None,
+        errors=None
+    ):
         if isinstance(files, str):
             files = (files,)
         elif isinstance(files, os.PathLike):
-            files = (os.fspath(files), )
+            files = (os.fspath(files),)
         else:
             if files is None:
                 files = sys.argv[1:]
             if not files:
-                files = ('-',)
+                files = ("-",)
             else:
                 files = tuple(files)
         self._files = files
@@ -210,17 +255,21 @@ class FileInput:
 
         # We can not use io.text_encoding() here because old openhook doesn't
         # take encoding parameter.
-        if (sys.flags.warn_default_encoding and
-                "b" not in mode and encoding is None and openhook is None):
+        if (
+            sys.flags.warn_default_encoding
+            and "b" not in mode
+            and encoding is None
+            and openhook is None
+        ):
             import warnings
-            warnings.warn("'encoding' argument not specified.",
-                          EncodingWarning, 2)
+
+            warnings.warn("'encoding' argument not specified.", EncodingWarning, 2)
 
         # restrict mode argument to reading modes
-        if mode not in ('r', 'rb'):
+        if mode not in ("r", "rb"):
             raise ValueError("FileInput opening mode must be 'r' or 'rb'")
         self._mode = mode
-        self._write_mode = mode.replace('r', 'w')
+        self._write_mode = mode.replace("r", "w")
         if openhook:
             if inplace:
                 raise ValueError("FileInput cannot use an opening hook in inplace mode")
@@ -282,8 +331,10 @@ class FileInput:
                 backupfilename = self._backupfilename
                 self._backupfilename = None
                 if backupfilename and not self._backup:
-                    try: os.unlink(backupfilename)
-                    except OSError: pass
+                    try:
+                        os.unlink(backupfilename)
+                    except OSError:
+                        pass
 
                 self._isstdin = False
 
@@ -300,10 +351,10 @@ class FileInput:
 
     def _readline(self):
         if not self._files:
-            if 'b' in self._mode:
-                return b''
+            if "b" in self._mode:
+                return b""
             else:
-                return ''
+                return ""
         self._filename = self._files[0]
         self._files = self._files[1:]
         self._startlineno = self.lineno()
@@ -318,38 +369,48 @@ class FileInput:
         else:
             encoding = None
 
-        if self._filename == '-':
-            self._filename = '<stdin>'
-            if 'b' in self._mode:
-                self._file = getattr(sys.stdin, 'buffer', sys.stdin)
+        if self._filename == "-":
+            self._filename = "<stdin>"
+            if "b" in self._mode:
+                self._file = getattr(sys.stdin, "buffer", sys.stdin)
             else:
                 self._file = sys.stdin
             self._isstdin = True
         else:
             if self._inplace:
-                self._backupfilename = (
-                    os.fspath(self._filename) + (self._backup or ".bak"))
+                self._backupfilename = os.fspath(self._filename) + (
+                    self._backup or ".bak"
+                )
                 try:
                     os.unlink(self._backupfilename)
                 except OSError:
                     pass
                 # The next few lines may raise OSError
                 os.rename(self._filename, self._backupfilename)
-                self._file = open(self._backupfilename, self._mode,
-                                  encoding=encoding, errors=self._errors)
+                self._file = open(
+                    self._backupfilename,
+                    self._mode,
+                    encoding=encoding,
+                    errors=self._errors,
+                )
                 try:
                     perm = os.fstat(self._file.fileno()).st_mode
                 except OSError:
-                    self._output = open(self._filename, self._write_mode,
-                                        encoding=encoding, errors=self._errors)
+                    self._output = open(
+                        self._filename,
+                        self._write_mode,
+                        encoding=encoding,
+                        errors=self._errors,
+                    )
                 else:
                     mode = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
-                    if hasattr(os, 'O_BINARY'):
+                    if hasattr(os, "O_BINARY"):
                         mode |= os.O_BINARY
 
                     fd = os.open(self._filename, mode, perm)
-                    self._output = os.fdopen(fd, self._write_mode,
-                                             encoding=encoding, errors=self._errors)
+                    self._output = os.fdopen(
+                        fd, self._write_mode, encoding=encoding, errors=self._errors
+                    )
                     try:
                         os.chmod(self._filename, perm)
                     except OSError:
@@ -365,9 +426,18 @@ class FileInput:
                         self._file = self._openhook(self._filename, self._mode)
                     else:
                         self._file = self._openhook(
-                            self._filename, self._mode, encoding=self._encoding, errors=self._errors)
+                            self._filename,
+                            self._mode,
+                            encoding=self._encoding,
+                            errors=self._errors,
+                        )
                 else:
-                    self._file = open(self._filename, self._mode, encoding=encoding, errors=self._errors)
+                    self._file = open(
+                        self._filename,
+                        self._mode,
+                        encoding=encoding,
+                        errors=self._errors,
+                    )
         self._readline = self._file.readline  # hide FileInput._readline
         return self._readline()
 
@@ -399,14 +469,18 @@ class FileInput:
 
 
 def hook_compressed(filename, mode, *, encoding=None, errors=None):
-    if encoding is None and "b" not in mode:  # EncodingWarning is emitted in FileInput() already.
+    if (
+        encoding is None and "b" not in mode
+    ):  # EncodingWarning is emitted in FileInput() already.
         encoding = "locale"
     ext = os.path.splitext(filename)[1]
-    if ext == '.gz':
+    if ext == ".gz":
         import gzip
+
         stream = gzip.open(filename, mode)
-    elif ext == '.bz2':
+    elif ext == ".bz2":
         import bz2
+
         stream = bz2.BZ2File(filename, mode)
     else:
         return open(filename, mode, encoding=encoding, errors=errors)
@@ -420,23 +494,32 @@ def hook_compressed(filename, mode, *, encoding=None, errors=None):
 def hook_encoded(encoding, errors=None):
     def openhook(filename, mode):
         return open(filename, mode, encoding=encoding, errors=errors)
+
     return openhook
 
 
 def _test():
     import getopt
+
     inplace = False
     backup = False
     opts, args = getopt.getopt(sys.argv[1:], "ib:")
     for o, a in opts:
-        if o == '-i': inplace = True
-        if o == '-b': backup = a
+        if o == "-i":
+            inplace = True
+        if o == "-b":
+            backup = a
     for line in input(args, inplace=inplace, backup=backup):
-        if line[-1:] == '\n': line = line[:-1]
-        if line[-1:] == '\r': line = line[:-1]
-        print("%d: %s[%d]%s %s" % (lineno(), filename(), filelineno(),
-                                   isfirstline() and "*" or "", line))
+        if line[-1:] == "\n":
+            line = line[:-1]
+        if line[-1:] == "\r":
+            line = line[:-1]
+        print(
+            "%d: %s[%d]%s %s"
+            % (lineno(), filename(), filelineno(), isfirstline() and "*" or "", line)
+        )
     print("%d: %s[%d]" % (lineno(), filename(), filelineno()))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     _test()

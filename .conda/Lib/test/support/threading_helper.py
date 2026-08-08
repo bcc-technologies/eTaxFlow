@@ -8,8 +8,7 @@ import unittest
 
 from test import support
 
-
-#=======================================================================
+# =======================================================================
 # Threading support to prevent reporting refleaks when running regrtest.py -R
 
 # NOTE: we use thread._count() rather than threading.enumerate() (or the
@@ -44,7 +43,8 @@ def threading_cleanup(*original_values):
         f"threading_cleanup() failed to clean up threads "
         f"in {timeout:.1f} seconds\n"
         f"  before: thread count={orig_count}, dangling={orig_ndangling}\n"
-        f"  after: thread count={count}, dangling={len(dangling_threads)}")
+        f"  after: thread count={count}, dangling={len(dangling_threads)}"
+    )
     for thread in dangling_threads:
         support.print_warning(f"Dangling thread: {thread!r}")
 
@@ -59,6 +59,7 @@ def reap_threads(func):
     """Use this function when threads are being used.  This will
     ensure that the threads are cleaned up even when the test fails.
     """
+
     @functools.wraps(func)
     def decorator(*args):
         key = threading_setup()
@@ -66,6 +67,7 @@ def reap_threads(func):
             return func(*args)
         finally:
             threading_cleanup(*key)
+
     return decorator
 
 
@@ -98,9 +100,11 @@ def wait_threads_exit(timeout=None):
                 break
         else:
             dt = time.monotonic() - start_time
-            msg = (f"wait_threads() failed to cleanup {count - old_count} "
-                   f"threads after {dt:.1f} seconds "
-                   f"(count: {count}, old count: {old_count})")
+            msg = (
+                f"wait_threads() failed to cleanup {count - old_count} "
+                f"threads after {dt:.1f} seconds "
+                f"(count: {count}, old count: {old_count})"
+            )
             raise AssertionError(msg)
 
 
@@ -132,8 +136,10 @@ def start_threads(threads, unlock=None):
                 started.append(t)
         except:
             if support.verbose:
-                print("Can't start %d threads, only %d threads started" %
-                      (len(threads), len(started)))
+                print(
+                    "Can't start %d threads, only %d threads started"
+                    % (len(threads), len(started))
+                )
             raise
         yield
     finally:
@@ -149,14 +155,16 @@ def start_threads(threads, unlock=None):
                 if not started:
                     break
                 if support.verbose:
-                    print('Unable to join %d threads during a period of '
-                          '%d minutes' % (len(started), timeout))
+                    print(
+                        "Unable to join %d threads during a period of "
+                        "%d minutes" % (len(started), timeout)
+                    )
         finally:
             started = [t for t in started if t.is_alive()]
             if started:
                 if faulthandler is not None:
                     faulthandler.dump_traceback(sys.stdout)
-                raise AssertionError('Unable to join %d threads' % len(started))
+                raise AssertionError("Unable to join %d threads" % len(started))
 
 
 class catch_threading_exception:
@@ -235,7 +243,9 @@ def _can_start_thread() -> bool:
         # assume all other platforms have working thread support.
         return True
 
+
 can_start_thread = _can_start_thread()
+
 
 def requires_working_threading(*, module=False):
     """Skip tests or modules that require working threading.

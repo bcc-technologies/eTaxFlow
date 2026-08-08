@@ -38,9 +38,9 @@ if os.name == "nt":
             # better be safe than sorry
             return None
         if version <= 6:
-            clibname = 'msvcrt'
+            clibname = "msvcrt"
         elif version <= 13:
-            clibname = 'msvcr%d' % (version * 10)
+            clibname = "msvcr%d" % (version * 10)
         else:
             # CRT is no longer directly loadable. See issue23606 for the
             # discussion about alternative approaches.
@@ -48,15 +48,16 @@ if os.name == "nt":
 
         # If python was built with in debug mode
         import importlib.machinery
-        if '_d.pyd' in importlib.machinery.EXTENSION_SUFFIXES:
-            clibname += 'd'
-        return clibname+'.dll'
+
+        if "_d.pyd" in importlib.machinery.EXTENSION_SUFFIXES:
+            clibname += "d"
+        return clibname + ".dll"
 
     def find_library(name):
-        if name in ('c', 'm'):
+        if name in ("c", "m"):
             return find_msvcrt()
         # See MSDN for the REAL search order.
-        for directory in os.environ['PATH'].split(os.pathsep):
+        for directory in os.environ["PATH"].split(os.pathsep):
             fname = os.path.join(directory, name)
             if os.path.isfile(fname):
                 return fname
@@ -69,11 +70,14 @@ if os.name == "nt":
 
 elif os.name == "posix" and sys.platform == "darwin":
     from ctypes.macholib.dyld import dyld_find as _dyld_find
+
     def find_library(name):
-        possible = ['@executable_path/../lib/lib%s.dylib' % name,
-                    'lib%s.dylib' % name,
-                    '%s.dylib' % name,
-                    '%s.framework/%s' % (name, name)]
+        possible = [
+            "@executable_path/../lib/lib%s.dylib" % name,
+            "lib%s.dylib" % name,
+            "%s.dylib" % name,
+            "%s.framework/%s" % (name, name),
+        ]
         for name in possible:
             try:
                 return _dyld_find(name)
@@ -96,9 +100,9 @@ elif os.name == "posix":
 
     def _is_elf(filename):
         "Return True if the given file is an ELF file"
-        elf_header = b'\x7fELF'
+        elf_header = b"\x7fELF"
         try:
-            with open(filename, 'br') as thefile:
+            with open(filename, "br") as thefile:
                 return thefile.read(4) == elf_header
         except FileNotFoundError:
             return False
@@ -108,27 +112,26 @@ elif os.name == "posix":
         # library name it prints out. The GCC command will fail because we
         # haven't supplied a proper program with main(), but that does not
         # matter.
-        expr = os.fsencode(r'[^\(\)\s]*lib%s\.[^\(\)\s]*' % re.escape(name))
+        expr = os.fsencode(r"[^\(\)\s]*lib%s\.[^\(\)\s]*" % re.escape(name))
 
-        c_compiler = shutil.which('gcc')
+        c_compiler = shutil.which("gcc")
         if not c_compiler:
-            c_compiler = shutil.which('cc')
+            c_compiler = shutil.which("cc")
         if not c_compiler:
             # No C compiler available, give up
             return None
 
         temp = tempfile.NamedTemporaryFile()
         try:
-            args = [c_compiler, '-Wl,-t', '-o', temp.name, '-l' + name]
+            args = [c_compiler, "-Wl,-t", "-o", temp.name, "-l" + name]
 
             env = dict(os.environ)
-            env['LC_ALL'] = 'C'
-            env['LANG'] = 'C'
+            env["LC_ALL"] = "C"
+            env["LANG"] = "C"
             try:
-                proc = subprocess.Popen(args,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.STDOUT,
-                                        env=env)
+                proc = subprocess.Popen(
+                    args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env
+                )
             except OSError:  # E.g. bad executable
                 return None
             with proc:
@@ -152,7 +155,6 @@ elif os.name == "posix":
                 continue
             return os.fsdecode(file)
 
-
     if sys.platform == "sunos5":
         # use /usr/ccs/bin/dump on solaris
         def _get_soname(f):
@@ -160,36 +162,42 @@ elif os.name == "posix":
                 return None
 
             try:
-                proc = subprocess.Popen(("/usr/ccs/bin/dump", "-Lpv", f),
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.DEVNULL)
+                proc = subprocess.Popen(
+                    ("/usr/ccs/bin/dump", "-Lpv", f),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                )
             except OSError:  # E.g. command not found
                 return None
             with proc:
                 data = proc.stdout.read()
-            res = re.search(br'\[.*\]\sSONAME\s+([^\s]+)', data)
+            res = re.search(rb"\[.*\]\sSONAME\s+([^\s]+)", data)
             if not res:
                 return None
             return os.fsdecode(res.group(1))
+
     else:
+
         def _get_soname(f):
             # assuming GNU binutils / ELF
             if not f:
                 return None
-            objdump = shutil.which('objdump')
+            objdump = shutil.which("objdump")
             if not objdump:
                 # objdump is not available, give up
                 return None
 
             try:
-                proc = subprocess.Popen((objdump, '-p', '-j', '.dynamic', f),
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.DEVNULL)
+                proc = subprocess.Popen(
+                    (objdump, "-p", "-j", ".dynamic", f),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                )
             except OSError:  # E.g. bad executable
                 return None
             with proc:
                 dump = proc.stdout.read()
-            res = re.search(br'\sSONAME\s+([^\s]+)', dump)
+            res = re.search(rb"\sSONAME\s+([^\s]+)", dump)
             if not res:
                 return None
             return os.fsdecode(res.group(1))
@@ -209,15 +217,17 @@ elif os.name == "posix":
 
         def find_library(name):
             ename = re.escape(name)
-            expr = r':-l%s\.\S+ => \S*/(lib%s\.\S+)' % (ename, ename)
+            expr = r":-l%s\.\S+ => \S*/(lib%s\.\S+)" % (ename, ename)
             expr = os.fsencode(expr)
 
             try:
-                proc = subprocess.Popen(('/sbin/ldconfig', '-r'),
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.DEVNULL)
+                proc = subprocess.Popen(
+                    ("/sbin/ldconfig", "-r"),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                )
             except OSError:  # E.g. command not found
-                data = b''
+                data = b""
             else:
                 with proc:
                     data = proc.stdout.read()
@@ -231,29 +241,28 @@ elif os.name == "posix":
     elif sys.platform == "sunos5":
 
         def _findLib_crle(name, is64):
-            if not os.path.exists('/usr/bin/crle'):
+            if not os.path.exists("/usr/bin/crle"):
                 return None
 
             env = dict(os.environ)
-            env['LC_ALL'] = 'C'
+            env["LC_ALL"] = "C"
 
             if is64:
-                args = ('/usr/bin/crle', '-64')
+                args = ("/usr/bin/crle", "-64")
             else:
-                args = ('/usr/bin/crle',)
+                args = ("/usr/bin/crle",)
 
             paths = None
             try:
-                proc = subprocess.Popen(args,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.DEVNULL,
-                                        env=env)
+                proc = subprocess.Popen(
+                    args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env=env
+                )
             except OSError:  # E.g. bad executable
                 return None
             with proc:
                 for line in proc.stdout:
                     line = line.strip()
-                    if line.startswith(b'Default Library Path (ELF):'):
+                    if line.startswith(b"Default Library Path (ELF):"):
                         paths = os.fsdecode(line).split()[4]
 
             if not paths:
@@ -266,35 +275,38 @@ elif os.name == "posix":
 
             return None
 
-        def find_library(name, is64 = False):
+        def find_library(name, is64=False):
             return _get_soname(_findLib_crle(name, is64) or _findLib_gcc(name))
 
     else:
 
         def _findSoname_ldconfig(name):
             import struct
-            if struct.calcsize('l') == 4:
-                machine = os.uname().machine + '-32'
+
+            if struct.calcsize("l") == 4:
+                machine = os.uname().machine + "-32"
             else:
-                machine = os.uname().machine + '-64'
+                machine = os.uname().machine + "-64"
             mach_map = {
-                'x86_64-64': 'libc6,x86-64',
-                'ppc64-64': 'libc6,64bit',
-                'sparc64-64': 'libc6,64bit',
-                's390x-64': 'libc6,64bit',
-                'ia64-64': 'libc6,IA-64',
-                }
-            abi_type = mach_map.get(machine, 'libc6')
+                "x86_64-64": "libc6,x86-64",
+                "ppc64-64": "libc6,64bit",
+                "sparc64-64": "libc6,64bit",
+                "s390x-64": "libc6,64bit",
+                "ia64-64": "libc6,IA-64",
+            }
+            abi_type = mach_map.get(machine, "libc6")
 
             # XXX assuming GLIBC's ldconfig (with option -p)
-            regex = r'\s+(lib%s\.[^\s]+)\s+\(%s'
+            regex = r"\s+(lib%s\.[^\s]+)\s+\(%s"
             regex = os.fsencode(regex % (re.escape(name), abi_type))
             try:
-                with subprocess.Popen(['/sbin/ldconfig', '-p'],
-                                      stdin=subprocess.DEVNULL,
-                                      stderr=subprocess.DEVNULL,
-                                      stdout=subprocess.PIPE,
-                                      env={'LC_ALL': 'C', 'LANG': 'C'}) as p:
+                with subprocess.Popen(
+                    ["/sbin/ldconfig", "-p"],
+                    stdin=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    stdout=subprocess.PIPE,
+                    env={"LC_ALL": "C", "LANG": "C"},
+                ) as p:
                     res = re.search(regex, p.stdout.read())
                     if res:
                         return os.fsdecode(res.group(1))
@@ -303,18 +315,21 @@ elif os.name == "posix":
 
         def _findLib_ld(name):
             # See issue #9998 for why this is needed
-            expr = r'[^\(\)\s]*lib%s\.[^\(\)\s]*' % re.escape(name)
-            cmd = ['ld', '-t']
-            libpath = os.environ.get('LD_LIBRARY_PATH')
+            expr = r"[^\(\)\s]*lib%s\.[^\(\)\s]*" % re.escape(name)
+            cmd = ["ld", "-t"]
+            libpath = os.environ.get("LD_LIBRARY_PATH")
             if libpath:
-                for d in libpath.split(':'):
-                    cmd.extend(['-L', d])
-            cmd.extend(['-o', os.devnull, '-l%s' % name])
+                for d in libpath.split(":"):
+                    cmd.extend(["-L", d])
+            cmd.extend(["-o", os.devnull, "-l%s" % name])
             result = None
             try:
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     universal_newlines=True)
+                p = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True,
+                )
                 out, _ = p.communicate()
                 res = re.findall(expr, os.fsdecode(out))
                 for file in res:
@@ -332,7 +347,7 @@ elif os.name == "posix":
             if not name:
                 return None
             for fullname in (name, "lib%s.so" % (name)):
-                path = os.path.join(sys.prefix, 'lib', fullname)
+                path = os.path.join(sys.prefix, "lib", fullname)
                 if os.path.exists(path):
                     return path
             return None
@@ -344,20 +359,29 @@ elif os.name == "posix":
             # When objdump is unavailable this returns None
             so_name = _get_soname(_findLib_prefix(name)) or name
             if so_name != name:
-                return _findLib_prefix(so_name) or \
-                       _findLib_prefix(name) or \
-                       _findSoname_ldconfig(name) or \
-                       _get_soname(_findLib_gcc(name)) or _get_soname(_findLib_ld(name))
+                return (
+                    _findLib_prefix(so_name)
+                    or _findLib_prefix(name)
+                    or _findSoname_ldconfig(name)
+                    or _get_soname(_findLib_gcc(name))
+                    or _get_soname(_findLib_ld(name))
+                )
             else:
-                 return _findLib_prefix(name) or \
-                        _findSoname_ldconfig(name) or \
-                        _get_soname(_findLib_gcc(name)) or _get_soname(_findLib_ld(name))
+                return (
+                    _findLib_prefix(name)
+                    or _findSoname_ldconfig(name)
+                    or _get_soname(_findLib_gcc(name))
+                    or _get_soname(_findLib_ld(name))
+                )
+
 
 ################################################################
 # test code
 
+
 def test():
     from ctypes import cdll
+
     if os.name == "nt":
         print(cdll.msvcrt)
         print(cdll.load("msvcrt"))
@@ -378,15 +402,22 @@ def test():
         # issue-26439 - fix broken test call for AIX
         elif sys.platform.startswith("aix"):
             from ctypes import CDLL
+
             if sys.maxsize < 2**32:
-                print(f"Using CDLL(name, os.RTLD_MEMBER): {CDLL('libc.a(shr.o)', os.RTLD_MEMBER)}")
+                print(
+                    f"Using CDLL(name, os.RTLD_MEMBER): {CDLL('libc.a(shr.o)', os.RTLD_MEMBER)}"
+                )
                 print(f"Using cdll.LoadLibrary(): {cdll.LoadLibrary('libc.a(shr.o)')}")
                 # librpm.so is only available as 32-bit shared library
                 print(find_library("rpm"))
                 print(cdll.LoadLibrary("librpm.so"))
             else:
-                print(f"Using CDLL(name, os.RTLD_MEMBER): {CDLL('libc.a(shr_64.o)', os.RTLD_MEMBER)}")
-                print(f"Using cdll.LoadLibrary(): {cdll.LoadLibrary('libc.a(shr_64.o)')}")
+                print(
+                    f"Using CDLL(name, os.RTLD_MEMBER): {CDLL('libc.a(shr_64.o)', os.RTLD_MEMBER)}"
+                )
+                print(
+                    f"Using cdll.LoadLibrary(): {cdll.LoadLibrary('libc.a(shr_64.o)')}"
+                )
             print(f"crypt\t:: {find_library('crypt')}")
             print(f"crypt\t:: {cdll.LoadLibrary(find_library('crypt'))}")
             print(f"crypto\t:: {find_library('crypto')}")
@@ -395,6 +426,7 @@ def test():
             print(cdll.LoadLibrary("libm.so"))
             print(cdll.LoadLibrary("libcrypt.so"))
             print(find_library("crypt"))
+
 
 if __name__ == "__main__":
     test()

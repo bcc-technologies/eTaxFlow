@@ -1,110 +1,110 @@
 # Symbolic constants for Tk
 
 # Booleans
-NO=FALSE=OFF=0
-YES=TRUE=ON=1
+NO = FALSE = OFF = 0
+YES = TRUE = ON = 1
 
 # -anchor and -sticky
-N='n'
-S='s'
-W='w'
-E='e'
-NW='nw'
-SW='sw'
-NE='ne'
-SE='se'
-NS='ns'
-EW='ew'
-NSEW='nsew'
-CENTER='center'
+N = "n"
+S = "s"
+W = "w"
+E = "e"
+NW = "nw"
+SW = "sw"
+NE = "ne"
+SE = "se"
+NS = "ns"
+EW = "ew"
+NSEW = "nsew"
+CENTER = "center"
 
 # -fill
-NONE='none'
-X='x'
-Y='y'
-BOTH='both'
+NONE = "none"
+X = "x"
+Y = "y"
+BOTH = "both"
 
 # -side
-LEFT='left'
-TOP='top'
-RIGHT='right'
-BOTTOM='bottom'
+LEFT = "left"
+TOP = "top"
+RIGHT = "right"
+BOTTOM = "bottom"
 
 # -relief
-RAISED='raised'
-SUNKEN='sunken'
-FLAT='flat'
-RIDGE='ridge'
-GROOVE='groove'
-SOLID = 'solid'
+RAISED = "raised"
+SUNKEN = "sunken"
+FLAT = "flat"
+RIDGE = "ridge"
+GROOVE = "groove"
+SOLID = "solid"
 
 # -orient
-HORIZONTAL='horizontal'
-VERTICAL='vertical'
+HORIZONTAL = "horizontal"
+VERTICAL = "vertical"
 
 # -tabs
-NUMERIC='numeric'
+NUMERIC = "numeric"
 
 # -wrap
-CHAR='char'
-WORD='word'
+CHAR = "char"
+WORD = "word"
 
 # -align
-BASELINE='baseline'
+BASELINE = "baseline"
 
 # -bordermode
-INSIDE='inside'
-OUTSIDE='outside'
+INSIDE = "inside"
+OUTSIDE = "outside"
 
 # Special tags, marks and insert positions
-SEL='sel'
-SEL_FIRST='sel.first'
-SEL_LAST='sel.last'
-END='end'
-INSERT='insert'
-CURRENT='current'
-ANCHOR='anchor'
-ALL='all' # e.g. Canvas.delete(ALL)
+SEL = "sel"
+SEL_FIRST = "sel.first"
+SEL_LAST = "sel.last"
+END = "end"
+INSERT = "insert"
+CURRENT = "current"
+ANCHOR = "anchor"
+ALL = "all"  # e.g. Canvas.delete(ALL)
 
 # Text widget and button states
-NORMAL='normal'
-DISABLED='disabled'
-ACTIVE='active'
+NORMAL = "normal"
+DISABLED = "disabled"
+ACTIVE = "active"
 # Canvas state
-HIDDEN='hidden'
+HIDDEN = "hidden"
 
 # Menu item types
-CASCADE='cascade'
-CHECKBUTTON='checkbutton'
-COMMAND='command'
-RADIOBUTTON='radiobutton'
-SEPARATOR='separator'
+CASCADE = "cascade"
+CHECKBUTTON = "checkbutton"
+COMMAND = "command"
+RADIOBUTTON = "radiobutton"
+SEPARATOR = "separator"
 
 # Selection modes for list boxes
-SINGLE='single'
-BROWSE='browse'
-MULTIPLE='multiple'
-EXTENDED='extended'
+SINGLE = "single"
+BROWSE = "browse"
+MULTIPLE = "multiple"
+EXTENDED = "extended"
 
 # Activestyle for list boxes
 # NONE='none' is also valid
-DOTBOX='dotbox'
-UNDERLINE='underline'
+DOTBOX = "dotbox"
+UNDERLINE = "underline"
 
 # Various canvas styles
-PIESLICE='pieslice'
-CHORD='chord'
-ARC='arc'
-FIRST='first'
-LAST='last'
-BUTT='butt'
-PROJECTING='projecting'
-ROUND='round'
-BEVEL='bevel'
-MITER='miter'
+PIESLICE = "pieslice"
+CHORD = "chord"
+ARC = "arc"
+FIRST = "first"
+LAST = "last"
+BUTT = "butt"
+PROJECTING = "projecting"
+ROUND = "round"
+BEVEL = "bevel"
+MITER = "miter"
 
 # Arguments to xview/yview
-MOVETO='moveto'
-SCROLL='scroll'
-UNITS='units'
-PAGES='pages'
+MOVETO = "moveto"
+SCROLL = "scroll"
+UNITS = "units"
+PAGES = "pages"

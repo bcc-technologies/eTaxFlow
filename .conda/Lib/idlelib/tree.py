@@ -34,10 +34,12 @@ if os.path.isdir(_icondir):
 elif not os.path.isdir(ICONDIR):
     raise RuntimeError(f"can't find icon directory ({ICONDIR!r})")
 
+
 def listicons(icondir=ICONDIR):
     """Utility to display the available icons."""
     root = Tk()
     import glob
+
     list = glob.glob(os.path.join(glob.escape(icondir), "*.gif"))
     list.sort()
     images = []
@@ -49,12 +51,13 @@ def listicons(icondir=ICONDIR):
         label = Label(root, image=image, bd=1, relief="raised")
         label.grid(row=row, column=column)
         label = Label(root, text=name)
-        label.grid(row=row+1, column=column)
+        label.grid(row=row + 1, column=column)
         column = column + 1
         if column >= 10:
-            row = row+2
+            row = row + 2
             column = 0
     root.images = images
+
 
 def wheel_event(event, widget=None):
     """Handle scrollwheel event.
@@ -73,12 +76,11 @@ def wheel_event(event, widget=None):
     This function depends on widget.yview to not be overridden by
     a subclass.
     """
-    up = {EventType.MouseWheel: event.delta > 0,
-          EventType.ButtonPress: event.num == 4}
+    up = {EventType.MouseWheel: event.delta > 0, EventType.ButtonPress: event.num == 4}
     lines = -5 if up[event.type] else 5
     widget = event.widget if widget is None else widget
-    widget.yview(SCROLL, lines, 'units')
-    return 'break'
+    widget.yview(SCROLL, lines, "units")
+    return "break"
 
 
 class TreeNode:
@@ -89,11 +91,11 @@ class TreeNode:
         self.canvas = canvas
         self.parent = parent
         self.item = item
-        self.state = 'collapsed'
+        self.state = "collapsed"
         self.selected = False
         self.children = []
         self.x = self.y = None
-        self.iconimages = {} # cache of PhotoImage instances for icons
+        self.iconimages = {}  # cache of PhotoImage instances for icons
 
     def destroy(self):
         for c in self.children[:]:
@@ -143,7 +145,7 @@ class TreeNode:
             child.deselecttree()
 
     def flip(self, event=None):
-        if self.state == 'expanded':
+        if self.state == "expanded":
             self.collapse()
         else:
             self.expand()
@@ -153,14 +155,14 @@ class TreeNode:
     def expand(self, event=None):
         if not self.item._IsExpandable():
             return
-        if self.state != 'expanded':
-            self.state = 'expanded'
+        if self.state != "expanded":
+            self.state = "expanded"
             self.update()
             self.view()
 
     def collapse(self, event=None):
-        if self.state != 'collapsed':
-            self.state = 'collapsed'
+        if self.state != "collapsed":
+            self.state = "collapsed"
             self.update()
 
     def view(self):
@@ -172,7 +174,7 @@ class TreeNode:
         visible_bottom = self.canvas.canvasy(visible_height)
         if visible_top <= top and bottom <= visible_bottom:
             return
-        x0, y0, x1, y1 = self.canvas._getints(self.canvas['scrollregion'])
+        x0, y0, x1, y1 = self.canvas._getints(self.canvas["scrollregion"])
         if top >= visible_top and height <= visible_height:
             fraction = top + height - visible_height
         else:
@@ -181,7 +183,7 @@ class TreeNode:
         self.canvas.yview_moveto(fraction)
 
     def lastvisiblechild(self):
-        if self.children and self.state == 'expanded':
+        if self.children and self.state == "expanded":
             return self.children[-1].lastvisiblechild()
         else:
             return self
@@ -190,21 +192,21 @@ class TreeNode:
         if self.parent:
             self.parent.update()
         else:
-            oldcursor = self.canvas['cursor']
-            self.canvas['cursor'] = "watch"
+            oldcursor = self.canvas["cursor"]
+            self.canvas["cursor"] = "watch"
             self.canvas.update()
-            self.canvas.delete(ALL)     # XXX could be more subtle
+            self.canvas.delete(ALL)  # XXX could be more subtle
             self.draw(7, 2)
             x0, y0, x1, y1 = self.canvas.bbox(ALL)
             self.canvas.configure(scrollregion=(0, 0, x1, y1))
-            self.canvas['cursor'] = oldcursor
+            self.canvas["cursor"] = oldcursor
 
     def draw(self, x, y):
         # XXX This hard-codes too many geometry constants!
         self.x, self.y = x, y
         self.drawicon()
         self.drawtext()
-        if self.state != 'expanded':
+        if self.state != "expanded":
             return y + TreeNode.dy
         # draw children
         if not self.children:
@@ -215,36 +217,43 @@ class TreeNode:
             for item in sublist:
                 child = self.__class__(self.canvas, self, item)
                 self.children.append(child)
-        cx = x+20
+        cx = x + 20
         cy = y + TreeNode.dy
         cylast = 0
         for child in self.children:
             cylast = cy
-            self.canvas.create_line(x+9, cy+7, cx, cy+7, fill="gray50")
+            self.canvas.create_line(x + 9, cy + 7, cx, cy + 7, fill="gray50")
             cy = child.draw(cx, cy)
             if child.item._IsExpandable():
-                if child.state == 'expanded':
+                if child.state == "expanded":
                     iconname = "minusnode"
                     callback = child.collapse
                 else:
                     iconname = "plusnode"
                     callback = child.expand
                 image = self.geticonimage(iconname)
-                id = self.canvas.create_image(x+9, cylast+7, image=image)
+                id = self.canvas.create_image(x + 9, cylast + 7, image=image)
                 # XXX This leaks bindings until canvas is deleted:
                 self.canvas.tag_bind(id, "<1>", callback)
                 self.canvas.tag_bind(id, "<Double-1>", lambda x: None)
-        id = self.canvas.create_line(x+9, y+10, x+9, cylast+7,
+        id = self.canvas.create_line(
+            x + 9,
+            y + 10,
+            x + 9,
+            cylast + 7,
             ##stipple="gray50",     # XXX Seems broken in Tk 8.0.x
-            fill="gray50")
-        self.canvas.tag_lower(id) # XXX .lower(id) before Python 1.5.2
+            fill="gray50",
+        )
+        self.canvas.tag_lower(id)  # XXX .lower(id) before Python 1.5.2
         return cy
 
     def drawicon(self):
         if self.selected:
-            imagename = (self.item.GetSelectedIconName() or
-                         self.item.GetIconName() or
-                         "openfolder")
+            imagename = (
+                self.item.GetSelectedIconName()
+                or self.item.GetIconName()
+                or "openfolder"
+            )
         else:
             imagename = self.item.GetIconName() or "folder"
         image = self.geticonimage(imagename)
@@ -254,12 +263,11 @@ class TreeNode:
         self.canvas.tag_bind(id, "<Double-1>", self.flip)
 
     def drawtext(self):
-        textx = self.x+20-1
-        texty = self.y-4
+        textx = self.x + 20 - 1
+        texty = self.y - 4
         labeltext = self.item.GetLabelText()
         if labeltext:
-            id = self.canvas.create_text(textx, texty, anchor="nw",
-                                         text=labeltext)
+            id = self.canvas.create_text(textx, texty, anchor="nw", text=labeltext)
             self.canvas.tag_bind(id, "<1>", self.select)
             self.canvas.tag_bind(id, "<Double-1>", self.flip)
             x0, y0, x1, y1 = self.canvas.bbox(id)
@@ -278,15 +286,14 @@ class TreeNode:
             self.label = Label(self.canvas, text=text, bd=0, padx=2, pady=2)
         theme = idleConf.CurrentTheme()
         if self.selected:
-            self.label.configure(idleConf.GetHighlight(theme, 'hilite'))
+            self.label.configure(idleConf.GetHighlight(theme, "hilite"))
         else:
-            self.label.configure(idleConf.GetHighlight(theme, 'normal'))
-        id = self.canvas.create_window(textx, texty,
-                                       anchor="nw", window=self.label)
+            self.label.configure(idleConf.GetHighlight(theme, "normal"))
+        id = self.canvas.create_window(textx, texty, anchor="nw", window=self.label)
         self.label.bind("<1>", self.select_or_edit)
         self.label.bind("<Double-1>", self.flip)
         self.label.bind("<MouseWheel>", lambda e: wheel_event(e, self.canvas))
-        if self.label._windowingsystem == 'x11':
+        if self.label._windowingsystem == "x11":
             self.label.bind("<Button-4>", lambda e: wheel_event(e, self.canvas))
             self.label.bind("<Button-5>", lambda e: wheel_event(e, self.canvas))
         self.text_id = id
@@ -304,7 +311,7 @@ class TreeNode:
 
     def edit(self, event=None):
         self.entry = Entry(self.label, bd=0, highlightthickness=1, width=0)
-        self.entry.insert(0, self.label['text'])
+        self.entry.insert(0, self.label["text"])
         self.entry.selection_range(0, END)
         self.entry.pack(ipadx=5)
         self.entry.focus_set()
@@ -322,7 +329,7 @@ class TreeNode:
         if text and text != self.item.GetText():
             self.item.SetText(text)
         text = self.item.GetText()
-        self.label['text'] = text
+        self.label["text"] = text
         self.drawtext()
         self.canvas.focus_set()
 
@@ -338,7 +345,6 @@ class TreeNode:
 
 
 class TreeItem:
-
     """Abstract class representing tree items.
 
     Methods should typically be overridden, otherwise a default action
@@ -397,8 +403,8 @@ class TreeItem:
 
 # Example application
 
-class FileTreeItem(TreeItem):
 
+class FileTreeItem(TreeItem):
     """Example TreeItem subclass -- browse the file system."""
 
     def __init__(self, path):
@@ -423,7 +429,7 @@ class FileTreeItem(TreeItem):
 
     def GetIconName(self):
         if not self.IsExpandable():
-            return "python" # XXX wish there was a "file" icon
+            return "python"  # XXX wish there was a "file" icon
 
     def IsExpandable(self):
         return os.path.isdir(self.path)
@@ -433,7 +439,7 @@ class FileTreeItem(TreeItem):
             names = os.listdir(self.path)
         except OSError:
             return []
-        names.sort(key = os.path.normcase)
+        names.sort(key=os.path.normcase)
         sublist = []
         for name in names:
             item = FileTreeItem(os.path.join(self.path, name))
@@ -443,11 +449,12 @@ class FileTreeItem(TreeItem):
 
 # A canvas widget with scroll bars and some useful bindings
 
+
 class ScrolledCanvas:
 
     def __init__(self, master, **opts):
-        if 'yscrollincrement' not in opts:
-            opts['yscrollincrement'] = 17
+        if "yscrollincrement" not in opts:
+            opts["yscrollincrement"] = 17
         self.master = master
         self.frame = Frame(master)
         self.frame.rowconfigure(0, weight=1)
@@ -458,33 +465,38 @@ class ScrolledCanvas:
         self.vbar.grid(row=0, column=1, sticky="nse")
         self.hbar = Scrollbar(self.frame, name="hbar", orient="horizontal")
         self.hbar.grid(row=1, column=0, sticky="ews")
-        self.canvas['yscrollcommand'] = self.vbar.set
-        self.vbar['command'] = self.canvas.yview
-        self.canvas['xscrollcommand'] = self.hbar.set
-        self.hbar['command'] = self.canvas.xview
+        self.canvas["yscrollcommand"] = self.vbar.set
+        self.vbar["command"] = self.canvas.yview
+        self.canvas["xscrollcommand"] = self.hbar.set
+        self.hbar["command"] = self.canvas.xview
         self.canvas.bind("<Key-Prior>", self.page_up)
         self.canvas.bind("<Key-Next>", self.page_down)
         self.canvas.bind("<Key-Up>", self.unit_up)
         self.canvas.bind("<Key-Down>", self.unit_down)
         self.canvas.bind("<MouseWheel>", wheel_event)
-        if self.canvas._windowingsystem == 'x11':
+        if self.canvas._windowingsystem == "x11":
             self.canvas.bind("<Button-4>", wheel_event)
             self.canvas.bind("<Button-5>", wheel_event)
-        #if isinstance(master, Toplevel) or isinstance(master, Tk):
+        # if isinstance(master, Toplevel) or isinstance(master, Tk):
         self.canvas.bind("<Alt-Key-2>", self.zoom_height)
         self.canvas.focus_set()
+
     def page_up(self, event):
         self.canvas.yview_scroll(-1, "page")
         return "break"
+
     def page_down(self, event):
         self.canvas.yview_scroll(1, "page")
         return "break"
+
     def unit_up(self, event):
         self.canvas.yview_scroll(-1, "unit")
         return "break"
+
     def unit_down(self, event):
         self.canvas.yview_scroll(1, "unit")
         return "break"
+
     def zoom_height(self, event):
         zoomheight.zoom_height(self.master)
         return "break"
@@ -492,8 +504,8 @@ class ScrolledCanvas:
 
 def _tree_widget(parent):  # htest #
     top = Toplevel(parent)
-    x, y = map(int, parent.geometry().split('+')[1:])
-    top.geometry("+%d+%d" % (x+50, y+175))
+    x, y = map(int, parent.geometry().split("+")[1:])
+    top.geometry("+%d+%d" % (x + 50, y + 175))
     sc = ScrolledCanvas(top, bg="white", highlightthickness=0, takefocus=1)
     sc.frame.pack(expand=1, fill="both", side=LEFT)
     item = FileTreeItem(ICONDIR)
@@ -501,9 +513,11 @@ def _tree_widget(parent):  # htest #
     node.expand()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_tree', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_tree", verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
+
     run(_tree_widget)

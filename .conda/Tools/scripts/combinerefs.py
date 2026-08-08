@@ -67,10 +67,11 @@ between the times PYTHONDUMPREFS produced output.
 The string '<dummy key>', which is used in dictobject.c to overwrite a real
 key that gets deleted, grew several hundred references during cleanup.  It
 suggests that stuff did get removed from dicts by cleanup, but that the dicts
-themselves are staying alive for some reason. """
+themselves are staying alive for some reason."""
 
 import re
 import sys
+
 
 # Generate lines from fileiter.  If whilematch is true, continue reading
 # while the regexp object pat matches line.  If whilematch is false, lines
@@ -85,45 +86,48 @@ def read(fileiter, pat, whilematch):
         else:
             break
 
+
 def combinefile(f):
     fi = iter(f)
 
-    for line in read(fi, re.compile(r'^Remaining objects:$'), False):
+    for line in read(fi, re.compile(r"^Remaining objects:$"), False):
         pass
 
-    crack = re.compile(r'([a-zA-Z\d]+) \[(\d+)\] (.*)')
+    crack = re.compile(r"([a-zA-Z\d]+) \[(\d+)\] (.*)")
     addr2rc = {}
     addr2guts = {}
     before = 0
-    for line in read(fi, re.compile(r'^Remaining object addresses:$'), False):
+    for line in read(fi, re.compile(r"^Remaining object addresses:$"), False):
         m = crack.match(line)
         if m:
             addr, addr2rc[addr], addr2guts[addr] = m.groups()
             before += 1
         else:
-            print('??? skipped:', line)
+            print("??? skipped:", line)
 
     after = 0
     for line in read(fi, crack, True):
         after += 1
         m = crack.match(line)
         assert m
-        addr, rc, guts = m.groups() # guts is type name here
+        addr, rc, guts = m.groups()  # guts is type name here
         if addr not in addr2rc:
-            print('??? new object created while tearing down:', line.rstrip())
+            print("??? new object created while tearing down:", line.rstrip())
             continue
-        print(addr, end=' ')
+        print(addr, end=" ")
         if rc == addr2rc[addr]:
-            print('[%s]' % rc, end=' ')
+            print("[%s]" % rc, end=" ")
         else:
-            print('[%s->%s]' % (addr2rc[addr], rc), end=' ')
+            print("[%s->%s]" % (addr2rc[addr], rc), end=" ")
         print(guts, addr2guts[addr])
 
     print("%d objects before, %d after" % (before, after))
+
 
 def combine(fname):
     with open(fname) as f:
         combinefile(f)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     combine(sys.argv[1])

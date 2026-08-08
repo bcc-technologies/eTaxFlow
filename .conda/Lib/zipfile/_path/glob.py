@@ -11,7 +11,7 @@ def match_dirs(pattern):
 
     zipfile.Path directory names always end in a slash.
     """
-    return rf'{pattern}[/]?'
+    return rf"{pattern}[/]?"
 
 
 def translate_core(pattern):
@@ -25,7 +25,7 @@ def translate_core(pattern):
     >>> translate('**/*')
     '.*/[^/]*'
     """
-    return ''.join(map(replace, separate(pattern)))
+    return "".join(map(replace, separate(pattern)))
 
 
 def separate(pattern):
@@ -37,7 +37,7 @@ def separate(pattern):
     >>> [m.group(0) for m in separate('a[?]txt')]
     ['a', '[?]', 'txt']
     """
-    return re.finditer(r'([^\[]+)|(?P<set>[\[].*?[\]])|([\[][^\]]*$)', pattern)
+    return re.finditer(r"([^\[]+)|(?P<set>[\[].*?[\]])|([\[][^\]]*$)", pattern)
 
 
 def replace(match):
@@ -45,9 +45,9 @@ def replace(match):
     Perform the replacements for a match from :func:`separate`.
     """
 
-    return match.group('set') or (
+    return match.group("set") or (
         re.escape(match.group(0))
-        .replace('\\*\\*', r'.*')
-        .replace('\\*', r'[^/]*')
-        .replace('\\?', r'.')
+        .replace("\\*\\*", r".*")
+        .replace("\\*", r"[^/]*")
+        .replace("\\?", r".")
     )

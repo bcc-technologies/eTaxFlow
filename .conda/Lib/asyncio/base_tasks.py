@@ -11,35 +11,35 @@ def _task_repr_info(task):
 
     if task.cancelling() and not task.done():
         # replace status
-        info[0] = 'cancelling'
+        info[0] = "cancelling"
 
-    info.insert(1, 'name=%r' % task.get_name())
+    info.insert(1, "name=%r" % task.get_name())
 
     if task._fut_waiter is not None:
-        info.insert(2, f'wait_for={task._fut_waiter!r}')
+        info.insert(2, f"wait_for={task._fut_waiter!r}")
 
     if task._coro:
         coro = coroutines._format_coroutine(task._coro)
-        info.insert(2, f'coro=<{coro}>')
+        info.insert(2, f"coro=<{coro}>")
 
     return info
 
 
 @reprlib.recursive_repr()
 def _task_repr(task):
-    info = ' '.join(_task_repr_info(task))
-    return f'<{task.__class__.__name__} {info}>'
+    info = " ".join(_task_repr_info(task))
+    return f"<{task.__class__.__name__} {info}>"
 
 
 def _task_get_stack(task, limit):
     frames = []
-    if hasattr(task._coro, 'cr_frame'):
+    if hasattr(task._coro, "cr_frame"):
         # case 1: 'async def' coroutines
         f = task._coro.cr_frame
-    elif hasattr(task._coro, 'gi_frame'):
+    elif hasattr(task._coro, "gi_frame"):
         # case 2: legacy coroutines
         f = task._coro.gi_frame
-    elif hasattr(task._coro, 'ag_frame'):
+    elif hasattr(task._coro, "ag_frame"):
         # case 3: async generators
         f = task._coro.ag_frame
     else:
@@ -82,13 +82,13 @@ def _task_print_stack(task, limit, file):
 
     exc = task._exception
     if not extracted_list:
-        print(f'No stack for {task!r}', file=file)
+        print(f"No stack for {task!r}", file=file)
     elif exc is not None:
-        print(f'Traceback for {task!r} (most recent call last):', file=file)
+        print(f"Traceback for {task!r} (most recent call last):", file=file)
     else:
-        print(f'Stack for {task!r} (most recent call last):', file=file)
+        print(f"Stack for {task!r} (most recent call last):", file=file)
 
     traceback.print_list(extracted_list, file=file)
     if exc is not None:
         for line in traceback.format_exception_only(exc.__class__, exc):
-            print(line, file=file, end='')
+            print(line, file=file, end="")

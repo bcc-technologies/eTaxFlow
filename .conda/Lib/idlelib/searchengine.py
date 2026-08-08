@@ -1,16 +1,19 @@
-'''Define SearchEngine for search dialogs.'''
+"""Define SearchEngine for search dialogs."""
+
 import re
+
 re.PatternError = re.error  # New in 3.13.
 
 from tkinter import StringVar, BooleanVar, TclError
 from tkinter import messagebox
 
+
 def get(root):
-    '''Return the singleton SearchEngine instance for the process.
+    """Return the singleton SearchEngine instance for the process.
 
     The single SearchEngine saves settings between dialog instances.
     If there is not a SearchEngine already, make one.
-    '''
+    """
     if not hasattr(root, "_searchengine"):
         root._searchengine = SearchEngine(root)
         # This creates a cycle that persists until root is deleted.
@@ -21,17 +24,17 @@ class SearchEngine:
     """Handles searching a text widget for Find, Replace, and Grep."""
 
     def __init__(self, root):
-        '''Initialize Variables that save search state.
+        """Initialize Variables that save search state.
 
         The dialogs bind these to the UI elements present in the dialogs.
-        '''
+        """
         self.root = root  # need for report_error()
-        self.patvar = StringVar(root, '')   # search pattern
-        self.revar = BooleanVar(root, False)   # regular expression?
-        self.casevar = BooleanVar(root, False)   # match case?
-        self.wordvar = BooleanVar(root, False)   # match whole word?
-        self.wrapvar = BooleanVar(root, True)   # wrap around buffer?
-        self.backvar = BooleanVar(root, False)   # search backwards?
+        self.patvar = StringVar(root, "")  # search pattern
+        self.revar = BooleanVar(root, False)  # regular expression?
+        self.casevar = BooleanVar(root, False)  # match case?
+        self.wordvar = BooleanVar(root, False)  # match whole word?
+        self.wrapvar = BooleanVar(root, True)  # wrap around buffer?
+        self.backvar = BooleanVar(root, False)  # search backwards?
 
     # Access methods
 
@@ -97,11 +100,10 @@ class SearchEngine:
             msg = msg + "\nPattern: " + str(pat)
         if col is not None:
             msg = msg + "\nOffset: " + str(col)
-        messagebox.showerror("Regular expression error",
-                               msg, master=self.root)
+        messagebox.showerror("Regular expression error", msg, master=self.root)
 
     def search_text(self, text, prog=None, ok=0):
-        '''Return (lineno, matchobj) or None for forward/backward search.
+        """Return (lineno, matchobj) or None for forward/backward search.
 
         This function calls the right function with the right arguments.
         It directly return the result of that call.
@@ -116,12 +118,12 @@ class SearchEngine:
 
         To aid progress, the search functions do not return an empty
         match at the starting position unless ok is True.
-        '''
+        """
 
         if not prog:
             prog = self.getprog()
             if not prog:
-                return None # Compilation failed -- stop
+                return None  # Compilation failed -- stop
         wrap = self.wrapvar.get()
         first, last = get_selection(text)
         if self.isback():
@@ -143,7 +145,7 @@ class SearchEngine:
     def search_forward(self, text, prog, line, col, wrap, ok=0):
         wrapped = 0
         startline = line
-        chars = text.get("%d.0" % line, "%d.0" % (line+1))
+        chars = text.get("%d.0" % line, "%d.0" % (line + 1))
         while chars:
             m = prog.search(chars[:-1], col)
             if m:
@@ -154,7 +156,7 @@ class SearchEngine:
                 break
             col = 0
             ok = 1
-            chars = text.get("%d.0" % line, "%d.0" % (line+1))
+            chars = text.get("%d.0" % line, "%d.0" % (line + 1))
             if not chars and wrap:
                 wrapped = 1
                 wrap = 0
@@ -165,7 +167,7 @@ class SearchEngine:
     def search_backward(self, text, prog, line, col, wrap, ok=0):
         wrapped = 0
         startline = line
-        chars = text.get("%d.0" % line, "%d.0" % (line+1))
+        chars = text.get("%d.0" % line, "%d.0" % (line + 1))
         while True:
             m = search_reverse(prog, chars[:-1], col)
             if m:
@@ -182,19 +184,19 @@ class SearchEngine:
                 wrap = 0
                 pos = text.index("end-1c")
                 line, col = map(int, pos.split("."))
-            chars = text.get("%d.0" % line, "%d.0" % (line+1))
+            chars = text.get("%d.0" % line, "%d.0" % (line + 1))
             col = len(chars) - 1
         return None
 
 
 def search_reverse(prog, chars, col):
-    '''Search backwards and return an re match object or None.
+    """Search backwards and return an re match object or None.
 
     This is done by searching forwards until there is no match.
     Prog: compiled re object with a search method returning a match.
     Chars: line of text, without \\n.
     Col: stop index for the search; the limit for match.end().
-    '''
+    """
     m = prog.search(chars)
     if not m:
         return None
@@ -203,16 +205,16 @@ def search_reverse(prog, chars, col):
     while i < col and j <= col:
         found = m
         if i == j:
-            j = j+1
+            j = j + 1
         m = prog.search(chars, j)
         if not m:
             break
         i, j = m.span()
     return found
 
+
 def get_selection(text):
-    '''Return tuple of 'line.col' indexes from selection or insert mark.
-    '''
+    """Return tuple of 'line.col' indexes from selection or insert mark."""
     try:
         first = text.index("sel.first")
         last = text.index("sel.last")
@@ -224,12 +226,14 @@ def get_selection(text):
         last = first
     return first, last
 
+
 def get_line_col(index):
-    '''Return (line, col) tuple of ints from 'line.col' string.'''
-    line, col = map(int, index.split(".")) # Fails on invalid index
+    """Return (line, col) tuple of ints from 'line.col' string."""
+    line, col = map(int, index.split("."))  # Fails on invalid index
     return line, col
 
 
 if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_searchengine', verbosity=2)
+
+    main("idlelib.idle_test.test_searchengine", verbosity=2)

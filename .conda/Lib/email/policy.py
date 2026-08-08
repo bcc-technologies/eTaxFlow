@@ -11,21 +11,21 @@ from email.contentmanager import raw_data_manager
 from email.message import EmailMessage
 
 __all__ = [
-    'Compat32',
-    'compat32',
-    'Policy',
-    'EmailPolicy',
-    'default',
-    'strict',
-    'SMTP',
-    'HTTP',
-    ]
+    "Compat32",
+    "compat32",
+    "Policy",
+    "EmailPolicy",
+    "default",
+    "strict",
+    "SMTP",
+    "HTTP",
+]
 
-linesep_splitter = re.compile(r'\n|\r\n?')
+linesep_splitter = re.compile(r"\n|\r\n?")
+
 
 @_extend_docstrings
 class EmailPolicy(Policy):
-
     """+
     PROVISIONAL
 
@@ -86,15 +86,15 @@ class EmailPolicy(Policy):
 
     message_factory = EmailMessage
     utf8 = False
-    refold_source = 'long'
+    refold_source = "long"
     header_factory = HeaderRegistry()
     content_manager = raw_data_manager
 
     def __init__(self, **kw):
         # Ensure that each new instance gets a unique header factory
         # (as opposed to clones, which share the factory).
-        if 'header_factory' not in kw:
-            object.__setattr__(self, 'header_factory', HeaderRegistry())
+        if "header_factory" not in kw:
+            object.__setattr__(self, "header_factory", HeaderRegistry())
         super().__init__(**kw)
 
     def header_max_count(self, name):
@@ -124,9 +124,9 @@ class EmailPolicy(Policy):
         is the same as Compat32).
 
         """
-        name, value = sourcelines[0].split(':', 1)
-        value = ''.join((value, *sourcelines[1:])).lstrip(' \t\r\n')
-        return (name, value.rstrip('\r\n'))
+        name, value = sourcelines[0].split(":", 1)
+        value = "".join((value, *sourcelines[1:])).lstrip(" \t\r\n")
+        return (name, value.rstrip("\r\n"))
 
     def header_store_parse(self, name, value):
         """+
@@ -138,13 +138,15 @@ class EmailPolicy(Policy):
         CR or LF characters.
 
         """
-        if hasattr(value, 'name') and value.name.lower() == name.lower():
+        if hasattr(value, "name") and value.name.lower() == name.lower():
             return (name, value)
-        if isinstance(value, str) and len(value.splitlines())>1:
+        if isinstance(value, str) and len(value.splitlines()) > 1:
             # XXX this error message isn't quite right when we use splitlines
             # (see issue 22233), but I'm not sure what should happen here.
-            raise ValueError("Header values may not contain linefeed "
-                             "or carriage return characters")
+            raise ValueError(
+                "Header values may not contain linefeed "
+                "or carriage return characters"
+            )
         return (name, self.header_factory(name, value))
 
     def header_fetch_parse(self, name, value):
@@ -156,10 +158,10 @@ class EmailPolicy(Policy):
         into the unicode unknown-character glyph.
 
         """
-        if hasattr(value, 'name'):
+        if hasattr(value, "name"):
             return value
         # We can't use splitlines here because it splits on more than \r and \n.
-        value = ''.join(linesep_splitter.split(value))
+        value = "".join(linesep_splitter.split(value))
         return self.header_factory(name, value)
 
     def fold(self, name, value):
@@ -197,20 +199,25 @@ class EmailPolicy(Policy):
         non-ASCII unicode rendered as encoded words.
 
         """
-        folded = self._fold(name, value, refold_binary=self.cte_type=='7bit')
-        charset = 'utf8' if self.utf8 else 'ascii'
-        return folded.encode(charset, 'surrogateescape')
+        folded = self._fold(name, value, refold_binary=self.cte_type == "7bit")
+        charset = "utf8" if self.utf8 else "ascii"
+        return folded.encode(charset, "surrogateescape")
 
     def _fold(self, name, value, refold_binary=False):
-        if hasattr(value, 'name'):
+        if hasattr(value, "name"):
             return value.fold(policy=self)
         maxlen = self.max_line_length if self.max_line_length else sys.maxsize
         # We can't use splitlines here because it splits on more than \r and \n.
         lines = linesep_splitter.split(value)
-        refold = (self.refold_source == 'all' or
-                  self.refold_source == 'long' and
-                    (lines and len(lines[0])+len(name)+2 > maxlen or
-                     any(len(x) > maxlen for x in lines[1:])))
+        refold = (
+            self.refold_source == "all"
+            or self.refold_source == "long"
+            and (
+                lines
+                and len(lines[0]) + len(name) + 2 > maxlen
+                or any(len(x) > maxlen for x in lines[1:])
+            )
+        )
 
         if not refold:
             if not self.utf8:
@@ -218,15 +225,15 @@ class EmailPolicy(Policy):
             elif refold_binary:
                 refold = _has_surrogates(value)
         if refold:
-            return self.header_factory(name, ''.join(lines)).fold(policy=self)
+            return self.header_factory(name, "".join(lines)).fold(policy=self)
 
-        return name + ': ' + self.linesep.join(lines) + self.linesep
+        return name + ": " + self.linesep.join(lines) + self.linesep
 
 
 default = EmailPolicy()
 # Make the default policy use the class default header_factory
 del default.header_factory
 strict = default.clone(raise_on_defect=True)
-SMTP = default.clone(linesep='\r\n')
-HTTP = default.clone(linesep='\r\n', max_line_length=None)
+SMTP = default.clone(linesep="\r\n")
+HTTP = default.clone(linesep="\r\n", max_line_length=None)
 SMTPUTF8 = SMTP.clone(utf8=True)

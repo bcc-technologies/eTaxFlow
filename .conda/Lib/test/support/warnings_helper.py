@@ -9,25 +9,24 @@ import warnings
 def import_deprecated(name):
     """Import *name* while suppressing DeprecationWarning."""
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore', category=DeprecationWarning)
+        warnings.simplefilter("ignore", category=DeprecationWarning)
         return importlib.import_module(name)
 
 
-def check_syntax_warning(testcase, statement, errtext='',
-                         *, lineno=1, offset=None):
+def check_syntax_warning(testcase, statement, errtext="", *, lineno=1, offset=None):
     # Test also that a warning is emitted only once.
     from test.support import check_syntax_error
+
     with warnings.catch_warnings(record=True) as warns:
-        warnings.simplefilter('always', SyntaxWarning)
-        compile(statement, '<testcase>', 'exec')
+        warnings.simplefilter("always", SyntaxWarning)
+        compile(statement, "<testcase>", "exec")
     testcase.assertEqual(len(warns), 1, warns)
 
-    warn, = warns
-    testcase.assertTrue(issubclass(warn.category, SyntaxWarning),
-                        warn.category)
+    (warn,) = warns
+    testcase.assertTrue(issubclass(warn.category, SyntaxWarning), warn.category)
     if errtext:
         testcase.assertRegex(str(warn.message), errtext)
-    testcase.assertEqual(warn.filename, '<testcase>')
+    testcase.assertEqual(warn.filename, "<testcase>")
     testcase.assertIsNotNone(warn.lineno)
     if lineno is not None:
         testcase.assertEqual(warn.lineno, lineno)
@@ -36,9 +35,8 @@ def check_syntax_warning(testcase, statement, errtext='',
     # since the latter contains more information and provides better
     # error report.
     with warnings.catch_warnings(record=True) as warns:
-        warnings.simplefilter('error', SyntaxWarning)
-        check_syntax_error(testcase, statement, errtext,
-                           lineno=lineno, offset=offset)
+        warnings.simplefilter("error", SyntaxWarning)
+        check_syntax_error(testcase, statement, errtext, lineno=lineno, offset=offset)
     # No warnings are leaked when a SyntaxError is raised.
     testcase.assertEqual(warns, [])
 
@@ -49,20 +47,24 @@ def ignore_warnings(*, category):
     Use of context managers to hide warnings make diffs
     more noisy and tools like 'git blame' less useful.
     """
+
     def decorator(test):
         @functools.wraps(test)
         def wrapper(self, *args, **kwargs):
             with warnings.catch_warnings():
-                warnings.simplefilter('ignore', category=category)
+                warnings.simplefilter("ignore", category=category)
                 return test(self, *args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 class WarningsRecorder(object):
     """Convenience wrapper for the warnings list returned on
-       entry to the warnings.catch_warnings() context manager.
+    entry to the warnings.catch_warnings() context manager.
     """
+
     def __init__(self, warnings_list):
         self._warnings = warnings_list
         self._last = 0
@@ -76,7 +78,7 @@ class WarningsRecorder(object):
 
     @property
     def warnings(self):
-        return self._warnings[self._last:]
+        return self._warnings[self._last :]
 
     def reset(self):
         self._last = len(self._warnings)
@@ -97,7 +99,7 @@ def check_warnings(*filters, **kwargs):
     Without argument, it defaults to:
         check_warnings(("", Warning), quiet=True)
     """
-    quiet = kwargs.get('quiet')
+    quiet = kwargs.get("quiet")
     if not filters:
         filters = (("", Warning),)
         # Preserve backward compatibility
@@ -107,7 +109,7 @@ def check_warnings(*filters, **kwargs):
 
 
 @contextlib.contextmanager
-def check_no_warnings(testcase, message='', category=Warning, force_gc=False):
+def check_no_warnings(testcase, message="", category=Warning, force_gc=False):
     """Context manager to check that no warnings are emitted.
 
     This context manager enables a given warning within its scope
@@ -121,10 +123,9 @@ def check_no_warnings(testcase, message='', category=Warning, force_gc=False):
     Other keyword arguments are passed to warnings.filterwarnings().
     """
     from test.support import gc_collect
+
     with warnings.catch_warnings(record=True) as warns:
-        warnings.filterwarnings('always',
-                                message=message,
-                                category=category)
+        warnings.filterwarnings("always", message=message, category=category)
         yield
         if force_gc:
             gc_collect()
@@ -157,14 +158,14 @@ def _filterwarnings(filters, quiet=False):
     # Clear the warning registry of the calling module
     # in order to re-raise the warnings.
     frame = sys._getframe(2)
-    registry = frame.f_globals.get('__warningregistry__')
+    registry = frame.f_globals.get("__warningregistry__")
     if registry:
         registry.clear()
     with warnings.catch_warnings(record=True) as w:
         # Set filter "always" to record all warnings.  Because
         # test_warnings swap the module, we need to look up in
         # the sys.modules dictionary.
-        sys.modules['warnings'].simplefilter("always")
+        sys.modules["warnings"].simplefilter("always")
         yield WarningsRecorder(w)
     # Filter the recorded warnings
     reraise = list(w)
@@ -174,8 +175,7 @@ def _filterwarnings(filters, quiet=False):
         for w in reraise[:]:
             warning = w.message
             # Filter out the matching messages
-            if (re.match(msg, str(warning), re.I) and
-                issubclass(warning.__class__, cat)):
+            if re.match(msg, str(warning), re.I) and issubclass(warning.__class__, cat):
                 seen = True
                 reraise.remove(w)
         if not seen and not quiet:
@@ -184,8 +184,7 @@ def _filterwarnings(filters, quiet=False):
     if reraise:
         raise AssertionError("unhandled warning %s" % reraise[0])
     if missing:
-        raise AssertionError("filter (%r, %s) did not catch any warning" %
-                             missing[0])
+        raise AssertionError("filter (%r, %s) did not catch any warning" % missing[0])
 
 
 @contextlib.contextmanager

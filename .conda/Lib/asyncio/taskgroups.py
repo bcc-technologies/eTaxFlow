@@ -25,6 +25,7 @@ class TaskGroup:
     a task will cancel all remaining tasks and wait for them to exit.
     The exceptions are then combined and raised as an `ExceptionGroup`.
     """
+
     def __init__(self):
         self._entered = False
         self._exiting = False
@@ -38,29 +39,27 @@ class TaskGroup:
         self._on_completed_fut = None
 
     def __repr__(self):
-        info = ['']
+        info = [""]
         if self._tasks:
-            info.append(f'tasks={len(self._tasks)}')
+            info.append(f"tasks={len(self._tasks)}")
         if self._errors:
-            info.append(f'errors={len(self._errors)}')
+            info.append(f"errors={len(self._errors)}")
         if self._aborting:
-            info.append('cancelling')
+            info.append("cancelling")
         elif self._entered:
-            info.append('entered')
+            info.append("entered")
 
-        info_str = ' '.join(info)
-        return f'<TaskGroup{info_str}>'
+        info_str = " ".join(info)
+        return f"<TaskGroup{info_str}>"
 
     async def __aenter__(self):
         if self._entered:
-            raise RuntimeError(
-                f"TaskGroup {self!r} has already been entered")
+            raise RuntimeError(f"TaskGroup {self!r} has already been entered")
         if self._loop is None:
             self._loop = events.get_running_loop()
         self._parent_task = tasks.current_task(self._loop)
         if self._parent_task is None:
-            raise RuntimeError(
-                f'TaskGroup {self!r} cannot determine the parent task')
+            raise RuntimeError(f"TaskGroup {self!r} cannot determine the parent task")
         self._entered = True
 
         return self
@@ -82,13 +81,10 @@ class TaskGroup:
     async def _aexit(self, et, exc):
         self._exiting = True
 
-        if (exc is not None and
-                self._is_base_error(exc) and
-                self._base_error is None):
+        if exc is not None and self._is_base_error(exc) and self._base_error is None:
             self._base_error = exc
 
-        propagate_cancellation_error = \
-            exc if et is exceptions.CancelledError else None
+        propagate_cancellation_error = exc if et is exceptions.CancelledError else None
         if self._parent_cancel_requested:
             # If this flag is set we *must* call uncancel().
             if self._parent_task.uncancel() == 0:
@@ -162,12 +158,11 @@ class TaskGroup:
         if self._errors:
             try:
                 raise BaseExceptionGroup(
-                    'unhandled errors in a TaskGroup',
+                    "unhandled errors in a TaskGroup",
                     self._errors,
                 ) from None
             finally:
                 exc = None
-
 
     def create_task(self, coro, *, name=None, context=None):
         """Create a new task in this group and return it.
@@ -236,12 +231,14 @@ class TaskGroup:
         if self._parent_task.done():
             # Not sure if this case is possible, but we want to handle
             # it anyways.
-            self._loop.call_exception_handler({
-                'message': f'Task {task!r} has errored out but its parent '
-                           f'task {self._parent_task} is already completed',
-                'exception': exc,
-                'task': task,
-            })
+            self._loop.call_exception_handler(
+                {
+                    "message": f"Task {task!r} has errored out but its parent "
+                    f"task {self._parent_task} is already completed",
+                    "exception": exc,
+                    "task": task,
+                }
+            )
             return
 
         if not self._aborting and not self._parent_cancel_requested:

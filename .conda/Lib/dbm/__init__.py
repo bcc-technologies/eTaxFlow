@@ -27,7 +27,7 @@ tested for existence, and add interfaces to other dbm-like
 implementations.
 """
 
-__all__ = ['open', 'whichdb', 'error']
+__all__ = ["open", "whichdb", "error"]
 
 import io
 import os
@@ -38,7 +38,8 @@ import sys
 class error(Exception):
     pass
 
-_names = ['dbm.gnu', 'dbm.ndbm', 'dbm.dumb']
+
+_names = ["dbm.gnu", "dbm.ndbm", "dbm.dumb"]
 _defaultmod = None
 _modules = {}
 
@@ -50,7 +51,7 @@ except ImportError:
     ndbm = None
 
 
-def open(file, flag='r', mode=0o666):
+def open(file, flag="r", mode=0o666):
     """Open or create database at path given by *file*.
 
     Optional argument *flag* can be 'r' (default) for read-only access, 'w'
@@ -65,7 +66,7 @@ def open(file, flag='r', mode=0o666):
     if _defaultmod is None:
         for name in _names:
             try:
-                mod = __import__(name, fromlist=['open'])
+                mod = __import__(name, fromlist=["open"])
             except ImportError:
                 continue
             if not _defaultmod:
@@ -75,21 +76,23 @@ def open(file, flag='r', mode=0o666):
             raise ImportError("no dbm clone found; tried %s" % _names)
 
     # guess the type of an existing database, if not creating a new one
-    result = whichdb(file) if 'n' not in flag else None
+    result = whichdb(file) if "n" not in flag else None
     if result is None:
         # db doesn't exist or 'n' flag was specified to create a new db
-        if 'c' in flag or 'n' in flag:
+        if "c" in flag or "n" in flag:
             # file doesn't exist and the new flag was used so use default type
             mod = _defaultmod
         else:
-            raise error[0]("db file doesn't exist; "
-                           "use 'c' or 'n' flag to create a new db")
+            raise error[0](
+                "db file doesn't exist; " "use 'c' or 'n' flag to create a new db"
+            )
     elif result == "":
         # db type cannot be determined
         raise error[0]("db type could not be determined")
     elif result not in _modules:
-        raise error[0]("db type is {0}, but the module is not "
-                       "available".format(result))
+        raise error[0](
+            "db type is {0}, but the module is not " "available".format(result)
+        )
     else:
         mod = _modules[result]
     return mod.open(file, flag, mode)
@@ -171,7 +174,7 @@ def whichdb(filename):
         return ""
 
     # Check for GNU dbm
-    if magic in (0x13579ace, 0x13579acd, 0x13579acf):
+    if magic in (0x13579ACE, 0x13579ACD, 0x13579ACF):
         return "dbm.gnu"
 
     # Later versions of Berkeley db hash file have a 12-byte pad in

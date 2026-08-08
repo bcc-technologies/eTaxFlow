@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""       turtle-example-suite:
+"""turtle-example-suite:
 
         xtx_lindenmayer_indian.py
 
@@ -21,21 +21,24 @@ Elsewhere, An Exploration of Ideas Across
 Cultures
 
 """
+
 ################################
 # Mini Lindenmayer tool
 ###############################
 
 from turtle import *
 
-def replace( seq, replacementRules, n ):
+
+def replace(seq, replacementRules, n):
     for i in range(n):
         newseq = ""
         for element in seq:
-            newseq = newseq + replacementRules.get(element,element)
+            newseq = newseq + replacementRules.get(element, element)
         seq = newseq
     return seq
 
-def draw( commands, rules ):
+
+def draw(commands, rules):
     for b in commands:
         try:
             rules[b]()
@@ -51,7 +54,6 @@ def main():
     # Example 1: Snake kolam
     ################################
 
-
     def r():
         right(45)
 
@@ -61,7 +63,7 @@ def main():
     def f():
         forward(7.5)
 
-    snake_rules = {"-":r, "+":l, "f":f, "b":"f+f+f--f--f+f+f"}
+    snake_rules = {"-": r, "+": l, "f": f, "b": "f+f+f--f--f+f+f"}
     snake_replacementRules = {"b": "b+f+b--f--b+f+b"}
     snake_start = "b--f--b--f"
 
@@ -69,7 +71,7 @@ def main():
 
     reset()
     speed(3)
-    tracer(1,0)
+    tracer(1, 0)
     ht()
     up()
     backward(195)
@@ -77,6 +79,7 @@ def main():
     draw(drawing, snake_rules)
 
     from time import sleep
+
     sleep(3)
 
     ################################
@@ -85,12 +88,13 @@ def main():
 
     def A():
         color("red")
-        circle(10,90)
+        circle(10, 90)
 
     def B():
         from math import sqrt
+
         color("black")
-        l = 5/sqrt(2)
+        l = 5 / sqrt(2)
         forward(l)
         circle(l, 270)
         forward(l)
@@ -99,13 +103,13 @@ def main():
         color("green")
         forward(10)
 
-    krishna_rules = {"a":A, "b":B, "f":F}
-    krishna_replacementRules = {"a" : "afbfa", "b" : "afbfbfbfa" }
+    krishna_rules = {"a": A, "b": B, "f": F}
+    krishna_replacementRules = {"a": "afbfa", "b": "afbfbfbfa"}
     krishna_start = "fbfbfbfb"
 
     reset()
     speed(0)
-    tracer(3,0)
+    tracer(3, 0)
     ht()
     left(45)
     drawing = replace(krishna_start, krishna_replacementRules, 3)
@@ -113,7 +117,8 @@ def main():
     tracer(1)
     return "Done!"
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     msg = main()
     print(msg)
     mainloop()

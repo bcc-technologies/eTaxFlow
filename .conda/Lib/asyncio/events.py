@@ -5,14 +5,21 @@
 # SPDX-FileCopyrightText: Copyright (c) 2015-2021 MagicStack Inc.  http://magic.io
 
 __all__ = (
-    'AbstractEventLoopPolicy',
-    'AbstractEventLoop', 'AbstractServer',
-    'Handle', 'TimerHandle',
-    'get_event_loop_policy', 'set_event_loop_policy',
-    'get_event_loop', 'set_event_loop', 'new_event_loop',
-    'get_child_watcher', 'set_child_watcher',
-    '_set_running_loop', 'get_running_loop',
-    '_get_running_loop',
+    "AbstractEventLoopPolicy",
+    "AbstractEventLoop",
+    "AbstractServer",
+    "Handle",
+    "TimerHandle",
+    "get_event_loop_policy",
+    "set_event_loop_policy",
+    "get_event_loop",
+    "set_event_loop",
+    "new_event_loop",
+    "get_child_watcher",
+    "set_child_watcher",
+    "_set_running_loop",
+    "get_running_loop",
+    "_get_running_loop",
 )
 
 import contextvars
@@ -29,9 +36,16 @@ from . import format_helpers
 class Handle:
     """Object returned by callback registration methods."""
 
-    __slots__ = ('_callback', '_args', '_cancelled', '_loop',
-                 '_source_traceback', '_repr', '__weakref__',
-                 '_context')
+    __slots__ = (
+        "_callback",
+        "_args",
+        "_cancelled",
+        "_loop",
+        "_source_traceback",
+        "_repr",
+        "__weakref__",
+        "_context",
+    )
 
     def __init__(self, callback, args, loop, context=None):
         if context is None:
@@ -43,28 +57,28 @@ class Handle:
         self._cancelled = False
         self._repr = None
         if self._loop.get_debug():
-            self._source_traceback = format_helpers.extract_stack(
-                sys._getframe(1))
+            self._source_traceback = format_helpers.extract_stack(sys._getframe(1))
         else:
             self._source_traceback = None
 
     def _repr_info(self):
         info = [self.__class__.__name__]
         if self._cancelled:
-            info.append('cancelled')
+            info.append("cancelled")
         if self._callback is not None:
-            info.append(format_helpers._format_callback_source(
-                self._callback, self._args))
+            info.append(
+                format_helpers._format_callback_source(self._callback, self._args)
+            )
         if self._source_traceback:
             frame = self._source_traceback[-1]
-            info.append(f'created at {frame[0]}:{frame[1]}')
+            info.append(f"created at {frame[0]}:{frame[1]}")
         return info
 
     def __repr__(self):
         if self._repr is not None:
             return self._repr
         info = self._repr_info()
-        return '<{}>'.format(' '.join(info))
+        return "<{}>".format(" ".join(info))
 
     def get_context(self):
         return self._context
@@ -89,16 +103,15 @@ class Handle:
         except (SystemExit, KeyboardInterrupt):
             raise
         except BaseException as exc:
-            cb = format_helpers._format_callback_source(
-                self._callback, self._args)
-            msg = f'Exception in callback {cb}'
+            cb = format_helpers._format_callback_source(self._callback, self._args)
+            msg = f"Exception in callback {cb}"
             context = {
-                'message': msg,
-                'exception': exc,
-                'handle': self,
+                "message": msg,
+                "exception": exc,
+                "handle": self,
             }
             if self._source_traceback:
-                context['source_traceback'] = self._source_traceback
+                context["source_traceback"] = self._source_traceback
             self._loop.call_exception_handler(context)
         self = None  # Needed to break cycles when an exception occurs.
 
@@ -106,7 +119,7 @@ class Handle:
 class TimerHandle(Handle):
     """Object returned by timed callback registration methods."""
 
-    __slots__ = ['_scheduled', '_when']
+    __slots__ = ["_scheduled", "_when"]
 
     def __init__(self, when, callback, args, loop, context=None):
         super().__init__(callback, args, loop, context)
@@ -118,7 +131,7 @@ class TimerHandle(Handle):
     def _repr_info(self):
         info = super()._repr_info()
         pos = 2 if self._cancelled else 1
-        info.insert(pos, f'when={self._when}')
+        info.insert(pos, f"when={self._when}")
         return info
 
     def __hash__(self):
@@ -146,10 +159,12 @@ class TimerHandle(Handle):
 
     def __eq__(self, other):
         if isinstance(other, TimerHandle):
-            return (self._when == other._when and
-                    self._callback == other._callback and
-                    self._args == other._args and
-                    self._cancelled == other._cancelled)
+            return (
+                self._when == other._when
+                and self._callback == other._callback
+                and self._args == other._args
+                and self._cancelled == other._cancelled
+            )
         return NotImplemented
 
     def cancel(self):
@@ -298,31 +313,49 @@ class AbstractEventLoop:
 
     # Network I/O methods returning Futures.
 
-    async def getaddrinfo(self, host, port, *,
-                          family=0, type=0, proto=0, flags=0):
+    async def getaddrinfo(self, host, port, *, family=0, type=0, proto=0, flags=0):
         raise NotImplementedError
 
     async def getnameinfo(self, sockaddr, flags=0):
         raise NotImplementedError
 
     async def create_connection(
-            self, protocol_factory, host=None, port=None,
-            *, ssl=None, family=0, proto=0,
-            flags=0, sock=None, local_addr=None,
-            server_hostname=None,
-            ssl_handshake_timeout=None,
-            ssl_shutdown_timeout=None,
-            happy_eyeballs_delay=None, interleave=None):
+        self,
+        protocol_factory,
+        host=None,
+        port=None,
+        *,
+        ssl=None,
+        family=0,
+        proto=0,
+        flags=0,
+        sock=None,
+        local_addr=None,
+        server_hostname=None,
+        ssl_handshake_timeout=None,
+        ssl_shutdown_timeout=None,
+        happy_eyeballs_delay=None,
+        interleave=None,
+    ):
         raise NotImplementedError
 
     async def create_server(
-            self, protocol_factory, host=None, port=None,
-            *, family=socket.AF_UNSPEC,
-            flags=socket.AI_PASSIVE, sock=None, backlog=100,
-            ssl=None, reuse_address=None, reuse_port=None,
-            ssl_handshake_timeout=None,
-            ssl_shutdown_timeout=None,
-            start_serving=True):
+        self,
+        protocol_factory,
+        host=None,
+        port=None,
+        *,
+        family=socket.AF_UNSPEC,
+        flags=socket.AI_PASSIVE,
+        sock=None,
+        backlog=100,
+        ssl=None,
+        reuse_address=None,
+        reuse_port=None,
+        ssl_handshake_timeout=None,
+        ssl_shutdown_timeout=None,
+        start_serving=True,
+    ):
         """A coroutine which creates a TCP server bound to host and port.
 
         The return value is a Server object which can be used to stop
@@ -373,19 +406,24 @@ class AbstractEventLoop:
         """
         raise NotImplementedError
 
-    async def sendfile(self, transport, file, offset=0, count=None,
-                       *, fallback=True):
+    async def sendfile(self, transport, file, offset=0, count=None, *, fallback=True):
         """Send a file through a transport.
 
         Return an amount of sent bytes.
         """
         raise NotImplementedError
 
-    async def start_tls(self, transport, protocol, sslcontext, *,
-                        server_side=False,
-                        server_hostname=None,
-                        ssl_handshake_timeout=None,
-                        ssl_shutdown_timeout=None):
+    async def start_tls(
+        self,
+        transport,
+        protocol,
+        sslcontext,
+        *,
+        server_side=False,
+        server_hostname=None,
+        ssl_handshake_timeout=None,
+        ssl_shutdown_timeout=None,
+    ):
         """Upgrade a transport to TLS.
 
         Return a new transport that *protocol* should start using
@@ -394,19 +432,30 @@ class AbstractEventLoop:
         raise NotImplementedError
 
     async def create_unix_connection(
-            self, protocol_factory, path=None, *,
-            ssl=None, sock=None,
-            server_hostname=None,
-            ssl_handshake_timeout=None,
-            ssl_shutdown_timeout=None):
+        self,
+        protocol_factory,
+        path=None,
+        *,
+        ssl=None,
+        sock=None,
+        server_hostname=None,
+        ssl_handshake_timeout=None,
+        ssl_shutdown_timeout=None,
+    ):
         raise NotImplementedError
 
     async def create_unix_server(
-            self, protocol_factory, path=None, *,
-            sock=None, backlog=100, ssl=None,
-            ssl_handshake_timeout=None,
-            ssl_shutdown_timeout=None,
-            start_serving=True):
+        self,
+        protocol_factory,
+        path=None,
+        *,
+        sock=None,
+        backlog=100,
+        ssl=None,
+        ssl_handshake_timeout=None,
+        ssl_shutdown_timeout=None,
+        start_serving=True,
+    ):
         """A coroutine which creates a UNIX Domain Socket server.
 
         The return value is a Server object, which can be used to stop
@@ -438,10 +487,14 @@ class AbstractEventLoop:
         raise NotImplementedError
 
     async def connect_accepted_socket(
-            self, protocol_factory, sock,
-            *, ssl=None,
-            ssl_handshake_timeout=None,
-            ssl_shutdown_timeout=None):
+        self,
+        protocol_factory,
+        sock,
+        *,
+        ssl=None,
+        ssl_handshake_timeout=None,
+        ssl_shutdown_timeout=None,
+    ):
         """Handle an accepted connection.
 
         This is used by servers that accept connections outside of
@@ -452,11 +505,20 @@ class AbstractEventLoop:
         """
         raise NotImplementedError
 
-    async def create_datagram_endpoint(self, protocol_factory,
-                                       local_addr=None, remote_addr=None, *,
-                                       family=0, proto=0, flags=0,
-                                       reuse_address=None, reuse_port=None,
-                                       allow_broadcast=None, sock=None):
+    async def create_datagram_endpoint(
+        self,
+        protocol_factory,
+        local_addr=None,
+        remote_addr=None,
+        *,
+        family=0,
+        proto=0,
+        flags=0,
+        reuse_address=None,
+        reuse_port=None,
+        allow_broadcast=None,
+        sock=None,
+    ):
         """A coroutine which creates a datagram endpoint.
 
         This method will try to establish the endpoint in the background.
@@ -515,18 +577,27 @@ class AbstractEventLoop:
         # close fd in pipe transport then close f and vice versa.
         raise NotImplementedError
 
-    async def subprocess_shell(self, protocol_factory, cmd, *,
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               **kwargs):
+    async def subprocess_shell(
+        self,
+        protocol_factory,
+        cmd,
+        *,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        **kwargs,
+    ):
         raise NotImplementedError
 
-    async def subprocess_exec(self, protocol_factory, *args,
-                              stdin=subprocess.PIPE,
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE,
-                              **kwargs):
+    async def subprocess_exec(
+        self,
+        protocol_factory,
+        *args,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        **kwargs,
+    ):
         raise NotImplementedError
 
     # Ready-based callback registration methods.
@@ -572,8 +643,7 @@ class AbstractEventLoop:
     async def sock_accept(self, sock):
         raise NotImplementedError
 
-    async def sock_sendfile(self, sock, file, offset=0, count=None,
-                            *, fallback=None):
+    async def sock_sendfile(self, sock, file, offset=0, count=None, *, fallback=None):
         raise NotImplementedError
 
     # Signal handling.
@@ -676,9 +746,11 @@ class BaseDefaultEventLoopPolicy(AbstractEventLoopPolicy):
 
         Returns an instance of EventLoop or raises an exception.
         """
-        if (self._local._loop is None and
-                not self._local._set_called and
-                threading.current_thread() is threading.main_thread()):
+        if (
+            self._local._loop is None
+            and not self._local._set_called
+            and threading.current_thread() is threading.main_thread()
+        ):
             stacklevel = 2
             try:
                 f = sys._getframe(1)
@@ -688,19 +760,25 @@ class BaseDefaultEventLoopPolicy(AbstractEventLoopPolicy):
                 # Move up the call stack so that the warning is attached
                 # to the line outside asyncio itself.
                 while f:
-                    module = f.f_globals.get('__name__')
-                    if not (module == 'asyncio' or module.startswith('asyncio.')):
+                    module = f.f_globals.get("__name__")
+                    if not (module == "asyncio" or module.startswith("asyncio.")):
                         break
                     f = f.f_back
                     stacklevel += 1
             import warnings
-            warnings.warn('There is no current event loop',
-                          DeprecationWarning, stacklevel=stacklevel)
+
+            warnings.warn(
+                "There is no current event loop",
+                DeprecationWarning,
+                stacklevel=stacklevel,
+            )
             self.set_event_loop(self.new_event_loop())
 
         if self._local._loop is None:
-            raise RuntimeError('There is no current event loop in thread %r.'
-                               % threading.current_thread().name)
+            raise RuntimeError(
+                "There is no current event loop in thread %r."
+                % threading.current_thread().name
+            )
 
         return self._local._loop
 
@@ -708,7 +786,9 @@ class BaseDefaultEventLoopPolicy(AbstractEventLoopPolicy):
         """Set the event loop."""
         self._local._set_called = True
         if loop is not None and not isinstance(loop, AbstractEventLoop):
-            raise TypeError(f"loop must be an instance of AbstractEventLoop or None, not '{type(loop).__name__}'")
+            raise TypeError(
+                f"loop must be an instance of AbstractEventLoop or None, not '{type(loop).__name__}'"
+            )
         self._local._loop = loop
 
     def new_event_loop(self):
@@ -746,7 +826,7 @@ def get_running_loop():
     # NOTE: this function is implemented in C (see _asynciomodule.c)
     loop = _get_running_loop()
     if loop is None:
-        raise RuntimeError('no running event loop')
+        raise RuntimeError("no running event loop")
     return loop
 
 
@@ -777,6 +857,7 @@ def _init_event_loop_policy():
     with _lock:
         if _event_loop_policy is None:  # pragma: no branch
             from . import DefaultEventLoopPolicy
+
             _event_loop_policy = DefaultEventLoopPolicy()
 
 
@@ -793,7 +874,9 @@ def set_event_loop_policy(policy):
     If policy is None, the default policy is restored."""
     global _event_loop_policy
     if policy is not None and not isinstance(policy, AbstractEventLoopPolicy):
-        raise TypeError(f"policy must be an instance of AbstractEventLoopPolicy or None, not '{type(policy).__name__}'")
+        raise TypeError(
+            f"policy must be an instance of AbstractEventLoopPolicy or None, not '{type(policy).__name__}'"
+        )
     _event_loop_policy = policy
 
 
@@ -845,8 +928,12 @@ try:
     # get_event_loop() is one of the most frequently called
     # functions in asyncio.  Pure Python implementation is
     # about 4 times slower than C-accelerated.
-    from _asyncio import (_get_running_loop, _set_running_loop,
-                          get_running_loop, get_event_loop)
+    from _asyncio import (
+        _get_running_loop,
+        _set_running_loop,
+        get_running_loop,
+        get_event_loop,
+    )
 except ImportError:
     pass
 else:
@@ -857,7 +944,8 @@ else:
     _c_get_event_loop = get_event_loop
 
 
-if hasattr(os, 'fork'):
+if hasattr(os, "fork"):
+
     def on_fork():
         # Reset the loop and wakeupfd in the forked child process.
         if _event_loop_policy is not None:

@@ -59,11 +59,12 @@ class Chooser(Dialog):
         # To simplify application code, the color chooser returns
         # an RGB tuple together with the Tk color string.
         r, g, b = widget.winfo_rgb(result)
-        return (r//256, g//256, b//256), str(result)
+        return (r // 256, g // 256, b // 256), str(result)
 
 
 #
 # convenience stuff
+
 
 def askcolor(color=None, **options):
     """Display dialog window for selection of a color.

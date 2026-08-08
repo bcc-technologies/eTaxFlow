@@ -1,9 +1,11 @@
 """Fixer that changes raw_input(...) into input(...)."""
+
 # Author: Andre Roberge
 
 # Local imports
 from .. import fixer_base
 from ..fixer_util import Name
+
 
 class FixRawInput(fixer_base.BaseFix):
 

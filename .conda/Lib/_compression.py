@@ -23,11 +23,13 @@ class BaseStream(io.BufferedIOBase):
 
     def _check_can_seek(self):
         if not self.readable():
-            raise io.UnsupportedOperation("Seeking is only supported "
-                                          "on files open for reading")
+            raise io.UnsupportedOperation(
+                "Seeking is only supported " "on files open for reading"
+            )
         if not self.seekable():
-            raise io.UnsupportedOperation("The underlying file object "
-                                          "does not support seeking")
+            raise io.UnsupportedOperation(
+                "The underlying file object " "does not support seeking"
+            )
 
 
 class DecompressReader(io.RawIOBase):
@@ -66,7 +68,7 @@ class DecompressReader(io.RawIOBase):
     def readinto(self, b):
         with memoryview(b) as view, view.cast("B") as byte_view:
             data = self.read(len(byte_view))
-            byte_view[:len(data)] = data
+            byte_view[: len(data)] = data
         return len(data)
 
     def read(self, size=-1):
@@ -80,13 +82,11 @@ class DecompressReader(io.RawIOBase):
         # return any data. In this case, try again after reading another block.
         while True:
             if self._decompressor.eof:
-                rawblock = (self._decompressor.unused_data or
-                            self._fp.read(BUFFER_SIZE))
+                rawblock = self._decompressor.unused_data or self._fp.read(BUFFER_SIZE)
                 if not rawblock:
                     break
                 # Continue to next stream.
-                self._decompressor = self._decomp_factory(
-                    **self._decomp_args)
+                self._decompressor = self._decomp_factory(**self._decomp_args)
                 try:
                     data = self._decompressor.decompress(rawblock, size)
                 except self._trailing_error:
@@ -96,8 +96,10 @@ class DecompressReader(io.RawIOBase):
                 if self._decompressor.needs_input:
                     rawblock = self._fp.read(BUFFER_SIZE)
                     if not rawblock:
-                        raise EOFError("Compressed file ended before the "
-                                       "end-of-stream marker was reached")
+                        raise EOFError(
+                            "Compressed file ended before the "
+                            "end-of-stream marker was reached"
+                        )
                 else:
                     rawblock = b""
                 data = self._decompressor.decompress(rawblock, size)

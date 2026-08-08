@@ -7,7 +7,7 @@
 # Licensed to PSF under a Contributor Agreement.
 #
 
-__all__ = ['Queue', 'SimpleQueue', 'JoinableQueue']
+__all__ = ["Queue", "SimpleQueue", "JoinableQueue"]
 
 import sys
 import os
@@ -24,6 +24,7 @@ import _multiprocessing
 
 from . import connection
 from . import context
+
 _ForkingPickler = context.reduction.ForkingPickler
 
 from .util import debug, info, Finalize, register_after_fork, is_exiting
@@ -31,6 +32,7 @@ from .util import debug, info, Finalize, register_after_fork, is_exiting
 #
 # Queue type using a pipe, buffer and thread
 #
+
 
 class Queue(object):
 
@@ -42,7 +44,7 @@ class Queue(object):
         self._reader, self._writer = connection.Pipe(duplex=False)
         self._rlock = ctx.Lock()
         self._opid = os.getpid()
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             self._wlock = None
         else:
             self._wlock = ctx.Lock()
@@ -51,21 +53,37 @@ class Queue(object):
         self._ignore_epipe = False
         self._reset()
 
-        if sys.platform != 'win32':
+        if sys.platform != "win32":
             register_after_fork(self, Queue._after_fork)
 
     def __getstate__(self):
         context.assert_spawning(self)
-        return (self._ignore_epipe, self._maxsize, self._reader, self._writer,
-                self._rlock, self._wlock, self._sem, self._opid)
+        return (
+            self._ignore_epipe,
+            self._maxsize,
+            self._reader,
+            self._writer,
+            self._rlock,
+            self._wlock,
+            self._sem,
+            self._opid,
+        )
 
     def __setstate__(self, state):
-        (self._ignore_epipe, self._maxsize, self._reader, self._writer,
-         self._rlock, self._wlock, self._sem, self._opid) = state
+        (
+            self._ignore_epipe,
+            self._maxsize,
+            self._reader,
+            self._writer,
+            self._rlock,
+            self._wlock,
+            self._sem,
+            self._opid,
+        ) = state
         self._reset()
 
     def _after_fork(self):
-        debug('Queue._after_fork()')
+        debug("Queue._after_fork()")
         self._reset(after_fork=True)
 
     def _reset(self, after_fork=False):
@@ -145,13 +163,13 @@ class Queue(object):
             close()
 
     def join_thread(self):
-        debug('Queue.join_thread()')
+        debug("Queue.join_thread()")
         assert self._closed, "Queue {0!r} not closed".format(self)
         if self._jointhread:
             self._jointhread()
 
     def cancel_join_thread(self):
-        debug('Queue.cancel_join_thread()')
+        debug("Queue.cancel_join_thread()")
         self._joincancelled = True
         try:
             self._jointhread.cancel()
@@ -166,31 +184,38 @@ class Queue(object):
 
         # gh-107219: Close the connection writer which can unblock
         # Queue._feed() if it was stuck in send_bytes().
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             self._writer.close()
 
         self.close()
         self.join_thread()
 
     def _start_thread(self):
-        debug('Queue._start_thread()')
+        debug("Queue._start_thread()")
 
         # Start thread which transfers data from buffer to pipe
         self._buffer.clear()
         self._thread = threading.Thread(
             target=Queue._feed,
-            args=(self._buffer, self._notempty, self._send_bytes,
-                  self._wlock, self._reader.close, self._writer.close,
-                  self._ignore_epipe, self._on_queue_feeder_error,
-                  self._sem),
-            name='QueueFeederThread',
+            args=(
+                self._buffer,
+                self._notempty,
+                self._send_bytes,
+                self._wlock,
+                self._reader.close,
+                self._writer.close,
+                self._ignore_epipe,
+                self._on_queue_feeder_error,
+                self._sem,
+            ),
+            name="QueueFeederThread",
             daemon=True,
         )
 
         try:
-            debug('doing self._thread.start()')
+            debug("doing self._thread.start()")
             self._thread.start()
-            debug('... done self._thread.start()')
+            debug("... done self._thread.start()")
         except:
             # gh-109047: During Python finalization, creating a thread
             # can fail with RuntimeError.
@@ -199,45 +224,53 @@ class Queue(object):
 
         if not self._joincancelled:
             self._jointhread = Finalize(
-                self._thread, Queue._finalize_join,
+                self._thread,
+                Queue._finalize_join,
                 [weakref.ref(self._thread)],
-                exitpriority=-5
-                )
+                exitpriority=-5,
+            )
 
         # Send sentinel to the thread queue object when garbage collected
         self._close = Finalize(
-            self, Queue._finalize_close,
-            [self._buffer, self._notempty],
-            exitpriority=10
-            )
+            self, Queue._finalize_close, [self._buffer, self._notempty], exitpriority=10
+        )
 
     @staticmethod
     def _finalize_join(twr):
-        debug('joining queue thread')
+        debug("joining queue thread")
         thread = twr()
         if thread is not None:
             thread.join()
-            debug('... queue thread joined')
+            debug("... queue thread joined")
         else:
-            debug('... queue thread already dead')
+            debug("... queue thread already dead")
 
     @staticmethod
     def _finalize_close(buffer, notempty):
-        debug('telling queue thread to quit')
+        debug("telling queue thread to quit")
         with notempty:
             buffer.append(_sentinel)
             notempty.notify()
 
     @staticmethod
-    def _feed(buffer, notempty, send_bytes, writelock, reader_close,
-              writer_close, ignore_epipe, onerror, queue_sem):
-        debug('starting thread to feed data to pipe')
+    def _feed(
+        buffer,
+        notempty,
+        send_bytes,
+        writelock,
+        reader_close,
+        writer_close,
+        ignore_epipe,
+        onerror,
+        queue_sem,
+    ):
+        debug("starting thread to feed data to pipe")
         nacquire = notempty.acquire
         nrelease = notempty.release
         nwait = notempty.wait
         bpopleft = buffer.popleft
         sentinel = _sentinel
-        if sys.platform != 'win32':
+        if sys.platform != "win32":
             wacquire = writelock.acquire
             wrelease = writelock.release
         else:
@@ -255,7 +288,7 @@ class Queue(object):
                     while 1:
                         obj = bpopleft()
                         if obj is sentinel:
-                            debug('feeder thread got sentinel -- exiting')
+                            debug("feeder thread got sentinel -- exiting")
                             reader_close()
                             writer_close()
                             return
@@ -273,14 +306,14 @@ class Queue(object):
                 except IndexError:
                     pass
             except Exception as e:
-                if ignore_epipe and getattr(e, 'errno', 0) == errno.EPIPE:
+                if ignore_epipe and getattr(e, "errno", 0) == errno.EPIPE:
                     return
                 # Since this runs in a daemon thread the resources it uses
                 # may be become unusable while the process is cleaning up.
                 # We ignore errors which happen after the process has
                 # started to cleanup.
                 if is_exiting():
-                    info('error in queue thread: %s', e)
+                    info("error in queue thread: %s", e)
                     return
                 else:
                     # Since the object has not been sent in the queue, we need
@@ -298,6 +331,7 @@ class Queue(object):
         raises an exception.  For overriding by concurrent.futures.
         """
         import traceback
+
         traceback.print_exc()
 
     __class_getitem__ = classmethod(types.GenericAlias)
@@ -312,6 +346,7 @@ _sentinel = object()
 # eventually the counter's semaphore may overflow causing Bad Things
 # to happen.
 #
+
 
 class JoinableQueue(Queue):
 
@@ -343,7 +378,7 @@ class JoinableQueue(Queue):
     def task_done(self):
         with self._cond:
             if not self._unfinished_tasks.acquire(False):
-                raise ValueError('task_done() called too many times')
+                raise ValueError("task_done() called too many times")
             if self._unfinished_tasks._semlock._is_zero():
                 self._cond.notify_all()
 
@@ -352,9 +387,11 @@ class JoinableQueue(Queue):
             if not self._unfinished_tasks._semlock._is_zero():
                 self._cond.wait()
 
+
 #
 # Simplified Queue type -- really just a locked pipe
 #
+
 
 class SimpleQueue(object):
 
@@ -362,7 +399,7 @@ class SimpleQueue(object):
         self._reader, self._writer = connection.Pipe(duplex=False)
         self._rlock = ctx.Lock()
         self._poll = self._reader.poll
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             self._wlock = None
         else:
             self._wlock = ctx.Lock()
@@ -379,7 +416,7 @@ class SimpleQueue(object):
         return (self._reader, self._writer, self._rlock, self._wlock)
 
     def __setstate__(self, state):
-        (self._reader, self._writer, self._rlock, self._wlock) = state
+        self._reader, self._writer, self._rlock, self._wlock = state
         self._poll = self._reader.poll
 
     def get(self):

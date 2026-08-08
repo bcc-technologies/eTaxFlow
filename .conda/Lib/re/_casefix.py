@@ -4,103 +4,103 @@
 # characters which have the same uppercase.
 _EXTRA_CASES = {
     # LATIN SMALL LETTER I: LATIN SMALL LETTER DOTLESS I
-    0x0069: (0x0131,), # 'i': 'ı'
+    0x0069: (0x0131,),  # 'i': 'ı'
     # LATIN SMALL LETTER S: LATIN SMALL LETTER LONG S
-    0x0073: (0x017f,), # 's': 'ſ'
+    0x0073: (0x017F,),  # 's': 'ſ'
     # MICRO SIGN: GREEK SMALL LETTER MU
-    0x00b5: (0x03bc,), # 'µ': 'μ'
+    0x00B5: (0x03BC,),  # 'µ': 'μ'
     # LATIN SMALL LETTER DOTLESS I: LATIN SMALL LETTER I
-    0x0131: (0x0069,), # 'ı': 'i'
+    0x0131: (0x0069,),  # 'ı': 'i'
     # LATIN SMALL LETTER LONG S: LATIN SMALL LETTER S
-    0x017f: (0x0073,), # 'ſ': 's'
+    0x017F: (0x0073,),  # 'ſ': 's'
     # COMBINING GREEK YPOGEGRAMMENI: GREEK SMALL LETTER IOTA, GREEK PROSGEGRAMMENI
-    0x0345: (0x03b9, 0x1fbe), # '\u0345': 'ιι'
+    0x0345: (0x03B9, 0x1FBE),  # '\u0345': 'ιι'
     # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS: GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
-    0x0390: (0x1fd3,), # 'ΐ': 'ΐ'
+    0x0390: (0x1FD3,),  # 'ΐ': 'ΐ'
     # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS: GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
-    0x03b0: (0x1fe3,), # 'ΰ': 'ΰ'
+    0x03B0: (0x1FE3,),  # 'ΰ': 'ΰ'
     # GREEK SMALL LETTER BETA: GREEK BETA SYMBOL
-    0x03b2: (0x03d0,), # 'β': 'ϐ'
+    0x03B2: (0x03D0,),  # 'β': 'ϐ'
     # GREEK SMALL LETTER EPSILON: GREEK LUNATE EPSILON SYMBOL
-    0x03b5: (0x03f5,), # 'ε': 'ϵ'
+    0x03B5: (0x03F5,),  # 'ε': 'ϵ'
     # GREEK SMALL LETTER THETA: GREEK THETA SYMBOL
-    0x03b8: (0x03d1,), # 'θ': 'ϑ'
+    0x03B8: (0x03D1,),  # 'θ': 'ϑ'
     # GREEK SMALL LETTER IOTA: COMBINING GREEK YPOGEGRAMMENI, GREEK PROSGEGRAMMENI
-    0x03b9: (0x0345, 0x1fbe), # 'ι': '\u0345ι'
+    0x03B9: (0x0345, 0x1FBE),  # 'ι': '\u0345ι'
     # GREEK SMALL LETTER KAPPA: GREEK KAPPA SYMBOL
-    0x03ba: (0x03f0,), # 'κ': 'ϰ'
+    0x03BA: (0x03F0,),  # 'κ': 'ϰ'
     # GREEK SMALL LETTER MU: MICRO SIGN
-    0x03bc: (0x00b5,), # 'μ': 'µ'
+    0x03BC: (0x00B5,),  # 'μ': 'µ'
     # GREEK SMALL LETTER PI: GREEK PI SYMBOL
-    0x03c0: (0x03d6,), # 'π': 'ϖ'
+    0x03C0: (0x03D6,),  # 'π': 'ϖ'
     # GREEK SMALL LETTER RHO: GREEK RHO SYMBOL
-    0x03c1: (0x03f1,), # 'ρ': 'ϱ'
+    0x03C1: (0x03F1,),  # 'ρ': 'ϱ'
     # GREEK SMALL LETTER FINAL SIGMA: GREEK SMALL LETTER SIGMA
-    0x03c2: (0x03c3,), # 'ς': 'σ'
+    0x03C2: (0x03C3,),  # 'ς': 'σ'
     # GREEK SMALL LETTER SIGMA: GREEK SMALL LETTER FINAL SIGMA
-    0x03c3: (0x03c2,), # 'σ': 'ς'
+    0x03C3: (0x03C2,),  # 'σ': 'ς'
     # GREEK SMALL LETTER PHI: GREEK PHI SYMBOL
-    0x03c6: (0x03d5,), # 'φ': 'ϕ'
+    0x03C6: (0x03D5,),  # 'φ': 'ϕ'
     # GREEK BETA SYMBOL: GREEK SMALL LETTER BETA
-    0x03d0: (0x03b2,), # 'ϐ': 'β'
+    0x03D0: (0x03B2,),  # 'ϐ': 'β'
     # GREEK THETA SYMBOL: GREEK SMALL LETTER THETA
-    0x03d1: (0x03b8,), # 'ϑ': 'θ'
+    0x03D1: (0x03B8,),  # 'ϑ': 'θ'
     # GREEK PHI SYMBOL: GREEK SMALL LETTER PHI
-    0x03d5: (0x03c6,), # 'ϕ': 'φ'
+    0x03D5: (0x03C6,),  # 'ϕ': 'φ'
     # GREEK PI SYMBOL: GREEK SMALL LETTER PI
-    0x03d6: (0x03c0,), # 'ϖ': 'π'
+    0x03D6: (0x03C0,),  # 'ϖ': 'π'
     # GREEK KAPPA SYMBOL: GREEK SMALL LETTER KAPPA
-    0x03f0: (0x03ba,), # 'ϰ': 'κ'
+    0x03F0: (0x03BA,),  # 'ϰ': 'κ'
     # GREEK RHO SYMBOL: GREEK SMALL LETTER RHO
-    0x03f1: (0x03c1,), # 'ϱ': 'ρ'
+    0x03F1: (0x03C1,),  # 'ϱ': 'ρ'
     # GREEK LUNATE EPSILON SYMBOL: GREEK SMALL LETTER EPSILON
-    0x03f5: (0x03b5,), # 'ϵ': 'ε'
+    0x03F5: (0x03B5,),  # 'ϵ': 'ε'
     # CYRILLIC SMALL LETTER VE: CYRILLIC SMALL LETTER ROUNDED VE
-    0x0432: (0x1c80,), # 'в': 'ᲀ'
+    0x0432: (0x1C80,),  # 'в': 'ᲀ'
     # CYRILLIC SMALL LETTER DE: CYRILLIC SMALL LETTER LONG-LEGGED DE
-    0x0434: (0x1c81,), # 'д': 'ᲁ'
+    0x0434: (0x1C81,),  # 'д': 'ᲁ'
     # CYRILLIC SMALL LETTER O: CYRILLIC SMALL LETTER NARROW O
-    0x043e: (0x1c82,), # 'о': 'ᲂ'
+    0x043E: (0x1C82,),  # 'о': 'ᲂ'
     # CYRILLIC SMALL LETTER ES: CYRILLIC SMALL LETTER WIDE ES
-    0x0441: (0x1c83,), # 'с': 'ᲃ'
+    0x0441: (0x1C83,),  # 'с': 'ᲃ'
     # CYRILLIC SMALL LETTER TE: CYRILLIC SMALL LETTER TALL TE, CYRILLIC SMALL LETTER THREE-LEGGED TE
-    0x0442: (0x1c84, 0x1c85), # 'т': 'ᲄᲅ'
+    0x0442: (0x1C84, 0x1C85),  # 'т': 'ᲄᲅ'
     # CYRILLIC SMALL LETTER HARD SIGN: CYRILLIC SMALL LETTER TALL HARD SIGN
-    0x044a: (0x1c86,), # 'ъ': 'ᲆ'
+    0x044A: (0x1C86,),  # 'ъ': 'ᲆ'
     # CYRILLIC SMALL LETTER YAT: CYRILLIC SMALL LETTER TALL YAT
-    0x0463: (0x1c87,), # 'ѣ': 'ᲇ'
+    0x0463: (0x1C87,),  # 'ѣ': 'ᲇ'
     # CYRILLIC SMALL LETTER ROUNDED VE: CYRILLIC SMALL LETTER VE
-    0x1c80: (0x0432,), # 'ᲀ': 'в'
+    0x1C80: (0x0432,),  # 'ᲀ': 'в'
     # CYRILLIC SMALL LETTER LONG-LEGGED DE: CYRILLIC SMALL LETTER DE
-    0x1c81: (0x0434,), # 'ᲁ': 'д'
+    0x1C81: (0x0434,),  # 'ᲁ': 'д'
     # CYRILLIC SMALL LETTER NARROW O: CYRILLIC SMALL LETTER O
-    0x1c82: (0x043e,), # 'ᲂ': 'о'
+    0x1C82: (0x043E,),  # 'ᲂ': 'о'
     # CYRILLIC SMALL LETTER WIDE ES: CYRILLIC SMALL LETTER ES
-    0x1c83: (0x0441,), # 'ᲃ': 'с'
+    0x1C83: (0x0441,),  # 'ᲃ': 'с'
     # CYRILLIC SMALL LETTER TALL TE: CYRILLIC SMALL LETTER TE, CYRILLIC SMALL LETTER THREE-LEGGED TE
-    0x1c84: (0x0442, 0x1c85), # 'ᲄ': 'тᲅ'
+    0x1C84: (0x0442, 0x1C85),  # 'ᲄ': 'тᲅ'
     # CYRILLIC SMALL LETTER THREE-LEGGED TE: CYRILLIC SMALL LETTER TE, CYRILLIC SMALL LETTER TALL TE
-    0x1c85: (0x0442, 0x1c84), # 'ᲅ': 'тᲄ'
+    0x1C85: (0x0442, 0x1C84),  # 'ᲅ': 'тᲄ'
     # CYRILLIC SMALL LETTER TALL HARD SIGN: CYRILLIC SMALL LETTER HARD SIGN
-    0x1c86: (0x044a,), # 'ᲆ': 'ъ'
+    0x1C86: (0x044A,),  # 'ᲆ': 'ъ'
     # CYRILLIC SMALL LETTER TALL YAT: CYRILLIC SMALL LETTER YAT
-    0x1c87: (0x0463,), # 'ᲇ': 'ѣ'
+    0x1C87: (0x0463,),  # 'ᲇ': 'ѣ'
     # CYRILLIC SMALL LETTER UNBLENDED UK: CYRILLIC SMALL LETTER MONOGRAPH UK
-    0x1c88: (0xa64b,), # 'ᲈ': 'ꙋ'
+    0x1C88: (0xA64B,),  # 'ᲈ': 'ꙋ'
     # LATIN SMALL LETTER S WITH DOT ABOVE: LATIN SMALL LETTER LONG S WITH DOT ABOVE
-    0x1e61: (0x1e9b,), # 'ṡ': 'ẛ'
+    0x1E61: (0x1E9B,),  # 'ṡ': 'ẛ'
     # LATIN SMALL LETTER LONG S WITH DOT ABOVE: LATIN SMALL LETTER S WITH DOT ABOVE
-    0x1e9b: (0x1e61,), # 'ẛ': 'ṡ'
+    0x1E9B: (0x1E61,),  # 'ẛ': 'ṡ'
     # GREEK PROSGEGRAMMENI: COMBINING GREEK YPOGEGRAMMENI, GREEK SMALL LETTER IOTA
-    0x1fbe: (0x0345, 0x03b9), # 'ι': '\u0345ι'
+    0x1FBE: (0x0345, 0x03B9),  # 'ι': '\u0345ι'
     # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA: GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS
-    0x1fd3: (0x0390,), # 'ΐ': 'ΐ'
+    0x1FD3: (0x0390,),  # 'ΐ': 'ΐ'
     # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA: GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS
-    0x1fe3: (0x03b0,), # 'ΰ': 'ΰ'
+    0x1FE3: (0x03B0,),  # 'ΰ': 'ΰ'
     # CYRILLIC SMALL LETTER MONOGRAPH UK: CYRILLIC SMALL LETTER UNBLENDED UK
-    0xa64b: (0x1c88,), # 'ꙋ': 'ᲈ'
+    0xA64B: (0x1C88,),  # 'ꙋ': 'ᲈ'
     # LATIN SMALL LIGATURE LONG S T: LATIN SMALL LIGATURE ST
-    0xfb05: (0xfb06,), # 'ﬅ': 'ﬆ'
+    0xFB05: (0xFB06,),  # 'ﬅ': 'ﬆ'
     # LATIN SMALL LIGATURE ST: LATIN SMALL LIGATURE LONG S T
-    0xfb06: (0xfb05,), # 'ﬆ': 'ﬅ'
+    0xFB06: (0xFB05,),  # 'ﬆ': 'ﬅ'
 }

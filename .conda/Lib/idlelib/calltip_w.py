@@ -3,6 +3,7 @@
 After tooltip.py, which uses ideas gleaned from PySol.
 Used by calltip.py.
 """
+
 from tkinter import Label, LEFT, SOLID, TclError
 
 from idlelib.tooltip import TooltipBase
@@ -34,7 +35,7 @@ class CalltipWindow(TooltipBase):
 
     def get_position(self):
         """Choose the position of the call-tip."""
-        curline = int(self.anchor_widget.index("insert").split('.')[0])
+        curline = int(self.anchor_widget.index("insert").split(".")[0])
         if curline == self.parenline:
             anchor_index = (self.parenline, self.parencol)
         else:
@@ -49,7 +50,7 @@ class CalltipWindow(TooltipBase):
 
     def position_window(self):
         "Reposition the window if needed."
-        curline = int(self.anchor_widget.index("insert").split('.')[0])
+        curline = int(self.anchor_widget.index("insert").split(".")[0])
         if curline == self.lastline:
             return
         self.lastline = curline
@@ -71,7 +72,8 @@ class CalltipWindow(TooltipBase):
 
         self.anchor_widget.mark_set(MARK_RIGHT, parenright)
         self.parenline, self.parencol = map(
-            int, self.anchor_widget.index(parenleft).split("."))
+            int, self.anchor_widget.index(parenleft).split(".")
+        )
 
         super().showtip()
 
@@ -79,10 +81,16 @@ class CalltipWindow(TooltipBase):
 
     def showcontents(self):
         """Create the call-tip widget."""
-        self.label = Label(self.tipwindow, text=self.text, justify=LEFT,
-                           background="#ffffd0", foreground="black",
-                           relief=SOLID, borderwidth=1,
-                           font=self.anchor_widget['font'])
+        self.label = Label(
+            self.tipwindow,
+            text=self.text,
+            justify=LEFT,
+            background="#ffffd0",
+            foreground="black",
+            relief=SOLID,
+            borderwidth=1,
+            font=self.anchor_widget["font"],
+        )
         self.label.pack()
 
     def checkhide_event(self, event=None):
@@ -95,10 +103,12 @@ class CalltipWindow(TooltipBase):
 
         # Hide the call-tip if the insertion cursor moves outside of the
         # parenthesis.
-        curline, curcol = map(int, self.anchor_widget.index("insert").split('.'))
-        if curline < self.parenline or \
-           (curline == self.parenline and curcol <= self.parencol) or \
-           self.anchor_widget.compare("insert", ">", MARK_RIGHT):
+        curline, curcol = map(int, self.anchor_widget.index("insert").split("."))
+        if (
+            curline < self.parenline
+            or (curline == self.parenline and curcol <= self.parencol)
+            or self.anchor_widget.compare("insert", ">", MARK_RIGHT)
+        ):
             self.hidetip()
             return "break"
 
@@ -108,8 +118,9 @@ class CalltipWindow(TooltipBase):
         # Re-schedule this function to be called again in a short while.
         if self.checkhide_after_id is not None:
             self.anchor_widget.after_cancel(self.checkhide_after_id)
-        self.checkhide_after_id = \
-            self.anchor_widget.after(CHECKHIDE_TIME, self.checkhide_event)
+        self.checkhide_after_id = self.anchor_widget.after(
+            CHECKHIDE_TIME, self.checkhide_event
+        )
         return None
 
     def hide_event(self, event):
@@ -147,13 +158,13 @@ class CalltipWindow(TooltipBase):
 
     def _bind_events(self):
         """Bind event handlers."""
-        self.checkhideid = self.anchor_widget.bind(CHECKHIDE_EVENT,
-                                                   self.checkhide_event)
+        self.checkhideid = self.anchor_widget.bind(
+            CHECKHIDE_EVENT, self.checkhide_event
+        )
         for seq in CHECKHIDE_SEQUENCES:
             self.anchor_widget.event_add(CHECKHIDE_EVENT, seq)
         self.anchor_widget.after(CHECKHIDE_TIME, self.checkhide_event)
-        self.hideid = self.anchor_widget.bind(HIDE_EVENT,
-                                              self.hide_event)
+        self.hideid = self.anchor_widget.bind(HIDE_EVENT, self.hide_event)
         for seq in HIDE_SEQUENCES:
             self.anchor_widget.event_add(HIDE_EVENT, seq)
 
@@ -174,7 +185,7 @@ def _calltip_window(parent):  # htest #
 
     top = Toplevel(parent)
     top.title("Test call-tips")
-    x, y = map(int, parent.geometry().split('+')[1:])
+    x, y = map(int, parent.geometry().split("+")[1:])
     top.geometry("250x100+%d+%d" % (x + 175, y + 150))
     text = Text(top)
     text.pack(side=LEFT, fill=BOTH, expand=1)
@@ -182,10 +193,13 @@ def _calltip_window(parent):  # htest #
     top.update()
 
     calltip = CalltipWindow(text)
+
     def calltip_show(event):
         calltip.showtip("(s='Hello world')", "insert", "end")
+
     def calltip_hide(event):
         calltip.hidetip()
+
     text.event_add("<<calltip-show>>", "(")
     text.event_add("<<calltip-hide>>", ")")
     text.bind("<<calltip-show>>", calltip_show)
@@ -194,9 +208,11 @@ def _calltip_window(parent):  # htest #
     text.focus_set()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_calltip_w', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_calltip_w", verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
+
     run(_calltip_window)

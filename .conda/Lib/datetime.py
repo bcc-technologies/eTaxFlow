@@ -5,5 +5,14 @@ except ImportError:
     from _pydatetime import *
     from _pydatetime import __doc__
 
-__all__ = ("date", "datetime", "time", "timedelta", "timezone", "tzinfo",
-           "MINYEAR", "MAXYEAR", "UTC")
+__all__ = (
+    "date",
+    "datetime",
+    "time",
+    "timedelta",
+    "timezone",
+    "tzinfo",
+    "MINYEAR",
+    "MAXYEAR",
+    "UTC",
+)

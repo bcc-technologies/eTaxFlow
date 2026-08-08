@@ -20,8 +20,7 @@ def _ignore_deprecated_imports(ignore=True):
     """
     if ignore:
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", ".+ (module|package)",
-                                    DeprecationWarning)
+            warnings.filterwarnings("ignore", ".+ (module|package)", DeprecationWarning)
             yield
     else:
         yield
@@ -42,11 +41,11 @@ def forget(modname):
     """
     unload(modname)
     for dirname in sys.path:
-        source = os.path.join(dirname, modname + '.py')
+        source = os.path.join(dirname, modname + ".py")
         # It doesn't matter if they exist or not, unlink all possible
         # combinations of PEP 3147/488 and legacy pyc files.
-        unlink(source + 'c')
-        for opt in ('', 1, 2):
+        unlink(source + "c")
+        for opt in ("", 1, 2):
             unlink(importlib.util.cache_from_source(source, optimization=opt))
 
 
@@ -58,8 +57,8 @@ def make_legacy_pyc(source):
     :return: The file system path to the legacy pyc file.
     """
     pyc_file = importlib.util.cache_from_source(source)
-    assert source.endswith('.py')
-    legacy_pyc = source + 'c'
+    assert source.endswith(".py")
+    legacy_pyc = source + "c"
     shutil.move(pyc_file, legacy_pyc)
     return legacy_pyc
 
@@ -84,7 +83,7 @@ def import_module(name, deprecated=False, *, required_on=()):
 
 def _save_and_remove_modules(names):
     orig_modules = {}
-    prefixes = tuple(name + '.' for name in names)
+    prefixes = tuple(name + "." for name in names)
     for modname in list(sys.modules):
         if modname in names or modname.startswith(prefixes):
             orig_modules[modname] = sys.modules.pop(modname)
@@ -125,10 +124,14 @@ def multi_interp_extensions_check(enabled=True):
         _imp._override_multi_interp_extensions_check(old)
 
 
-def import_fresh_module(name, fresh=(), blocked=(), *,
-                        deprecated=False,
-                        usefrozen=False,
-                        ):
+def import_fresh_module(
+    name,
+    fresh=(),
+    blocked=(),
+    *,
+    deprecated=False,
+    usefrozen=False,
+):
     """Import and return a module, deliberately bypassing sys.modules.
 
     This function imports and returns a fresh copy of the named Python module
@@ -247,15 +250,14 @@ class DirsOnSysPath(object):
 
 
 def modules_setup():
-    return sys.modules.copy(),
+    return (sys.modules.copy(),)
 
 
 def modules_cleanup(oldmodules):
     # Encoders/decoders are registered permanently within the internal
     # codec cache. If we destroy the corresponding modules their
     # globals will be set to None which will trip up the cached functions.
-    encodings = [(k, v) for k, v in sys.modules.items()
-                 if k.startswith('encodings.')]
+    encodings = [(k, v) for k, v in sys.modules.items() if k.startswith("encodings.")]
     sys.modules.clear()
     sys.modules.update(encodings)
     # XXX: This kind of problem can affect more than just encodings.
@@ -285,7 +287,8 @@ def mock_register_at_fork(func):
     # since this function doesn't allow to unregister callbacks and would leak
     # memory.
     from unittest import mock
-    return mock.patch('os.register_at_fork', create=True)(func)
+
+    return mock.patch("os.register_at_fork", create=True)(func)
 
 
 @contextlib.contextmanager

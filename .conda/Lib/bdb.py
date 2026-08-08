@@ -58,6 +58,7 @@ class Bdb:
     def reset(self):
         """Set values of attributes as ready to start debugging."""
         import linecache
+
         linecache.checkcache()
         self.botframe = None
         self._set_stopinfo(None, None)
@@ -95,22 +96,22 @@ class Bdb:
 
         with self.set_enterframe(frame):
             if self.quitting:
-                return # None
-            if event == 'line':
+                return  # None
+            if event == "line":
                 return self.dispatch_line(frame)
-            if event == 'call':
+            if event == "call":
                 return self.dispatch_call(frame, arg)
-            if event == 'return':
+            if event == "return":
                 return self.dispatch_return(frame, arg)
-            if event == 'exception':
+            if event == "exception":
                 return self.dispatch_exception(frame, arg)
-            if event == 'c_call':
+            if event == "c_call":
                 return self.trace_dispatch
-            if event == 'c_exception':
+            if event == "c_exception":
                 return self.trace_dispatch
-            if event == 'c_return':
+            if event == "c_return":
                 return self.trace_dispatch
-            print('bdb.Bdb.dispatch: unknown debugging event:', repr(event))
+            print("bdb.Bdb.dispatch: unknown debugging event:", repr(event))
             return self.trace_dispatch
 
     def dispatch_line(self, frame):
@@ -122,7 +123,8 @@ class Bdb:
         """
         if self.stop_here(frame) or self.break_here(frame):
             self.user_line(frame)
-            if self.quitting: raise BdbQuit
+            if self.quitting:
+                raise BdbQuit
         return self.trace_dispatch
 
     def dispatch_call(self, frame, arg):
@@ -135,16 +137,17 @@ class Bdb:
         # XXX 'arg' is no longer used
         if self.botframe is None:
             # First call of dispatch since reset()
-            self.botframe = frame.f_back # (CT) Note that this may also be None!
+            self.botframe = frame.f_back  # (CT) Note that this may also be None!
             return self.trace_dispatch
         if not (self.stop_here(frame) or self.break_anywhere(frame)):
             # No need to trace this function
-            return # None
+            return  # None
         # Ignore call events in generator except when stepping.
         if self.stopframe and frame.f_code.co_flags & GENERATOR_AND_COROUTINE_FLAGS:
             return self.trace_dispatch
         self.user_call(frame, arg)
-        if self.quitting: raise BdbQuit
+        if self.quitting:
+            raise BdbQuit
         return self.trace_dispatch
 
     def dispatch_return(self, frame, arg):
@@ -163,7 +166,8 @@ class Bdb:
                 self.user_return(frame, arg)
             finally:
                 self.frame_returning = None
-            if self.quitting: raise BdbQuit
+            if self.quitting:
+                raise BdbQuit
             # The user issued a 'next' or 'until' command.
             if self.stopframe is frame and self.stoplineno != -1:
                 self._set_stopinfo(None, None)
@@ -185,19 +189,27 @@ class Bdb:
             # When stepping with next/until/return in a generator frame, skip
             # the internal StopIteration exception (with no traceback)
             # triggered by a subiterator run with the 'yield from' statement.
-            if not (frame.f_code.co_flags & GENERATOR_AND_COROUTINE_FLAGS
-                    and arg[0] is StopIteration and arg[2] is None):
+            if not (
+                frame.f_code.co_flags & GENERATOR_AND_COROUTINE_FLAGS
+                and arg[0] is StopIteration
+                and arg[2] is None
+            ):
                 self.user_exception(frame, arg)
-                if self.quitting: raise BdbQuit
+                if self.quitting:
+                    raise BdbQuit
         # Stop at the StopIteration or GeneratorExit exception when the user
         # has set stopframe in a generator by issuing a return command, or a
         # next/until command at the last statement in the generator before the
         # exception.
-        elif (self.stopframe and frame is not self.stopframe
-                and self.stopframe.f_code.co_flags & GENERATOR_AND_COROUTINE_FLAGS
-                and arg[0] in (StopIteration, GeneratorExit)):
+        elif (
+            self.stopframe
+            and frame is not self.stopframe
+            and self.stopframe.f_code.co_flags & GENERATOR_AND_COROUTINE_FLAGS
+            and arg[0] in (StopIteration, GeneratorExit)
+        ):
             self.user_exception(frame, arg)
-            if self.quitting: raise BdbQuit
+            if self.quitting:
+                raise BdbQuit
 
         return self.trace_dispatch
 
@@ -218,8 +230,7 @@ class Bdb:
         "Return True if frame is below the starting frame in the stack."
         # (CT) stopframe may now also be None, see dispatch_call.
         # (CT) the former test for None is therefore removed from here.
-        if self.skip and \
-               self.is_skipped_module(frame.f_globals.get('__name__')):
+        if self.skip and self.is_skipped_module(frame.f_globals.get("__name__")):
             return False
         if frame is self.stopframe:
             if self.stoplineno == -1:
@@ -247,10 +258,10 @@ class Bdb:
                 return False
 
         # flag says ok to delete temp. bp
-        (bp, flag) = effective(filename, lineno, frame)
+        bp, flag = effective(filename, lineno, frame)
         if bp:
             self.currentbp = bp.number
-            if (flag and bp.temporary):
+            if flag and bp.temporary:
                 self.do_clear(str(bp.number))
             return True
         else:
@@ -264,8 +275,7 @@ class Bdb:
         raise NotImplementedError("subclass of bdb must implement do_clear()")
 
     def break_anywhere(self, frame):
-        """Return True if there is any breakpoint for frame's filename.
-        """
+        """Return True if there is any breakpoint for frame's filename."""
         return self.canonic(frame.f_code.co_filename) in self.breaks
 
     # Derived classes should override the user_* methods
@@ -308,7 +318,11 @@ class Bdb:
         # for performance reasons) when returning from the current frame, unless
         # the caller is the botframe.
         caller_frame = current_frame.f_back
-        if caller_frame and not caller_frame.f_trace and caller_frame is not self.botframe:
+        if (
+            caller_frame
+            and not caller_frame.f_trace
+            and caller_frame is not self.botframe
+        ):
             caller_frame.f_trace = self.trace_dispatch
 
     # Derived classes and clients can call the following methods
@@ -392,18 +406,18 @@ class Bdb:
         if lineno not in bp_linenos:
             bp_linenos.append(lineno)
 
-    def set_break(self, filename, lineno, temporary=False, cond=None,
-                  funcname=None):
+    def set_break(self, filename, lineno, temporary=False, cond=None, funcname=None):
         """Set a new breakpoint for filename:lineno.
 
         If lineno doesn't exist for the filename, return an error message.
         The filename should be in canonical form.
         """
         filename = self.canonic(filename)
-        import linecache # Import as late as possible
+        import linecache  # Import as late as possible
+
         line = linecache.getline(filename, lineno)
         if not line:
-            return 'Line %s:%d does not exist' % (filename, lineno)
+            return "Line %s:%d does not exist" % (filename, lineno)
         self._add_to_breaks(filename, lineno)
         bp = Breakpoint(filename, lineno, temporary, cond, funcname)
         # After we set a new breakpoint, we need to search through all frames
@@ -424,7 +438,7 @@ class Bdb:
         is necessary for interactive sessions to keep the breakpoints
         active across multiple calls to run().
         """
-        for (filename, lineno) in Breakpoint.bplist.keys():
+        for filename, lineno in Breakpoint.bplist.keys():
             self._add_to_breaks(filename, lineno)
 
     def _prune_breaks(self, filename, lineno):
@@ -447,9 +461,9 @@ class Bdb:
         """
         filename = self.canonic(filename)
         if filename not in self.breaks:
-            return 'There are no breakpoints in %s' % filename
+            return "There are no breakpoints in %s" % filename
         if lineno not in self.breaks[filename]:
-            return 'There is no breakpoint at %s:%d' % (filename, lineno)
+            return "There is no breakpoint at %s:%d" % (filename, lineno)
         # If there's only one bp in the list for that file,line
         # pair, then remove the breaks entry
         for bp in Breakpoint.bplist[filename, lineno][:]:
@@ -477,7 +491,7 @@ class Bdb:
         """
         filename = self.canonic(filename)
         if filename not in self.breaks:
-            return 'There are no breakpoints in %s' % filename
+            return "There are no breakpoints in %s" % filename
         for line in self.breaks[filename]:
             blist = Breakpoint.bplist[filename, line]
             for bp in blist:
@@ -491,7 +505,7 @@ class Bdb:
         If none were set, return an error message.
         """
         if not self.breaks:
-            return 'There are no breakpoints'
+            return "There are no breakpoints"
         for bp in Breakpoint.bpbynumber:
             if bp:
                 bp.deleteMe()
@@ -505,24 +519,23 @@ class Bdb:
         raise a ValueError.
         """
         if not arg:
-            raise ValueError('Breakpoint number expected')
+            raise ValueError("Breakpoint number expected")
         try:
             number = int(arg)
         except ValueError:
-            raise ValueError('Non-numeric breakpoint number %s' % arg) from None
+            raise ValueError("Non-numeric breakpoint number %s" % arg) from None
         try:
             bp = Breakpoint.bpbynumber[number]
         except IndexError:
-            raise ValueError('Breakpoint number %d out of range' % number) from None
+            raise ValueError("Breakpoint number %d out of range" % number) from None
         if bp is None:
-            raise ValueError('Breakpoint %d already deleted' % number)
+            raise ValueError("Breakpoint %d already deleted" % number)
         return bp
 
     def get_break(self, filename, lineno):
         """Return True if there is a breakpoint for filename:lineno."""
         filename = self.canonic(filename)
-        return filename in self.breaks and \
-            lineno in self.breaks[filename]
+        return filename in self.breaks and lineno in self.breaks[filename]
 
     def get_breaks(self, filename, lineno):
         """Return all breakpoints for filename:lineno.
@@ -530,9 +543,12 @@ class Bdb:
         If no breakpoints are set, return an empty list.
         """
         filename = self.canonic(filename)
-        return filename in self.breaks and \
-            lineno in self.breaks[filename] and \
-            Breakpoint.bplist[filename, lineno] or []
+        return (
+            filename in self.breaks
+            and lineno in self.breaks[filename]
+            and Breakpoint.bplist[filename, lineno]
+            or []
+        )
 
     def get_file_breaks(self, filename):
         """Return all lines with breakpoints for filename.
@@ -575,7 +591,7 @@ class Bdb:
             i = max(0, len(stack) - 1)
         return stack, i
 
-    def format_stack_entry(self, frame_lineno, lprefix=': '):
+    def format_stack_entry(self, frame_lineno, lprefix=": "):
         """Return a string with information about a stack entry.
 
         The stack entry frame_lineno is a (frame, lineno) tuple.  The
@@ -585,24 +601,25 @@ class Bdb:
 
         """
         import linecache, reprlib
+
         frame, lineno = frame_lineno
         filename = self.canonic(frame.f_code.co_filename)
-        s = '%s(%r)' % (filename, lineno)
+        s = "%s(%r)" % (filename, lineno)
         if frame.f_code.co_name:
             s += frame.f_code.co_name
         else:
             s += "<lambda>"
-        s += '()'
-        if '__return__' in frame.f_locals:
-            rv = frame.f_locals['__return__']
-            s += '->'
+        s += "()"
+        if "__return__" in frame.f_locals:
+            rv = frame.f_locals["__return__"]
+            s += "->"
             s += reprlib.repr(rv)
         if lineno is not None:
             line = linecache.getline(filename, lineno, frame.f_globals)
             if line:
                 s += lprefix + line.strip()
         else:
-            s += f'{lprefix}Warning: lineno is None'
+            s += f"{lprefix}Warning: lineno is None"
         return s
 
     # The following methods can be called by clients to use
@@ -616,6 +633,7 @@ class Bdb:
         """
         if globals is None:
             import __main__
+
             globals = __main__.__dict__
         if locals is None:
             locals = globals
@@ -638,6 +656,7 @@ class Bdb:
         """
         if globals is None:
             import __main__
+
             globals = __main__.__dict__
         if locals is None:
             locals = globals
@@ -702,17 +721,17 @@ class Breakpoint:
     # XXX Keeping state in the class is a mistake -- this means
     # you cannot have more than one active Bdb instance.
 
-    next = 1        # Next bp to be assigned
-    bplist = {}     # indexed by (file, lineno) tuple
-    bpbynumber = [None] # Each entry is None or an instance of Bpt
-                # index 0 is unused, except for marking an
-                # effective break .... see effective()
+    next = 1  # Next bp to be assigned
+    bplist = {}  # indexed by (file, lineno) tuple
+    bpbynumber = [None]  # Each entry is None or an instance of Bpt
+    # index 0 is unused, except for marking an
+    # effective break .... see effective()
 
     def __init__(self, file, line, temporary=False, cond=None, funcname=None):
         self.funcname = funcname
         # Needed if funcname is not None.
         self.func_first_executable_line = None
-        self.file = file    # This better be in canonical form!
+        self.file = file  # This better be in canonical form!
         self.line = line
         self.temporary = temporary
         self.cond = cond
@@ -742,7 +761,7 @@ class Breakpoint:
         """
 
         index = (self.file, self.line)
-        self.bpbynumber[self.number] = None   # No longer in list
+        self.bpbynumber[self.number] = None  # No longer in list
         self.bplist[index].remove(self)
         if not self.bplist[index]:
             # No more bp for this f:l combo
@@ -775,30 +794,30 @@ class Breakpoint:
 
         """
         if self.temporary:
-            disp = 'del  '
+            disp = "del  "
         else:
-            disp = 'keep '
+            disp = "keep "
         if self.enabled:
-            disp = disp + 'yes  '
+            disp = disp + "yes  "
         else:
-            disp = disp + 'no   '
-        ret = '%-4dbreakpoint   %s at %s:%d' % (self.number, disp,
-                                                self.file, self.line)
+            disp = disp + "no   "
+        ret = "%-4dbreakpoint   %s at %s:%d" % (self.number, disp, self.file, self.line)
         if self.cond:
-            ret += '\n\tstop only if %s' % (self.cond,)
+            ret += "\n\tstop only if %s" % (self.cond,)
         if self.ignore:
-            ret += '\n\tignore next %d hits' % (self.ignore,)
+            ret += "\n\tignore next %d hits" % (self.ignore,)
         if self.hits:
             if self.hits > 1:
-                ss = 's'
+                ss = "s"
             else:
-                ss = ''
-            ret += '\n\tbreakpoint already hit %d time%s' % (self.hits, ss)
+                ss = ""
+            ret += "\n\tbreakpoint already hit %d time%s" % (self.hits, ss)
         return ret
 
     def __str__(self):
         "Return a condensed description of the breakpoint."
-        return 'breakpoint %s at %s:%s' % (self.number, self.file, self.line)
+        return "breakpoint %s at %s:%s" % (self.number, self.file, self.line)
+
 
 # -----------end of Breakpoint class----------
 
@@ -837,16 +856,16 @@ def checkfuncname(b, frame):
 
 def effective(file, line, frame):
     """Return (active breakpoint, delete temporary flag) or (None, None) as
-       breakpoint to act upon.
+    breakpoint to act upon.
 
-       The "active breakpoint" is the first entry in bplist[line, file] (which
-       must exist) that is enabled, for which checkfuncname is True, and that
-       has neither a False condition nor a positive ignore count.  The flag,
-       meaning that a temporary breakpoint should be deleted, is False only
-       when the condiion cannot be evaluated (in which case, ignore count is
-       ignored).
+    The "active breakpoint" is the first entry in bplist[line, file] (which
+    must exist) that is enabled, for which checkfuncname is True, and that
+    has neither a False condition nor a positive ignore count.  The flag,
+    meaning that a temporary breakpoint should be deleted, is False only
+    when the condiion cannot be evaluated (in which case, ignore count is
+    ignored).
 
-       If no such entry exists, then (None, None) is returned.
+    If no such entry exists, then (None, None) is returned.
     """
     possibles = Breakpoint.bplist[file, line]
     for b in possibles:
@@ -888,33 +907,43 @@ def effective(file, line, frame):
 
 # -------------------- testing --------------------
 
+
 class Tdb(Bdb):
     def user_call(self, frame, args):
         name = frame.f_code.co_name
-        if not name: name = '???'
-        print('+++ call', name, args)
+        if not name:
+            name = "???"
+        print("+++ call", name, args)
+
     def user_line(self, frame):
         import linecache
+
         name = frame.f_code.co_name
-        if not name: name = '???'
+        if not name:
+            name = "???"
         fn = self.canonic(frame.f_code.co_filename)
         line = linecache.getline(fn, frame.f_lineno, frame.f_globals)
-        print('+++', fn, frame.f_lineno, name, ':', line.strip())
+        print("+++", fn, frame.f_lineno, name, ":", line.strip())
+
     def user_return(self, frame, retval):
-        print('+++ return', retval)
+        print("+++ return", retval)
+
     def user_exception(self, frame, exc_stuff):
-        print('+++ exception', exc_stuff)
+        print("+++ exception", exc_stuff)
         self.set_continue()
 
+
 def foo(n):
-    print('foo(', n, ')')
-    x = bar(n*10)
-    print('bar returned', x)
+    print("foo(", n, ")")
+    x = bar(n * 10)
+    print("bar returned", x)
+
 
 def bar(a):
-    print('bar(', a, ')')
-    return a/2
+    print("bar(", a, ")")
+    return a / 2
+
 
 def test():
     t = Tdb()
-    t.run('import bdb; bdb.foo(10)')
+    t.run("import bdb; bdb.foo(10)")

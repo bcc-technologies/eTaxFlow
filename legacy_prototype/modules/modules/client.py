@@ -3,6 +3,5 @@ class Client:
         self.nombre = nombre
         self.rnc = rnc
         self.direccion = direccion
-        self.telefono = telefono 
-        self.email = email # opcional
-
+        self.telefono = telefono
+        self.email = email  # opcional

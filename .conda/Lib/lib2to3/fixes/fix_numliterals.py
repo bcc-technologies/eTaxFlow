@@ -1,5 +1,5 @@
-"""Fixer that turns 1L into 1, 0755 into 0o755.
-"""
+"""Fixer that turns 1L into 1, 0755 into 0o755."""
+
 # Copyright 2007 Georg Brandl.
 # Licensed to PSF under a Contributor Agreement.
 
@@ -16,13 +16,13 @@ class FixNumliterals(fixer_base.BaseFix):
 
     def match(self, node):
         # Override
-        return (node.value.startswith("0") or node.value[-1] in "Ll")
+        return node.value.startswith("0") or node.value[-1] in "Ll"
 
     def transform(self, node, results):
         val = node.value
-        if val[-1] in 'Ll':
+        if val[-1] in "Ll":
             val = val[:-1]
-        elif val.startswith('0') and val.isdigit() and len(set(val)) > 1:
+        elif val.startswith("0") and val.isdigit() and len(set(val)) > 1:
             val = "0o" + val[1:]
 
         return Number(val, prefix=node.prefix)

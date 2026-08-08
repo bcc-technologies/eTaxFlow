@@ -7,7 +7,6 @@ from . import events
 from . import exceptions
 from . import tasks
 
-
 __all__ = (
     "Timeout",
     "timeout",
@@ -75,11 +74,11 @@ class Timeout:
         return self._state in (_State.EXPIRING, _State.EXPIRED)
 
     def __repr__(self) -> str:
-        info = ['']
+        info = [""]
         if self._state is _State.ENTERED:
             when = round(self._when, 3) if self._when is not None else None
             info.append(f"when={when}")
-        info_str = ' '.join(info)
+        info_str = " ".join(info)
         return f"<Timeout [{self._state.value}]{info_str}>"
 
     async def __aenter__(self) -> "Timeout":
@@ -109,7 +108,10 @@ class Timeout:
         if self._state is _State.EXPIRING:
             self._state = _State.EXPIRED
 
-            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+            if (
+                self._task.uncancel() <= self._cancelling
+                and exc_type is exceptions.CancelledError
+            ):
                 # Since there are no new cancel requests, we're
                 # handling this.
                 raise TimeoutError from exc_val

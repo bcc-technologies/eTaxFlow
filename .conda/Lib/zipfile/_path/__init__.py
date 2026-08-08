@@ -17,8 +17,7 @@ import re
 
 from .glob import translate
 
-
-__all__ = ['Path']
+__all__ = ["Path"]
 
 
 def _parents(path):
@@ -127,7 +126,7 @@ class CompleteDirs(InitializedState, zipfile.ZipFile):
         as a directory (with the trailing slash).
         """
         names = self._name_set()
-        dirname = name + '/'
+        dirname = name + "/"
         dir_match = name not in names and dirname in names
         return dirname if dir_match else name
 
@@ -138,7 +137,7 @@ class CompleteDirs(InitializedState, zipfile.ZipFile):
         try:
             return super().getinfo(name)
         except KeyError:
-            if not name.endswith('/') or name not in self._name_set():
+            if not name.endswith("/") or name not in self._name_set():
                 raise
             return zipfile.ZipInfo(filename=name)
 
@@ -155,7 +154,7 @@ class CompleteDirs(InitializedState, zipfile.ZipFile):
             return cls(source)
 
         # Only allow for FastLookup when supplied zipfile is read-only
-        if 'r' not in source.mode:
+        if "r" not in source.mode:
             cls = CompleteDirs
 
         source.__class__ = cls
@@ -294,7 +293,7 @@ class Path:
     def __hash__(self):
         return hash((self.root, self.at))
 
-    def open(self, mode='r', *args, pwd=None, **kwargs):
+    def open(self, mode="r", *args, pwd=None, **kwargs):
         """
         Open this entry as text or binary following the semantics
         of ``pathlib.Path.open()`` by passing arguments through
@@ -303,10 +302,10 @@ class Path:
         if self.is_dir():
             raise IsADirectoryError(self)
         zip_mode = mode[0]
-        if zip_mode == 'r' and not self.exists():
+        if zip_mode == "r" and not self.exists():
             raise FileNotFoundError(self)
         stream = self.root.open(self.at, zip_mode, pwd=pwd)
-        if 'b' in mode:
+        if "b" in mode:
             if args or kwargs:
                 raise ValueError("encoding args invalid for binary operation")
             return stream
@@ -339,11 +338,11 @@ class Path:
 
     def read_text(self, *args, **kwargs):
         encoding, args, kwargs = _extract_text_encoding(*args, **kwargs)
-        with self.open('r', encoding, *args, **kwargs) as strm:
+        with self.open("r", encoding, *args, **kwargs) as strm:
             return strm.read()
 
     def read_bytes(self):
-        with self.open('rb') as strm:
+        with self.open("rb") as strm:
             return strm.read()
 
     def _is_child(self, path):
@@ -385,7 +384,7 @@ class Path:
         return map(self._next, filter(matches, self.root.namelist()))
 
     def rglob(self, pattern):
-        return self.glob(f'**/{pattern}')
+        return self.glob(f"**/{pattern}")
 
     def relative_to(self, other, *extra):
         return posixpath.relpath(str(self), str(other.joinpath(*extra)))
@@ -406,7 +405,7 @@ class Path:
     def parent(self):
         if not self.at:
             return self.filename.parent
-        parent_at = posixpath.dirname(self.at.rstrip('/'))
+        parent_at = posixpath.dirname(self.at.rstrip("/"))
         if parent_at:
-            parent_at += '/'
+            parent_at += "/"
         return self._next(parent_at)

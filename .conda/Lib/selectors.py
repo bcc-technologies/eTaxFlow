@@ -4,7 +4,6 @@ This module allows high-level and efficient I/O multiplexing, built upon the
 `select` module primitives.
 """
 
-
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from collections.abc import Mapping
@@ -12,10 +11,9 @@ import math
 import select
 import sys
 
-
 # generic events, that must be mapped to implementation-specific ones
-EVENT_READ = (1 << 0)
-EVENT_WRITE = (1 << 1)
+EVENT_READ = 1 << 0
+EVENT_WRITE = 1 << 1
 
 
 def _fileobj_to_fd(fileobj):
@@ -36,25 +34,24 @@ def _fileobj_to_fd(fileobj):
         try:
             fd = int(fileobj.fileno())
         except (AttributeError, TypeError, ValueError):
-            raise ValueError("Invalid file object: "
-                             "{!r}".format(fileobj)) from None
+            raise ValueError("Invalid file object: " "{!r}".format(fileobj)) from None
     if fd < 0:
         raise ValueError("Invalid file descriptor: {}".format(fd))
     return fd
 
 
-SelectorKey = namedtuple('SelectorKey', ['fileobj', 'fd', 'events', 'data'])
+SelectorKey = namedtuple("SelectorKey", ["fileobj", "fd", "events", "data"])
 
 SelectorKey.__doc__ = """SelectorKey(fileobj, fd, events, data)
 
     Object used to associate a file object to its backing
     file descriptor, selected event mask, and attached data.
 """
-SelectorKey.fileobj.__doc__ = 'File object registered.'
-SelectorKey.fd.__doc__ = 'Underlying file descriptor.'
-SelectorKey.events.__doc__ = 'Events that must be waited for on this file object.'
-SelectorKey.data.__doc__ = ('''Optional opaque data associated to this file object.
-For example, this could be used to store a per-client session ID.''')
+SelectorKey.fileobj.__doc__ = "File object registered."
+SelectorKey.fd.__doc__ = "Underlying file descriptor."
+SelectorKey.events.__doc__ = "Events that must be waited for on this file object."
+SelectorKey.data.__doc__ = """Optional opaque data associated to this file object.
+For example, this could be used to store a per-client session ID."""
 
 
 class _SelectorMapping(Mapping):
@@ -185,7 +182,7 @@ class BaseSelector(metaclass=ABCMeta):
         """
         mapping = self.get_map()
         if mapping is None:
-            raise RuntimeError('Selector is closed')
+            raise RuntimeError("Selector is closed")
         try:
             return mapping[fileobj]
         except KeyError:
@@ -238,8 +235,7 @@ class _BaseSelectorImpl(BaseSelector):
         key = SelectorKey(fileobj, self._fileobj_lookup(fileobj), events, data)
 
         if key.fd in self._fd_to_key:
-            raise KeyError("{!r} (FD {}) is already registered"
-                           .format(fileobj, key.fd))
+            raise KeyError("{!r} (FD {}) is already registered".format(fileobj, key.fd))
 
         self._fd_to_key[key.fd] = key
         return key
@@ -309,10 +305,12 @@ class SelectSelector(_BaseSelectorImpl):
         self._writers.discard(key.fd)
         return key
 
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
+
         def _select(self, r, w, _, timeout=None):
             r, w, x = select.select(r, w, w, timeout)
             return r, w + x, []
+
     else:
         _select = select.select
 
@@ -340,6 +338,7 @@ class SelectSelector(_BaseSelectorImpl):
 
 class _PollLikeSelector(_BaseSelectorImpl):
     """Base class shared between poll, epoll and devpoll selectors."""
+
     _selector_cls = None
     _EVENT_READ = None
     _EVENT_WRITE = None
@@ -428,19 +427,21 @@ class _PollLikeSelector(_BaseSelectorImpl):
         return ready
 
 
-if hasattr(select, 'poll'):
+if hasattr(select, "poll"):
 
     class PollSelector(_PollLikeSelector):
         """Poll-based selector."""
+
         _selector_cls = select.poll
         _EVENT_READ = select.POLLIN
         _EVENT_WRITE = select.POLLOUT
 
 
-if hasattr(select, 'epoll'):
+if hasattr(select, "epoll"):
 
     class EpollSelector(_PollLikeSelector):
         """Epoll-based selector."""
+
         _selector_cls = select.epoll
         _EVENT_READ = select.EPOLLIN
         _EVENT_WRITE = select.EPOLLOUT
@@ -485,10 +486,11 @@ if hasattr(select, 'epoll'):
             super().close()
 
 
-if hasattr(select, 'devpoll'):
+if hasattr(select, "devpoll"):
 
     class DevpollSelector(_PollLikeSelector):
         """Solaris /dev/poll selector."""
+
         _selector_cls = select.devpoll
         _EVENT_READ = select.POLLIN
         _EVENT_WRITE = select.POLLOUT
@@ -501,7 +503,7 @@ if hasattr(select, 'devpoll'):
             super().close()
 
 
-if hasattr(select, 'kqueue'):
+if hasattr(select, "kqueue"):
 
     class KqueueSelector(_BaseSelectorImpl):
         """Kqueue-based selector."""
@@ -518,13 +520,13 @@ if hasattr(select, 'kqueue'):
             key = super().register(fileobj, events, data)
             try:
                 if events & EVENT_READ:
-                    kev = select.kevent(key.fd, select.KQ_FILTER_READ,
-                                        select.KQ_EV_ADD)
+                    kev = select.kevent(key.fd, select.KQ_FILTER_READ, select.KQ_EV_ADD)
                     self._selector.control([kev], 0, 0)
                     self._max_events += 1
                 if events & EVENT_WRITE:
-                    kev = select.kevent(key.fd, select.KQ_FILTER_WRITE,
-                                        select.KQ_EV_ADD)
+                    kev = select.kevent(
+                        key.fd, select.KQ_FILTER_WRITE, select.KQ_EV_ADD
+                    )
                     self._selector.control([kev], 0, 0)
                     self._max_events += 1
             except:
@@ -535,8 +537,7 @@ if hasattr(select, 'kqueue'):
         def unregister(self, fileobj):
             key = super().unregister(fileobj)
             if key.events & EVENT_READ:
-                kev = select.kevent(key.fd, select.KQ_FILTER_READ,
-                                    select.KQ_EV_DELETE)
+                kev = select.kevent(key.fd, select.KQ_FILTER_READ, select.KQ_EV_DELETE)
                 self._max_events -= 1
                 try:
                     self._selector.control([kev], 0, 0)
@@ -545,8 +546,7 @@ if hasattr(select, 'kqueue'):
                     # was registered.
                     pass
             if key.events & EVENT_WRITE:
-                kev = select.kevent(key.fd, select.KQ_FILTER_WRITE,
-                                    select.KQ_EV_DELETE)
+                kev = select.kevent(key.fd, select.KQ_FILTER_WRITE, select.KQ_EV_DELETE)
                 self._max_events -= 1
                 try:
                     self._selector.control([kev], 0, 0)
@@ -587,7 +587,7 @@ if hasattr(select, 'kqueue'):
 
 def _can_use(method):
     """Check if we can use the selector depending upon the
-    operating system. """
+    operating system."""
     # Implementation based upon https://github.com/sethmlarson/selectors2/blob/master/selectors2.py
     selector = getattr(select, method, None)
     if selector is None:
@@ -597,7 +597,7 @@ def _can_use(method):
     # OSError: [Errno 38] Function not implemented
     try:
         selector_obj = selector()
-        if method == 'poll':
+        if method == "poll":
             # check that poll actually works
             selector_obj.poll(0)
         else:
@@ -611,13 +611,13 @@ def _can_use(method):
 # Choose the best implementation, roughly:
 #    epoll|kqueue|devpoll > poll > select.
 # select() also can't accept a FD > FD_SETSIZE (usually around 1024)
-if _can_use('kqueue'):
+if _can_use("kqueue"):
     DefaultSelector = KqueueSelector
-elif _can_use('epoll'):
+elif _can_use("epoll"):
     DefaultSelector = EpollSelector
-elif _can_use('devpoll'):
+elif _can_use("devpoll"):
     DefaultSelector = DevpollSelector
-elif _can_use('poll'):
+elif _can_use("poll"):
     DefaultSelector = PollSelector
 else:
     DefaultSelector = SelectSelector

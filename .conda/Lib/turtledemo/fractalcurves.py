@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""      turtle-example-suite:
+"""turtle-example-suite:
 
         tdemo_fractalCurves.py
 
@@ -11,8 +11,10 @@ The CurvesTurtle class and the fractal-curve-
 methods are taken from the PythonCard example
 scripts for turtle-graphics.
 """
+
 from turtle import *
 from time import sleep, perf_counter as clock
+
 
 class CurvesTurtle(Pen):
     # example derived from
@@ -75,20 +77,21 @@ class CurvesTurtle(Pen):
         self.lt(60 * dir)
         self.fractal(dist / 3, depth - 1, dir)
 
+
 def main():
     ft = CurvesTurtle()
 
     ft.reset()
     ft.speed(0)
     ft.ht()
-    ft.getscreen().tracer(1,0)
+    ft.getscreen().tracer(1, 0)
     ft.pu()
 
     size = 6
-    ft.setpos(-33*size, -32*size)
+    ft.setpos(-33 * size, -32 * size)
     ft.pd()
 
-    ta=clock()
+    ta = clock()
     ft.fillcolor("red")
     ft.begin_fill()
     ft.fd(size)
@@ -99,27 +102,27 @@ def main():
     ft.fd(size)
     for i in range(3):
         ft.lt(90)
-        ft.fd(size*(64+i%2))
+        ft.fd(size * (64 + i % 2))
     ft.pu()
     for i in range(2):
         ft.fd(size)
         ft.rt(90)
     ft.pd()
     for i in range(4):
-        ft.fd(size*(66+i%2))
+        ft.fd(size * (66 + i % 2))
         ft.rt(90)
     ft.end_fill()
-    tb=clock()
-    res =  "Hilbert: %.2fsec. " % (tb-ta)
+    tb = clock()
+    res = "Hilbert: %.2fsec. " % (tb - ta)
 
     sleep(3)
 
     ft.reset()
     ft.speed(0)
     ft.ht()
-    ft.getscreen().tracer(1,0)
+    ft.getscreen().tracer(1, 0)
 
-    ta=clock()
+    ta = clock()
     ft.color("black", "blue")
     ft.begin_fill()
     ft.fractalgon(3, 250, 4, 1)
@@ -128,11 +131,12 @@ def main():
     ft.color("red")
     ft.fractalgon(3, 200, 4, -1)
     ft.end_fill()
-    tb=clock()
-    res +=  "Koch: %.2fsec." % (tb-ta)
+    tb = clock()
+    res += "Koch: %.2fsec." % (tb - ta)
     return res
 
-if __name__  == '__main__':
+
+if __name__ == "__main__":
     msg = main()
     print(msg)
     mainloop()

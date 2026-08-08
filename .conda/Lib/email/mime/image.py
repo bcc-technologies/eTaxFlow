@@ -4,7 +4,7 @@
 
 """Class representing image/* type MIME documents."""
 
-__all__ = ['MIMEImage']
+__all__ = ["MIMEImage"]
 
 from email import encoders
 from email.mime.nonmultipart import MIMENonMultipart
@@ -13,8 +13,15 @@ from email.mime.nonmultipart import MIMENonMultipart
 class MIMEImage(MIMENonMultipart):
     """Class for generating image/* type MIME documents."""
 
-    def __init__(self, _imagedata, _subtype=None,
-                 _encoder=encoders.encode_base64, *, policy=None, **_params):
+    def __init__(
+        self,
+        _imagedata,
+        _subtype=None,
+        _encoder=encoders.encode_base64,
+        *,
+        policy=None,
+        **_params,
+    ):
         """Create an image/* type MIME document.
 
         _imagedata contains the bytes for the raw image data.  If the data
@@ -36,9 +43,8 @@ class MIMEImage(MIMENonMultipart):
         """
         _subtype = _what(_imagedata) if _subtype is None else _subtype
         if _subtype is None:
-            raise TypeError('Could not guess image MIME subtype')
-        MIMENonMultipart.__init__(self, 'image', _subtype, policy=policy,
-                                  **_params)
+            raise TypeError("Could not guess image MIME subtype")
+        MIMENonMultipart.__init__(self, "image", _subtype, policy=policy, **_params)
         self.set_payload(_imagedata)
         _encoder(self)
 
@@ -63,90 +69,87 @@ def rule(rulefunc):
 @rule
 def _jpeg(h):
     """JPEG data with JFIF or Exif markers; and raw JPEG"""
-    if h[6:10] in (b'JFIF', b'Exif'):
-        return 'jpeg'
-    elif h[:4] == b'\xff\xd8\xff\xdb':
-        return 'jpeg'
+    if h[6:10] in (b"JFIF", b"Exif"):
+        return "jpeg"
+    elif h[:4] == b"\xff\xd8\xff\xdb":
+        return "jpeg"
 
 
 @rule
 def _png(h):
-    if h.startswith(b'\211PNG\r\n\032\n'):
-        return 'png'
+    if h.startswith(b"\211PNG\r\n\032\n"):
+        return "png"
 
 
 @rule
 def _gif(h):
     """GIF ('87 and '89 variants)"""
-    if h[:6] in (b'GIF87a', b'GIF89a'):
-        return 'gif'
+    if h[:6] in (b"GIF87a", b"GIF89a"):
+        return "gif"
 
 
 @rule
 def _tiff(h):
     """TIFF (can be in Motorola or Intel byte order)"""
-    if h[:2] in (b'MM', b'II'):
-        return 'tiff'
+    if h[:2] in (b"MM", b"II"):
+        return "tiff"
 
 
 @rule
 def _rgb(h):
     """SGI image library"""
-    if h.startswith(b'\001\332'):
-        return 'rgb'
+    if h.startswith(b"\001\332"):
+        return "rgb"
 
 
 @rule
 def _pbm(h):
     """PBM (portable bitmap)"""
-    if len(h) >= 3 and \
-            h[0] == ord(b'P') and h[1] in b'14' and h[2] in b' \t\n\r':
-        return 'pbm'
+    if len(h) >= 3 and h[0] == ord(b"P") and h[1] in b"14" and h[2] in b" \t\n\r":
+        return "pbm"
 
 
 @rule
 def _pgm(h):
     """PGM (portable graymap)"""
-    if len(h) >= 3 and \
-            h[0] == ord(b'P') and h[1] in b'25' and h[2] in b' \t\n\r':
-        return 'pgm'
+    if len(h) >= 3 and h[0] == ord(b"P") and h[1] in b"25" and h[2] in b" \t\n\r":
+        return "pgm"
 
 
 @rule
 def _ppm(h):
     """PPM (portable pixmap)"""
-    if len(h) >= 3 and \
-            h[0] == ord(b'P') and h[1] in b'36' and h[2] in b' \t\n\r':
-        return 'ppm'
+    if len(h) >= 3 and h[0] == ord(b"P") and h[1] in b"36" and h[2] in b" \t\n\r":
+        return "ppm"
 
 
 @rule
 def _rast(h):
     """Sun raster file"""
-    if h.startswith(b'\x59\xA6\x6A\x95'):
-        return 'rast'
+    if h.startswith(b"\x59\xa6\x6a\x95"):
+        return "rast"
 
 
 @rule
 def _xbm(h):
     """X bitmap (X10 or X11)"""
-    if h.startswith(b'#define '):
-        return 'xbm'
+    if h.startswith(b"#define "):
+        return "xbm"
 
 
 @rule
 def _bmp(h):
-    if h.startswith(b'BM'):
-        return 'bmp'
+    if h.startswith(b"BM"):
+        return "bmp"
 
 
 @rule
 def _webp(h):
-    if h.startswith(b'RIFF') and h[8:12] == b'WEBP':
-        return 'webp'
+    if h.startswith(b"RIFF") and h[8:12] == b"WEBP":
+        return "webp"
 
 
 @rule
 def _exr(h):
-    if h.startswith(b'\x76\x2f\x31\x01'):
-        return 'exr'
+    if h.startswith(b"\x76\x2f\x31\x01"):
+        return "exr"

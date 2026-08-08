@@ -1,10 +1,14 @@
 """asyncio exceptions."""
 
-
-__all__ = ('BrokenBarrierError',
-           'CancelledError', 'InvalidStateError', 'TimeoutError',
-           'IncompleteReadError', 'LimitOverrunError',
-           'SendfileNotAvailableError')
+__all__ = (
+    "BrokenBarrierError",
+    "CancelledError",
+    "InvalidStateError",
+    "TimeoutError",
+    "IncompleteReadError",
+    "LimitOverrunError",
+    "SendfileNotAvailableError",
+)
 
 
 class CancelledError(BaseException):
@@ -33,10 +37,12 @@ class IncompleteReadError(EOFError):
     - partial: read bytes string before the end of stream was reached
     - expected: total number of expected bytes (or None if unknown)
     """
+
     def __init__(self, partial, expected):
-        r_expected = 'undefined' if expected is None else repr(expected)
-        super().__init__(f'{len(partial)} bytes read on a total of '
-                         f'{r_expected} expected bytes')
+        r_expected = "undefined" if expected is None else repr(expected)
+        super().__init__(
+            f"{len(partial)} bytes read on a total of " f"{r_expected} expected bytes"
+        )
         self.partial = partial
         self.expected = expected
 
@@ -50,6 +56,7 @@ class LimitOverrunError(Exception):
     Attributes:
     - consumed: total number of to be consumed bytes.
     """
+
     def __init__(self, message, consumed):
         super().__init__(message)
         self.consumed = consumed

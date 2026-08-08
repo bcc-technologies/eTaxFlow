@@ -8,7 +8,7 @@ from .context import reduction, get_spawning_popen, set_spawning_popen
 from . import spawn
 from . import util
 
-__all__ = ['Popen']
+__all__ = ["Popen"]
 
 #
 #
@@ -16,12 +16,13 @@ __all__ = ['Popen']
 
 # Exit code used by Popen.terminate()
 TERMINATE = 0x10000
-WINEXE = (sys.platform == 'win32' and getattr(sys, 'frozen', False))
+WINEXE = sys.platform == "win32" and getattr(sys, "frozen", False)
 WINSERVICE = sys.executable.lower().endswith("pythonservice.exe")
 
 
 def _path_eq(p1, p2):
     return p1 == p2 or os.path.normcase(p1) == os.path.normcase(p2)
+
 
 WINENV = not _path_eq(sys.executable, sys._base_executable)
 
@@ -36,11 +37,13 @@ def _close_handles(*handles):
 # whose constructor takes a process object as its argument.
 #
 
+
 class Popen(object):
-    '''
+    """
     Start a subprocess to run the code of a process object
-    '''
-    method = 'spawn'
+    """
+
+    method = "spawn"
 
     def __init__(self, process_obj):
         prep_data = spawn.get_preparation_data(process_obj._name)
@@ -53,8 +56,7 @@ class Popen(object):
         # terminated before it could steal the handle from the parent process.
         rhandle, whandle = _winapi.CreatePipe(None, 0)
         wfd = msvcrt.open_osfhandle(whandle, 0)
-        cmd = spawn.get_command_line(parent_pid=os.getpid(),
-                                     pipe_handle=rhandle)
+        cmd = spawn.get_command_line(parent_pid=os.getpid(), pipe_handle=rhandle)
 
         python_exe = spawn.get_executable()
 
@@ -67,14 +69,14 @@ class Popen(object):
         else:
             env = None
 
-        cmd = ' '.join('"%s"' % x for x in cmd)
+        cmd = " ".join('"%s"' % x for x in cmd)
 
-        with open(wfd, 'wb', closefd=True) as to_child:
+        with open(wfd, "wb", closefd=True) as to_child:
             # start process
             try:
                 hp, ht, pid, tid = _winapi.CreateProcess(
-                    python_exe, cmd,
-                    None, None, False, 0, env, None, None)
+                    python_exe, cmd, None, None, False, 0, env, None, None
+                )
                 _winapi.CloseHandle(ht)
             except:
                 _winapi.CloseHandle(rhandle)
@@ -85,8 +87,9 @@ class Popen(object):
             self.returncode = None
             self._handle = hp
             self.sentinel = int(hp)
-            self.finalizer = util.Finalize(self, _close_handles,
-                                           (self.sentinel, int(rhandle)))
+            self.finalizer = util.Finalize(
+                self, _close_handles, (self.sentinel, int(rhandle))
+            )
 
             # send information to child
             set_spawning_popen(self)

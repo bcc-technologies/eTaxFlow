@@ -47,8 +47,7 @@ def editable_opts(request):
 
 
 EXAMPLE = {
-    'pyproject.toml': dedent(
-        """\
+    "pyproject.toml": dedent("""\
         [build-system]
         requires = ["setuptools"]
         build-backend = "setuptools.build_meta"
@@ -75,22 +74,18 @@ EXAMPLE = {
 
         [tool.distutils.egg_info]
         tag-build = ".post0"
-        """
-    ),
-    "MANIFEST.in": dedent(
-        """\
+        """),
+    "MANIFEST.in": dedent("""\
         global-include *.py *.txt
         global-exclude *.py[cod]
         prune dist
         prune build
-        """
-    ).strip(),
+        """).strip(),
     "README.rst": "This is a ``README``",
     "LICENSE.txt": "---- placeholder MIT license ----",
     "src": {
         "mypkg": {
-            "__init__.py": dedent(
-                """\
+            "__init__.py": dedent("""\
                 import sys
                 from importlib.metadata import PackageNotFoundError, version
 
@@ -98,18 +93,15 @@ EXAMPLE = {
                     __version__ = version(__name__)
                 except PackageNotFoundError:
                     __version__ = "unknown"
-                """
-            ),
-            "__main__.py": dedent(
-                """\
+                """),
+            "__main__.py": dedent("""\
                 from importlib.resources import read_text
                 from . import __version__, __name__ as parent
                 from .mod import x
 
                 data = read_text(parent, "data.txt")
                 print(__version__, data, x)
-                """
-            ),
+                """),
             "mod.py": "x = ''",
             "data.txt": "Hello World",
         }
@@ -156,8 +148,7 @@ def test_editable_with_pyproject(tmp_path, venv, files, editable_opts):
 def test_editable_with_flat_layout(tmp_path, venv, editable_opts):
     files = {
         "mypkg": {
-            "pyproject.toml": dedent(
-                """\
+            "pyproject.toml": dedent("""\
                 [build-system]
                 requires = ["setuptools", "wheel"]
                 build-backend = "setuptools.build_meta"
@@ -169,8 +160,7 @@ def test_editable_with_flat_layout(tmp_path, venv, editable_opts):
                 [tool.setuptools]
                 packages = ["pkg"]
                 py-modules = ["mod"]
-                """
-            ),
+                """),
             "pkg": {"__init__.py": "a = 4"},
             "mod.py": "b = 2",
         },
@@ -196,8 +186,7 @@ def test_editable_with_flat_layout(tmp_path, venv, editable_opts):
 def test_editable_with_single_module(tmp_path, venv, editable_opts):
     files = {
         "mypkg": {
-            "pyproject.toml": dedent(
-                """\
+            "pyproject.toml": dedent("""\
                 [build-system]
                 requires = ["setuptools", "wheel"]
                 build-backend = "setuptools.build_meta"
@@ -208,8 +197,7 @@ def test_editable_with_single_module(tmp_path, venv, editable_opts):
 
                 [tool.setuptools]
                 py-modules = ["mod"]
-                """
-            ),
+                """),
             "mod.py": "b = 2",
         },
     }
@@ -304,8 +292,8 @@ class TestPep420Namespaces:
         normally using pip and the other installed in editable mode
         should allow importing both packages.
         """
-        pkg_A = namespaces.build_pep420_namespace_package(tmp_path, 'myns.n.pkgA')
-        pkg_B = namespaces.build_pep420_namespace_package(tmp_path, 'myns.n.pkgB')
+        pkg_A = namespaces.build_pep420_namespace_package(tmp_path, "myns.n.pkgA")
+        pkg_B = namespaces.build_pep420_namespace_package(tmp_path, "myns.n.pkgB")
         # use pip to install to the target directory
         opts = editable_opts[:]
         opts.append("--no-build-isolation")  # force current version of setuptools
@@ -317,8 +305,7 @@ class TestPep420Namespaces:
         """Currently users can create a namespace by tweaking `package_dir`"""
         files = {
             "pkgA": {
-                "pyproject.toml": dedent(
-                    """\
+                "pyproject.toml": dedent("""\
                     [build-system]
                     requires = ["setuptools", "wheel"]
                     build-backend = "setuptools.build_meta"
@@ -329,15 +316,14 @@ class TestPep420Namespaces:
 
                     [tool.setuptools]
                     package-dir = {"myns.n.pkgA" = "src"}
-                    """
-                ),
+                    """),
                 "src": {"__init__.py": "a = 1"},
             },
         }
         jaraco.path.build(files, prefix=tmp_path)
         pkg_A = tmp_path / "pkgA"
-        pkg_B = namespaces.build_pep420_namespace_package(tmp_path, 'myns.n.pkgB')
-        pkg_C = namespaces.build_pep420_namespace_package(tmp_path, 'myns.n.pkgC')
+        pkg_B = namespaces.build_pep420_namespace_package(tmp_path, "myns.n.pkgB")
+        pkg_C = namespaces.build_pep420_namespace_package(tmp_path, "myns.n.pkgC")
 
         # use pip to install to the target directory
         opts = editable_opts[:]
@@ -355,8 +341,7 @@ class TestPep420Namespaces:
         """
         files = {
             "pkgA": {
-                "pyproject.toml": dedent(
-                    """\
+                "pyproject.toml": dedent("""\
                     [build-system]
                     requires = ["setuptools", "wheel"]
                     build-backend = "setuptools.build_meta"
@@ -367,8 +352,7 @@ class TestPep420Namespaces:
 
                     [tool.setuptools]
                     packages.find.include = ["mypkg.*"]
-                    """
-                ),
+                    """),
                 "mypkg": {
                     "__init__.py": "",
                     "other.py": "b = 1",
@@ -402,13 +386,13 @@ def test_editable_with_prefix(tmp_path, sample_project, editable_opts):
     """
     Editable install to a prefix should be discoverable.
     """
-    prefix = tmp_path / 'prefix'
+    prefix = tmp_path / "prefix"
 
     # figure out where pip will likely install the package
     site_packages_all = [
         prefix / Path(path).relative_to(sys.prefix)
         for path in sys.path
-        if 'site-packages' in path and path.startswith(sys.prefix)
+        if "site-packages" in path and path.startswith(sys.prefix)
     ]
 
     for sp in site_packages_all:
@@ -420,21 +404,21 @@ def test_editable_with_prefix(tmp_path, sample_project, editable_opts):
     env = dict(os.environ, PYTHONPATH=os.pathsep.join(map(str, site_packages_all)))
     cmd = [
         sys.executable,
-        '-m',
-        'pip',
-        'install',
-        '--editable',
+        "-m",
+        "pip",
+        "install",
+        "--editable",
         str(sample_project),
-        '--prefix',
+        "--prefix",
         str(prefix),
-        '--no-build-isolation',
+        "--no-build-isolation",
         *editable_opts,
     ]
     subprocess.check_call(cmd, env=env)
 
     # now run 'sample' with the prefix on the PYTHONPATH
-    bin = 'Scripts' if platform.system() == 'Windows' else 'bin'
-    exe = prefix / bin / 'sample'
+    bin = "Scripts" if platform.system() == "Windows" else "bin"
+    exe = prefix / bin / "sample"
     subprocess.check_call([exe], env=env)
 
 
@@ -867,16 +851,13 @@ class TestOverallBehaviour:
             "src": {"mypkg": FLAT_LAYOUT["mypkg"]},
         },
         "custom-layout": {
-            "pyproject.toml": dedent(PYPROJECT)
-            + dedent(
-                """\
+            "pyproject.toml": dedent(PYPROJECT) + dedent("""\
                 [tool.setuptools]
                 packages = ["mypkg", "mypkg.subpackage"]
 
                 [tool.setuptools.package-dir]
                 "mypkg.subpackage" = "other"
-                """
-            ),
+                """),
             "MANIFEST.in": EXAMPLE["MANIFEST.in"],
             "otherfile.py": "",
             "mypkg": {
@@ -953,8 +934,7 @@ class TestOverallBehaviour:
 
 class TestLinkTree:
     FILES = deepcopy(TestOverallBehaviour.EXAMPLES["src-layout"])
-    FILES["pyproject.toml"] += dedent(
-        """\
+    FILES["pyproject.toml"] += dedent("""\
         [tool.setuptools]
         # Temporary workaround: both `include-package-data` and `package-data` configs
         # can be removed after #3260 is fixed.
@@ -964,8 +944,7 @@ class TestLinkTree:
         [tool.setuptools.packages.find]
         where = ["src"]
         exclude = ["*.subpackage*"]
-        """
-    )
+        """)
     FILES["src"]["mypkg"]["resource.not_in_manifest"] = "abc"
 
     def test_generated_tree(self, tmp_path):
@@ -1071,12 +1050,12 @@ def test_compat_install(tmp_path, venv):
 def test_pbr_integration(pbr_package, venv, editable_opts):
     """Ensure editable installs work with pbr, issue #3500"""
     cmd = [
-        'python',
-        '-m',
-        'pip',
-        '-v',
-        'install',
-        '--editable',
+        "python",
+        "-m",
+        "pip",
+        "-v",
+        "install",
+        "--editable",
         pbr_package,
         *editable_opts,
     ]
@@ -1100,8 +1079,7 @@ class TestCustomBuildPy:
 
     FILES = {
         **TestOverallBehaviour.EXAMPLES["flat-layout"],
-        "setup.py": dedent(
-            """\
+        "setup.py": dedent("""\
             import pathlib
             from setuptools import setup
             from setuptools.command.build_py import build_py as orig
@@ -1112,8 +1090,7 @@ class TestCustomBuildPy:
                     raise ValueError("TEST_RAISE")
 
             setup(cmdclass={"build_py": my_build_py})
-            """
-        ),
+            """),
     }
 
     def test_safeguarded_from_errors(self, tmp_path, venv):
@@ -1152,7 +1129,7 @@ class TestCustomBuildWheel:
         cmd = editable_wheel(dist)
         cmd.ensure_finalized()
         cmd.run()
-        wheel_file = str(next(Path().glob('dist/*.whl')))
+        wheel_file = str(next(Path().glob("dist/*.whl")))
         assert "editable" in wheel_file
 
 
@@ -1180,7 +1157,7 @@ class TestCustomBuildExt:
         cmd = editable_wheel(dist)
         cmd.ensure_finalized()
         cmd.run()
-        wheel_file = str(next(Path().glob('dist/*.whl')))
+        wheel_file = str(next(Path().glob("dist/*.whl")))
         assert "editable" in wheel_file
         files = [p for p in Path().glob("module.*") if p.suffix != ".c"]
         assert len(files) == 1
@@ -1203,7 +1180,7 @@ def test_debugging_tips(tmpdir_cwd, monkeypatch):
 
     with pytest.raises(SimulatedErr) as ctx:
         cmd.run()
-    assert any('debugging-tips' in note for note in ctx.value.__notes__)
+    assert any("debugging-tips" in note for note in ctx.value.__notes__)
 
 
 @pytest.mark.filterwarnings("error")
@@ -1231,7 +1208,7 @@ def _addsitedirs(new_dirs):
     If we manipulate sys.path/PYTHONPATH, we can force it to run our code,
     which invokes ``addsitedir`` and ensure ``.pth`` files are loaded.
     """
-    content = '\n'.join(
+    content = "\n".join(
         ("import site",)
         + tuple(f"site.addsitedir({os.fspath(new_dir)!r})" for new_dir in new_dirs)
     )

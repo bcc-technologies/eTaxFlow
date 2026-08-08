@@ -17,34 +17,42 @@ def any(name, alternates):
 def make_pat():
     kw = r"\b" + any("KEYWORD", keyword.kwlist) + r"\b"
     match_softkw = (
-        r"^[ \t]*" +  # at beginning of line + possible indentation
-        r"(?P<MATCH_SOFTKW>match)\b" +
-        r"(?![ \t]*(?:" + "|".join([  # not followed by ...
-            r"[:,;=^&|@~)\]}]",  # a character which means it can't be a
-                                 # pattern-matching statement
-            r"\b(?:" + r"|".join(keyword.kwlist) + r")\b",  # a keyword
-        ]) +
-        r"))"
+        r"^[ \t]*"  # at beginning of line + possible indentation
+        + r"(?P<MATCH_SOFTKW>match)\b"
+        + r"(?![ \t]*(?:"
+        + "|".join(
+            [  # not followed by ...
+                r"[:,;=^&|@~)\]}]",  # a character which means it can't be a
+                # pattern-matching statement
+                r"\b(?:" + r"|".join(keyword.kwlist) + r")\b",  # a keyword
+            ]
+        )
+        + r"))"
     )
     case_default = (
-        r"^[ \t]*" +  # at beginning of line + possible indentation
-        r"(?P<CASE_SOFTKW>case)" +
-        r"[ \t]+(?P<CASE_DEFAULT_UNDERSCORE>_\b)"
+        r"^[ \t]*"  # at beginning of line + possible indentation
+        + r"(?P<CASE_SOFTKW>case)"
+        + r"[ \t]+(?P<CASE_DEFAULT_UNDERSCORE>_\b)"
     )
     case_softkw_and_pattern = (
-        r"^[ \t]*" +  # at beginning of line + possible indentation
-        r"(?P<CASE_SOFTKW2>case)\b" +
-        r"(?![ \t]*(?:" + "|".join([  # not followed by ...
-            r"_\b",  # a lone underscore
-            r"[:,;=^&|@~)\]}]",  # a character which means it can't be a
-                                 # pattern-matching case
-            r"\b(?:" + r"|".join(keyword.kwlist) + r")\b",  # a keyword
-        ]) +
-        r"))"
+        r"^[ \t]*"  # at beginning of line + possible indentation
+        + r"(?P<CASE_SOFTKW2>case)\b"
+        + r"(?![ \t]*(?:"
+        + "|".join(
+            [  # not followed by ...
+                r"_\b",  # a lone underscore
+                r"[:,;=^&|@~)\]}]",  # a character which means it can't be a
+                # pattern-matching case
+                r"\b(?:" + r"|".join(keyword.kwlist) + r")\b",  # a keyword
+            ]
+        )
+        + r"))"
     )
-    builtinlist = [str(name) for name in dir(builtins)
-                   if not name.startswith('_') and
-                   name not in keyword.kwlist]
+    builtinlist = [
+        str(name)
+        for name in dir(builtins)
+        if not name.startswith("_") and name not in keyword.kwlist
+    ]
     builtin = r"([^.'\"\\#]\b|^)" + any("BUILTIN", builtinlist) + r"\b"
     comment = any("COMMENT", [r"#[^\n]*"])
     stringprefix = r"(?i:r|u|f|fr|rf|b|br|rb)?"
@@ -53,13 +61,21 @@ def make_pat():
     sq3string = stringprefix + r"'''[^'\\]*((\\.|'(?!''))[^'\\]*)*(''')?"
     dq3string = stringprefix + r'"""[^"\\]*((\\.|"(?!""))[^"\\]*)*(""")?'
     string = any("STRING", [sq3string, dq3string, sqstring, dqstring])
-    prog = re.compile("|".join([
-                                builtin, comment, string, kw,
-                                match_softkw, case_default,
-                                case_softkw_and_pattern,
-                                any("SYNC", [r"\n"]),
-                               ]),
-                      re.DOTALL | re.MULTILINE)
+    prog = re.compile(
+        "|".join(
+            [
+                builtin,
+                comment,
+                string,
+                kw,
+                match_softkw,
+                case_default,
+                case_softkw_and_pattern,
+                any("SYNC", [r"\n"]),
+            ]
+        ),
+        re.DOTALL | re.MULTILINE,
+    )
     return prog
 
 
@@ -86,17 +102,17 @@ def color_config(text):
     # Called from htest, TextFrame, Editor, and Turtledemo.
     # Not automatic because ColorDelegator does not know 'text'.
     theme = idleConf.CurrentTheme()
-    normal_colors = idleConf.GetHighlight(theme, 'normal')
-    cursor_color = idleConf.GetHighlight(theme, 'cursor')['foreground']
-    select_colors = idleConf.GetHighlight(theme, 'hilite')
+    normal_colors = idleConf.GetHighlight(theme, "normal")
+    cursor_color = idleConf.GetHighlight(theme, "cursor")["foreground"]
+    select_colors = idleConf.GetHighlight(theme, "hilite")
     text.config(
-        foreground=normal_colors['foreground'],
-        background=normal_colors['background'],
+        foreground=normal_colors["foreground"],
+        background=normal_colors["background"],
         insertbackground=cursor_color,
-        selectforeground=select_colors['foreground'],
-        selectbackground=select_colors['background'],
-        inactiveselectbackground=select_colors['background'],  # new in 8.5
-        )
+        selectforeground=select_colors["foreground"],
+        selectbackground=select_colors["background"],
+        inactiveselectbackground=select_colors["background"],  # new in 8.5
+    )
 
 
 class ColorDelegator(Delegator):
@@ -156,7 +172,7 @@ class ColorDelegator(Delegator):
         "Configure text widget tags with colors from tagdefs."
         for tag, cnf in self.tagdefs.items():
             self.tag_configure(tag, **cnf)
-        self.tag_raise('sel')
+        self.tag_raise("sel")
 
     def LoadTagDefs(self):
         "Create dictionary of tag names to text colors."
@@ -167,16 +183,17 @@ class ColorDelegator(Delegator):
             "BUILTIN": idleConf.GetHighlight(theme, "builtin"),
             "STRING": idleConf.GetHighlight(theme, "string"),
             "DEFINITION": idleConf.GetHighlight(theme, "definition"),
-            "SYNC": {'background': None, 'foreground': None},
-            "TODO": {'background': None, 'foreground': None},
+            "SYNC": {"background": None, "foreground": None},
+            "TODO": {"background": None, "foreground": None},
             "ERROR": idleConf.GetHighlight(theme, "error"),
             # "hit" is used by ReplaceDialog to mark matches. It shouldn't be changed by Colorizer, but
             # that currently isn't technically possible. This should be moved elsewhere in the future
             # when fixing the "hit" tag's visibility, or when the replace dialog is replaced with a
             # non-modal alternative.
             "hit": idleConf.GetHighlight(theme, "hit"),
-            }
-        if DEBUG: print('tagdefs', self.tagdefs)
+        }
+        if DEBUG:
+            print("tagdefs", self.tagdefs)
 
     def insert(self, index, chars, tags=None):
         "Insert chars into widget at index and mark for colorizing."
@@ -194,13 +211,16 @@ class ColorDelegator(Delegator):
         "Mark text changes for processing and restart colorizing, if active."
         self.tag_add("TODO", index1, index2)
         if self.after_id:
-            if DEBUG: print("colorizing already scheduled")
+            if DEBUG:
+                print("colorizing already scheduled")
             return
         if self.colorizing:
             self.stop_colorizing = True
-            if DEBUG: print("stop colorizing")
+            if DEBUG:
+                print("stop colorizing")
         if self.allow_colorizing:
-            if DEBUG: print("schedule colorizing")
+            if DEBUG:
+                print("schedule colorizing")
             self.after_id = self.after(1, self.recolorize)
         return
 
@@ -208,7 +228,8 @@ class ColorDelegator(Delegator):
         if self.after_id:
             after_id = self.after_id
             self.after_id = None
-            if DEBUG: print("cancel scheduled recolorizer")
+            if DEBUG:
+                print("cancel scheduled recolorizer")
             self.after_cancel(after_id)
         self.allow_colorizing = False
         self.stop_colorizing = True
@@ -224,17 +245,18 @@ class ColorDelegator(Delegator):
         if self.after_id:
             after_id = self.after_id
             self.after_id = None
-            if DEBUG: print("cancel scheduled recolorizer")
+            if DEBUG:
+                print("cancel scheduled recolorizer")
             self.after_cancel(after_id)
         if self.allow_colorizing and self.colorizing:
-            if DEBUG: print("stop colorizing")
+            if DEBUG:
+                print("stop colorizing")
             self.stop_colorizing = True
         self.allow_colorizing = not self.allow_colorizing
         if self.allow_colorizing and not self.colorizing:
             self.after_id = self.after(1, self.recolorize)
         if DEBUG:
-            print("auto colorizing turned",
-                  "on" if self.allow_colorizing else "off")
+            print("auto colorizing turned", "on" if self.allow_colorizing else "off")
         return "break"
 
     def recolorize(self):
@@ -249,26 +271,32 @@ class ColorDelegator(Delegator):
         """
         self.after_id = None
         if not self.delegate:
-            if DEBUG: print("no delegate")
+            if DEBUG:
+                print("no delegate")
             return
         if not self.allow_colorizing:
-            if DEBUG: print("auto colorizing is off")
+            if DEBUG:
+                print("auto colorizing is off")
             return
         if self.colorizing:
-            if DEBUG: print("already colorizing")
+            if DEBUG:
+                print("already colorizing")
             return
         try:
             self.stop_colorizing = False
             self.colorizing = True
-            if DEBUG: print("colorizing...")
+            if DEBUG:
+                print("colorizing...")
             t0 = time.perf_counter()
             self.recolorize_main()
             t1 = time.perf_counter()
-            if DEBUG: print("%.3f seconds" % (t1-t0))
+            if DEBUG:
+                print("%.3f seconds" % (t1 - t0))
         finally:
             self.colorizing = False
         if self.allow_colorizing and self.tag_nextrange("TODO", "1.0"):
-            if DEBUG: print("reschedule colorizing")
+            if DEBUG:
+                print("reschedule colorizing")
             self.after_id = self.after(1, self.recolorize)
 
     def recolorize_main(self):
@@ -285,8 +313,7 @@ class ColorDelegator(Delegator):
             ok = False
             while not ok:
                 mark = next
-                next = self.index(mark + "+%d lines linestart" %
-                                         lines_to_get)
+                next = self.index(mark + "+%d lines linestart" % lines_to_get)
                 lines_to_get = min(lines_to_get * 2, 100)
                 ok = "SYNC" in self.tag_names(next + "-1c")
                 line = self.get(mark, next)
@@ -312,7 +339,8 @@ class ColorDelegator(Delegator):
                     self.tag_add("TODO", next)
                 self.update_idletasks()
                 if self.stop_colorizing:
-                    if DEBUG: print("colorizing stopped")
+                    if DEBUG:
+                        print("colorizing stopped")
                     return
 
     def _add_tag(self, start, end, head, matched_group_name):
@@ -326,11 +354,8 @@ class ColorDelegator(Delegator):
         the name of a regular expression "named group" as matched by
         by the relevant highlighting regexps.
         """
-        tag = prog_group_name_to_tag.get(matched_group_name,
-                                         matched_group_name)
-        self.tag_add(tag,
-                     f"{head}+{start:d}c",
-                     f"{head}+{end:d}c")
+        tag = prog_group_name_to_tag.get(matched_group_name, matched_group_name)
+        self.tag_add(tag, f"{head}+{start:d}c", f"{head}+{end:d}c")
 
     def _add_tags_in_section(self, chars, head):
         """Parse and add highlighting tags to a given part of the text.
@@ -362,7 +387,7 @@ def _color_delegator(parent):  # htest #
 
     top = Toplevel(parent)
     top.title("Test ColorDelegator")
-    x, y = map(int, parent.geometry().split('+')[1:])
+    x, y = map(int, parent.geometry().split("+")[1:])
     top.geometry("700x550+%d+%d" % (x + 20, y + 175))
 
     text = Text(top, background="white")
@@ -378,7 +403,9 @@ def _color_delegator(parent):  # htest #
 
 if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_colorizer', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_colorizer", verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
+
     run(_color_delegator)

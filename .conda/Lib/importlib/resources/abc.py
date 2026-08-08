@@ -7,7 +7,6 @@ from typing import Any, BinaryIO, Iterable, Iterator, NoReturn, Text, Optional
 from typing import runtime_checkable, Protocol
 from typing import Union
 
-
 StrPath = Union[str, os.PathLike[str]]
 
 __all__ = ["ResourceReader", "Traversable", "TraversableResources"]
@@ -79,7 +78,7 @@ class Traversable(Protocol):
         """
         Read contents of self as bytes
         """
-        with self.open('rb') as strm:
+        with self.open("rb") as strm:
             return strm.read()
 
     def read_text(self, encoding: Optional[str] = None) -> str:
@@ -133,7 +132,7 @@ class Traversable(Protocol):
         return self.joinpath(child)
 
     @abc.abstractmethod
-    def open(self, mode='r', *args, **kwargs):
+    def open(self, mode="r", *args, **kwargs):
         """
         mode may be 'r' or 'rb' to open as text or binary. Return a handle
         suitable for reading (same as pathlib.Path.open).
@@ -161,7 +160,7 @@ class TraversableResources(ResourceReader):
         """Return a Traversable object for the loaded package."""
 
     def open_resource(self, resource: StrPath) -> io.BufferedReader:
-        return self.files().joinpath(resource).open('rb')
+        return self.files().joinpath(resource).open("rb")
 
     def resource_path(self, resource: Any) -> NoReturn:
         raise FileNotFoundError(resource)

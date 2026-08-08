@@ -1,60 +1,62 @@
 """Fix incompatible imports and module references."""
+
 # Authors: Collin Winter, Nick Edds
 
 # Local imports
 from .. import fixer_base
 from ..fixer_util import Name, attr_chain
 
-MAPPING = {'StringIO':  'io',
-           'cStringIO': 'io',
-           'cPickle': 'pickle',
-           '__builtin__' : 'builtins',
-           'copy_reg': 'copyreg',
-           'Queue': 'queue',
-           'SocketServer': 'socketserver',
-           'ConfigParser': 'configparser',
-           'repr': 'reprlib',
-           'FileDialog': 'tkinter.filedialog',
-           'tkFileDialog': 'tkinter.filedialog',
-           'SimpleDialog': 'tkinter.simpledialog',
-           'tkSimpleDialog': 'tkinter.simpledialog',
-           'tkColorChooser': 'tkinter.colorchooser',
-           'tkCommonDialog': 'tkinter.commondialog',
-           'Dialog': 'tkinter.dialog',
-           'Tkdnd': 'tkinter.dnd',
-           'tkFont': 'tkinter.font',
-           'tkMessageBox': 'tkinter.messagebox',
-           'ScrolledText': 'tkinter.scrolledtext',
-           'Tkconstants': 'tkinter.constants',
-           'Tix': 'tkinter.tix',
-           'ttk': 'tkinter.ttk',
-           'Tkinter': 'tkinter',
-           'markupbase': '_markupbase',
-           '_winreg': 'winreg',
-           'thread': '_thread',
-           'dummy_thread': '_dummy_thread',
-           # anydbm and whichdb are handled by fix_imports2
-           'dbhash': 'dbm.bsd',
-           'dumbdbm': 'dbm.dumb',
-           'dbm': 'dbm.ndbm',
-           'gdbm': 'dbm.gnu',
-           'xmlrpclib': 'xmlrpc.client',
-           'DocXMLRPCServer': 'xmlrpc.server',
-           'SimpleXMLRPCServer': 'xmlrpc.server',
-           'httplib': 'http.client',
-           'htmlentitydefs' : 'html.entities',
-           'HTMLParser' : 'html.parser',
-           'Cookie': 'http.cookies',
-           'cookielib': 'http.cookiejar',
-           'BaseHTTPServer': 'http.server',
-           'SimpleHTTPServer': 'http.server',
-           'CGIHTTPServer': 'http.server',
-           #'test.test_support': 'test.support',
-           'commands': 'subprocess',
-           'UserString' : 'collections',
-           'UserList' : 'collections',
-           'urlparse' : 'urllib.parse',
-           'robotparser' : 'urllib.robotparser',
+MAPPING = {
+    "StringIO": "io",
+    "cStringIO": "io",
+    "cPickle": "pickle",
+    "__builtin__": "builtins",
+    "copy_reg": "copyreg",
+    "Queue": "queue",
+    "SocketServer": "socketserver",
+    "ConfigParser": "configparser",
+    "repr": "reprlib",
+    "FileDialog": "tkinter.filedialog",
+    "tkFileDialog": "tkinter.filedialog",
+    "SimpleDialog": "tkinter.simpledialog",
+    "tkSimpleDialog": "tkinter.simpledialog",
+    "tkColorChooser": "tkinter.colorchooser",
+    "tkCommonDialog": "tkinter.commondialog",
+    "Dialog": "tkinter.dialog",
+    "Tkdnd": "tkinter.dnd",
+    "tkFont": "tkinter.font",
+    "tkMessageBox": "tkinter.messagebox",
+    "ScrolledText": "tkinter.scrolledtext",
+    "Tkconstants": "tkinter.constants",
+    "Tix": "tkinter.tix",
+    "ttk": "tkinter.ttk",
+    "Tkinter": "tkinter",
+    "markupbase": "_markupbase",
+    "_winreg": "winreg",
+    "thread": "_thread",
+    "dummy_thread": "_dummy_thread",
+    # anydbm and whichdb are handled by fix_imports2
+    "dbhash": "dbm.bsd",
+    "dumbdbm": "dbm.dumb",
+    "dbm": "dbm.ndbm",
+    "gdbm": "dbm.gnu",
+    "xmlrpclib": "xmlrpc.client",
+    "DocXMLRPCServer": "xmlrpc.server",
+    "SimpleXMLRPCServer": "xmlrpc.server",
+    "httplib": "http.client",
+    "htmlentitydefs": "html.entities",
+    "HTMLParser": "html.parser",
+    "Cookie": "http.cookies",
+    "cookielib": "http.cookiejar",
+    "BaseHTTPServer": "http.server",
+    "SimpleHTTPServer": "http.server",
+    "CGIHTTPServer": "http.server",
+    #'test.test_support': 'test.support',
+    "commands": "subprocess",
+    "UserString": "collections",
+    "UserList": "collections",
+    "urlparse": "urllib.parse",
+    "robotparser": "urllib.robotparser",
 }
 
 
@@ -63,7 +65,7 @@ def alternates(members):
 
 
 def build_pattern(mapping=MAPPING):
-    mod_list = ' | '.join(["module_name='%s'" % key for key in mapping])
+    mod_list = " | ".join(["module_name='%s'" % key for key in mapping])
     bare_names = alternates(mapping.keys())
 
     yield """name_import=import_name< 'import' ((%s) |
@@ -109,8 +111,9 @@ class FixImports(fixer_base.BaseFix):
         if results:
             # Module usage could be in the trailer of an attribute lookup, so we
             # might have nested matches when "bare_with_attr" is present.
-            if "bare_with_attr" not in results and \
-                    any(match(obj) for obj in attr_chain(node, "parent")):
+            if "bare_with_attr" not in results and any(
+                match(obj) for obj in attr_chain(node, "parent")
+            ):
                 return False
             return results
         return False

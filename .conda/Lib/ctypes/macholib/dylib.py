@@ -4,7 +4,7 @@ Generic dylib path manipulation
 
 import re
 
-__all__ = ['dylib_info']
+__all__ = ["dylib_info"]
 
 DYLIB_RE = re.compile(r"""(?x)
 (?P<location>^.*)(?:^|/)
@@ -15,6 +15,7 @@ DYLIB_RE = re.compile(r"""(?x)
     \.dylib$
 )
 """)
+
 
 def dylib_info(filename):
     """

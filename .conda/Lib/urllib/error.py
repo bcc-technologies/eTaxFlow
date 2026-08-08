@@ -10,10 +10,11 @@ responses, with a status code, headers, and a body.  In some contexts,
 an application may want to handle an exception like a regular
 response.
 """
+
 import io
 import urllib.response
 
-__all__ = ['URLError', 'HTTPError', 'ContentTooShortError']
+__all__ = ["URLError", "HTTPError", "ContentTooShortError"]
 
 
 class URLError(OSError):
@@ -23,17 +24,18 @@ class URLError(OSError):
     # subclasses, but args doesn't have the typical format with errno in
     # slot 0 and strerror in slot 1.  This may be better than nothing.
     def __init__(self, reason, filename=None):
-        self.args = reason,
+        self.args = (reason,)
         self.reason = reason
         if filename is not None:
             self.filename = filename
 
     def __str__(self):
-        return '<urlopen error %s>' % self.reason
+        return "<urlopen error %s>" % self.reason
 
 
 class HTTPError(URLError, urllib.response.addinfourl):
     """Raised when HTTP error occurs, but also acts like non-error return"""
+
     __super_init = urllib.response.addinfourl.__init__
 
     def __init__(self, url, code, msg, hdrs, fp):
@@ -47,10 +49,10 @@ class HTTPError(URLError, urllib.response.addinfourl):
         self.__super_init(fp, hdrs, url, code)
 
     def __str__(self):
-        return 'HTTP Error %s: %s' % (self.code, self.msg)
+        return "HTTP Error %s: %s" % (self.code, self.msg)
 
     def __repr__(self):
-        return '<HTTPError %s: %r>' % (self.code, self.msg)
+        return "<HTTPError %s: %r>" % (self.code, self.msg)
 
     # since URLError specifies a .reason attribute, HTTPError should also
     #  provide this attribute. See issue13211 for discussion.
@@ -69,6 +71,7 @@ class HTTPError(URLError, urllib.response.addinfourl):
 
 class ContentTooShortError(URLError):
     """Exception raised when downloaded size does not match content-length."""
+
     def __init__(self, message, content):
         URLError.__init__(self, message)
         self.content = content

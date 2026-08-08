@@ -2,7 +2,7 @@
 # as part of the release process.
 
 topics = {
-    'assert': r'''The "assert" statement
+    "assert": r"""The "assert" statement
 **********************
 
 Assert statements are a convenient way to insert debugging assertions
@@ -32,8 +32,8 @@ part of the stack trace.
 
 Assignments to "__debug__" are illegal.  The value for the built-in
 variable is determined when the interpreter starts.
-''',
-    'assignment': r'''Assignment statements
+""",
+    "assignment": r"""Assignment statements
 *********************
 
 Assignment statements are used to (re)bind names to values and to
@@ -284,8 +284,8 @@ Changed in version 3.8: Now annotated assignments allow the same
 expressions in the right hand side as regular assignments. Previously,
 some expressions (like un-parenthesized tuple expressions) caused a
 syntax error.
-''',
-    'async': r'''Coroutines
+""",
+    "async": r"""Coroutines
 **********
 
 Added in version 3.5.
@@ -401,8 +401,8 @@ See also:
   **PEP 492** - Coroutines with async and await syntax
      The proposal that made coroutines a proper standalone concept in
      Python, and added supporting syntax.
-''',
-    'atom-identifiers': r'''Identifiers (Names)
+""",
+    "atom-identifiers": r"""Identifiers (Names)
 *******************
 
 An identifier occurring as an atom is a name.  See section Identifiers
@@ -455,8 +455,8 @@ The transformation rule is defined as follows:
 * If the class name consists only of underscores, the transformation
   is the identity, e.g., the identifier "__spam" occurring in a class
   named "_" or "__" is left as is.
-''',
-    'atom-literals': r'''Literals
+""",
+    "atom-literals": r"""Literals
 ********
 
 Python supports string and bytes literals and various numeric
@@ -475,8 +475,8 @@ object’s identity is less important than its value.  Multiple
 evaluations of literals with the same value (either the same
 occurrence in the program text or a different occurrence) may obtain
 the same object or a different object with the same value.
-''',
-    'attribute-access': r'''Customizing attribute access
+""",
+    "attribute-access": r"""Customizing attribute access
 ****************************
 
 The following methods can be defined to customize the meaning of
@@ -806,8 +806,8 @@ Notes on using *__slots__*:
 * If an *iterator* is used for *__slots__* then a *descriptor* is
   created for each of the iterator’s values. However, the *__slots__*
   attribute will be an empty iterator.
-''',
-    'attribute-references': r'''Attribute references
+""",
+    "attribute-references": r"""Attribute references
 ********************
 
 An attribute reference is a primary followed by a period and a name:
@@ -827,8 +827,8 @@ or raises "AttributeError" if the attribute is not available.
 
 If an "AttributeError" is raised and the object has a "__getattr__()"
 method, that method is called as a fallback.
-''',
-    'augassign': r'''Augmented assignment statements
+""",
+    "augassign": r"""Augmented assignment statements
 *******************************
 
 Augmented assignment is the combination, in a single statement, of a
@@ -869,8 +869,8 @@ binary operations.
 
 For targets which are attribute references, the same caveat about
 class and instance attributes applies as for regular assignments.
-''',
-    'await': r'''Await expression
+""",
+    "await": r"""Await expression
 ****************
 
 Suspend the execution of *coroutine* on an *awaitable* object. Can
@@ -879,8 +879,8 @@ only be used inside a *coroutine function*.
    await_expr ::= "await" primary
 
 Added in version 3.5.
-''',
-    'binary': r'''Binary arithmetic operations
+""",
+    "binary": r"""Binary arithmetic operations
 ****************************
 
 The binary arithmetic operations have the conventional priority
@@ -965,8 +965,8 @@ The numeric arguments are first converted to a common type.
 
 This operation can be customized using the special "__sub__()" and
 "__rsub__()" methods.
-''',
-    'bitwise': r'''Binary bitwise operations
+""",
+    "bitwise": r"""Binary bitwise operations
 *************************
 
 Each of the three bitwise operations has a different priority level:
@@ -986,8 +986,8 @@ object overriding "__xor__()" or "__rxor__()" special methods.
 The "|" operator yields the bitwise (inclusive) OR of its arguments,
 which must be integers or one of them must be a custom object
 overriding "__or__()" or "__ror__()" special methods.
-''',
-    'bltin-code-objects': r'''Code Objects
+""",
+    "bltin-code-objects": r"""Code Objects
 ************
 
 Code objects are used by the implementation to represent “pseudo-
@@ -1004,8 +1004,8 @@ A code object can be executed or evaluated by passing it (instead of a
 source string) to the "exec()" or "eval()"  built-in functions.
 
 See The standard type hierarchy for more information.
-''',
-    'bltin-ellipsis-object': r'''The Ellipsis Object
+""",
+    "bltin-ellipsis-object": r"""The Ellipsis Object
 *******************
 
 This object is commonly used by slicing (see Slicings).  It supports
@@ -1014,8 +1014,8 @@ no special operations.  There is exactly one ellipsis object, named
 "Ellipsis" singleton.
 
 It is written as "Ellipsis" or "...".
-''',
-    'bltin-null-object': r'''The Null Object
+""",
+    "bltin-null-object": r"""The Null Object
 ***************
 
 This object is returned by functions that don’t explicitly return a
@@ -1024,8 +1024,8 @@ object, named "None" (a built-in name).  "type(None)()" produces the
 same singleton.
 
 It is written as "None".
-''',
-    'bltin-type-objects': r'''Type Objects
+""",
+    "bltin-type-objects": r"""Type Objects
 ************
 
 Type objects represent the various object types.  An object’s type is
@@ -1034,8 +1034,8 @@ operations on types.  The standard module "types" defines names for
 all standard built-in types.
 
 Types are written like this: "<class 'int'>".
-''',
-    'booleans': r'''Boolean operations
+""",
+    "booleans": r"""Boolean operations
 ******************
 
    or_test  ::= and_test | or_test "or" and_test
@@ -1068,8 +1068,8 @@ should be replaced by a default value if it is empty, the expression
 "s or 'foo'" yields the desired value.  Because "not" has to create a
 new value, it returns a boolean value regardless of the type of its
 argument (for example, "not 'foo'" produces "False" rather than "''".)
-''',
-    'break': r'''The "break" statement
+""",
+    "break": r"""The "break" statement
 *********************
 
    break_stmt ::= "break"
@@ -1087,8 +1087,8 @@ keeps its current value.
 When "break" passes control out of a "try" statement with a "finally"
 clause, that "finally" clause is executed before really leaving the
 loop.
-''',
-    'callable-types': r'''Emulating callable objects
+""",
+    "callable-types": r"""Emulating callable objects
 **************************
 
 object.__call__(self[, args...])
@@ -1097,8 +1097,8 @@ object.__call__(self[, args...])
    is defined, "x(arg1, arg2, ...)" roughly translates to
    "type(x).__call__(x, arg1, ...)". The "object" class itself does
    not provide this method.
-''',
-    'calls': r'''Calls
+""",
+    "calls": r"""Calls
 *****
 
 A call calls a callable object (e.g., a *function*) with a possibly
@@ -1250,8 +1250,8 @@ a class instance method:
 a class instance:
    The class must define a "__call__()" method; the effect is then the
    same as if that method was called.
-''',
-    'class': r'''Class definitions
+""",
+    "class": r"""Class definitions
 *****************
 
 A class definition defines a class object (see section The standard
@@ -1338,8 +1338,8 @@ See also:
   **PEP 3129** - Class Decorators
      The proposal that added class decorators.  Function and method
      decorators were introduced in **PEP 318**.
-''',
-    'comparisons': r'''Comparisons
+""",
+    "comparisons": r'''Comparisons
 ***********
 
 Unlike C, all comparison operations in Python have the same priority,
@@ -1580,7 +1580,7 @@ y" is true if and only if *x* and *y* are the same object.  An
 Object’s identity is determined using the "id()" function.  "x is not
 y" yields the inverse truth value. [4]
 ''',
-    'compound': r'''Compound statements
+    "compound": r"""Compound statements
 *******************
 
 Compound statements contain (groups of) other statements; they affect
@@ -3289,8 +3289,8 @@ actually bound at runtime.
 [5] A string literal appearing as the first statement in the class
     body is transformed into the namespace’s "__doc__" item and
     therefore the class’s *docstring*.
-''',
-    'context-managers': r'''With Statement Context Managers
+""",
+    "context-managers": r"""With Statement Context Managers
 *******************************
 
 A *context manager* is an object that defines the runtime context to
@@ -3334,8 +3334,8 @@ See also:
   **PEP 343** - The “with” statement
      The specification, background, and examples for the Python "with"
      statement.
-''',
-    'continue': r'''The "continue" statement
+""",
+    "continue": r"""The "continue" statement
 ************************
 
    continue_stmt ::= "continue"
@@ -3347,8 +3347,8 @@ loop.  It continues with the next cycle of the nearest enclosing loop.
 When "continue" passes control out of a "try" statement with a
 "finally" clause, that "finally" clause is executed before really
 starting the next loop cycle.
-''',
-    'conversions': r'''Arithmetic conversions
+""",
+    "conversions": r"""Arithmetic conversions
 **********************
 
 When a description of an arithmetic operator below uses the phrase
@@ -3366,8 +3366,8 @@ that the operator implementation for built-in types works as follows:
 Some additional rules apply for certain operators (e.g., a string as a
 left argument to the ‘%’ operator).  Extensions must define their own
 conversion behavior.
-''',
-    'customization': r'''Basic customization
+""",
+    "customization": r"""Basic customization
 *******************
 
 object.__new__(cls[, ...])
@@ -3675,8 +3675,8 @@ object.__bool__(self)
    considered true if its result is nonzero.  If a class defines
    neither "__len__()" nor "__bool__()" (which is true of the "object"
    class itself), all its instances are considered true.
-''',
-    'debugger': r'''"pdb" — The Python Debugger
+""",
+    "debugger": r""""pdb" — The Python Debugger
 ***************************
 
 **Source code:** Lib/pdb.py
@@ -4307,8 +4307,8 @@ retval
 
 [1] Whether a frame is considered to originate in a certain module is
     determined by the "__name__" in the frame globals.
-''',
-    'del': r'''The "del" statement
+""",
+    "del": r"""The "del" statement
 *******************
 
    del_stmt ::= "del" target_list
@@ -4333,8 +4333,8 @@ this is determined by the sliced object).
 Changed in version 3.2: Previously it was illegal to delete a name
 from the local namespace if it occurs as a free variable in a nested
 block.
-''',
-    'dict': r'''Dictionary displays
+""",
+    "dict": r"""Dictionary displays
 *******************
 
 A dictionary display is a possibly empty series of dict items
@@ -4378,8 +4378,8 @@ Changed in version 3.8: Prior to Python 3.8, in dict comprehensions,
 the evaluation order of key and value was not well-defined.  In
 CPython, the value was evaluated before the key.  Starting with 3.8,
 the key is evaluated before the value, as proposed by **PEP 572**.
-''',
-    'dynamic-features': r'''Interaction with dynamic features
+""",
+    "dynamic-features": r"""Interaction with dynamic features
 *********************************
 
 Name resolution of free variables occurs at runtime, not at compile
@@ -4398,8 +4398,8 @@ in the nearest enclosing namespace, but in the global namespace.  [1]
 The "exec()" and "eval()" functions have optional arguments to
 override the global and local namespace.  If only one namespace is
 specified, it is used for both.
-''',
-    'else': r'''The "if" statement
+""",
+    "else": r"""The "if" statement
 ******************
 
 The "if" statement is used for conditional execution:
@@ -4414,8 +4414,8 @@ for the definition of true and false); then that suite is executed
 (and no other part of the "if" statement is executed or evaluated).
 If all expressions are false, the suite of the "else" clause, if
 present, is executed.
-''',
-    'exceptions': r'''Exceptions
+""",
+    "exceptions": r"""Exceptions
 **********
 
 Exceptions are a means of breaking out of the normal flow of control
@@ -4464,8 +4464,8 @@ statement and "raise" statement in section The raise statement.
 
 [1] This limitation occurs because the code that is executed by these
     operations is not available at the time the module is compiled.
-''',
-    'execmodel': r'''Execution model
+""",
+    "execmodel": r"""Execution model
 ***************
 
 
@@ -4810,8 +4810,8 @@ statement and "raise" statement in section The raise statement.
 
 [1] This limitation occurs because the code that is executed by these
     operations is not available at the time the module is compiled.
-''',
-    'exprlists': r'''Expression lists
+""",
+    "exprlists": r"""Expression lists
 ****************
 
    starred_expression       ::= ["*"] or_expr
@@ -4842,8 +4842,8 @@ A trailing comma is required only to create a one-item tuple, such as
 trailing comma doesn’t create a tuple, but rather yields the value of
 that expression. (To create an empty tuple, use an empty pair of
 parentheses: "()".)
-''',
-    'floating': r'''Floating-point literals
+""",
+    "floating": r"""Floating-point literals
 ***********************
 
 Floating-point literals are described by the following lexical
@@ -4868,8 +4868,8 @@ Some examples of floating-point literals:
 
 Changed in version 3.6: Underscores are now allowed for grouping
 purposes in literals.
-''',
-    'for': r'''The "for" statement
+""",
+    "for": r"""The "for" statement
 *******************
 
 The "for" statement is used to iterate over the elements of a sequence
@@ -4911,8 +4911,8 @@ immutable arithmetic sequences of integers. For instance, iterating
 
 Changed in version 3.11: Starred elements are now allowed in the
 expression list.
-''',
-    'formatstrings': r'''Format String Syntax
+""",
+    "formatstrings": r"""Format String Syntax
 ********************
 
 The "str.format()" method and the "Formatter" class share the same
@@ -5446,8 +5446,8 @@ Nesting arguments and more complex examples:
        9     9    11  1001
       10     A    12  1010
       11     B    13  1011
-''',
-    'function': r'''Function definitions
+""",
+    "function": r"""Function definitions
 ********************
 
 A function definition defines a user-defined function object (see
@@ -5606,8 +5606,8 @@ See also:
   **PEP 318** - Decorators for Functions and Methods
      Function and method decorators were introduced. Class decorators
      were introduced in **PEP 3129**.
-''',
-    'global': r'''The "global" statement
+""",
+    "global": r"""The "global" statement
 **********************
 
    global_stmt ::= "global" identifier ("," identifier)*
@@ -5629,8 +5629,8 @@ affect the code block *containing* the function call, and code
 contained in such a string is unaffected by "global" statements in the
 code containing the function call.  The same applies to the "eval()"
 and "compile()" functions.
-''',
-    'id-classes': r'''Reserved classes of identifiers
+""",
+    "id-classes": r"""Reserved classes of identifiers
 *******************************
 
 Certain classes of identifiers (besides keywords) have special
@@ -5672,8 +5672,8 @@ trailing underscore characters:
    context of a class definition, are re-written to use a mangled form
    to help avoid name clashes between “private” attributes of base and
    derived classes. See section Identifiers (Names).
-''',
-    'identifiers': r'''Identifiers and keywords
+""",
+    "identifiers": r"""Identifiers and keywords
 ************************
 
 Identifiers (also referred to as *names*) are described by the
@@ -5812,8 +5812,8 @@ trailing underscore characters:
    context of a class definition, are re-written to use a mangled form
    to help avoid name clashes between “private” attributes of base and
    derived classes. See section Identifiers (Names).
-''',
-    'if': r'''The "if" statement
+""",
+    "if": r"""The "if" statement
 ******************
 
 The "if" statement is used for conditional execution:
@@ -5828,8 +5828,8 @@ for the definition of true and false); then that suite is executed
 (and no other part of the "if" statement is executed or evaluated).
 If all expressions are false, the suite of the "else" clause, if
 present, is executed.
-''',
-    'imaginary': r'''Imaginary literals
+""",
+    "imaginary": r"""Imaginary literals
 ******************
 
 Imaginary literals are described by the following lexical definitions:
@@ -5843,8 +5843,8 @@ number with a nonzero real part, add a floating-point number to it,
 e.g., "(3+4j)".  Some examples of imaginary literals:
 
    3.14j   10.j    10j     .001j   1e100j   3.14e-10j   3.14_15_93j
-''',
-    'import': r'''The "import" statement
+""",
+    "import": r"""The "import" statement
 **********************
 
    import_stmt     ::= "import" module ["as" identifier] ("," module ["as" identifier])*
@@ -6044,8 +6044,8 @@ See also:
 
   **PEP 236** - Back to the __future__
      The original proposal for the __future__ mechanism.
-''',
-    'in': r'''Membership test operations
+""",
+    "in": r'''Membership test operations
 **************************
 
 The operators "in" and "not in" test for membership.  "x in s"
@@ -6081,7 +6081,7 @@ exception is raised, it is as if "in" raised that exception).
 The operator "not in" is defined to have the inverse truth value of
 "in".
 ''',
-    'integers': r'''Integer literals
+    "integers": r"""Integer literals
 ****************
 
 Integer literals are described by the following lexical definitions:
@@ -6117,8 +6117,8 @@ Some examples of integer literals:
 
 Changed in version 3.6: Underscores are now allowed for grouping
 purposes in literals.
-''',
-    'lambda': r'''Lambdas
+""",
+    "lambda": r"""Lambdas
 *******
 
    lambda_expr ::= "lambda" [parameter_list] ":" expression
@@ -6134,8 +6134,8 @@ object defined with:
 See section Function definitions for the syntax of parameter lists.
 Note that functions created with lambda expressions cannot contain
 statements or annotations.
-''',
-    'lists': r'''List displays
+""",
+    "lists": r"""List displays
 *************
 
 A list display is a possibly empty series of expressions enclosed in
@@ -6149,8 +6149,8 @@ separated list of expressions is supplied, its elements are evaluated
 from left to right and placed into the list object in that order.
 When a comprehension is supplied, the list is constructed from the
 elements resulting from the comprehension.
-''',
-    'naming': r'''Naming and binding
+""",
+    "naming": r"""Naming and binding
 ******************
 
 
@@ -6419,8 +6419,8 @@ in the nearest enclosing namespace, but in the global namespace.  [1]
 The "exec()" and "eval()" functions have optional arguments to
 override the global and local namespace.  If only one namespace is
 specified, it is used for both.
-''',
-    'nonlocal': r'''The "nonlocal" statement
+""",
+    "nonlocal": r"""The "nonlocal" statement
 ************************
 
    nonlocal_stmt ::= "nonlocal" identifier ("," identifier)*
@@ -6446,8 +6446,8 @@ See also:
 **Programmer’s note:** "nonlocal" is a directive to the parser and
 applies only to code parsed along with it.  See the note for the
 "global" statement.
-''',
-    'numbers': r'''Numeric literals
+""",
+    "numbers": r"""Numeric literals
 ****************
 
 There are three types of numeric literals: integers, floating-point
@@ -6458,8 +6458,8 @@ imaginary number).
 Note that numeric literals do not include a sign; a phrase like "-1"
 is actually an expression composed of the unary operator ‘"-"’ and the
 literal "1".
-''',
-    'numeric-types': r'''Emulating numeric types
+""",
+    "numeric-types": r"""Emulating numeric types
 ***********************
 
 The following methods can be defined to emulate numeric objects.
@@ -6605,8 +6605,8 @@ object.__ceil__(self)
 
    Changed in version 3.11: The delegation of "int()" to "__trunc__()"
    is deprecated.
-''',
-    'objects': r'''Objects, values and types
+""",
+    "objects": r"""Objects, values and types
 *************************
 
 *Objects* are Python’s abstraction for data.  All data in a Python
@@ -6696,8 +6696,8 @@ identity tests. However, after "c = []; d = []", *c* and *d* are
 guaranteed to refer to two different, unique, newly created empty
 lists. (Note that "e = f = []" assigns the *same* object to both *e*
 and *f*.)
-''',
-    'operator-summary': r'''Operator precedence
+""",
+    "operator-summary": r"""Operator precedence
 *******************
 
 The following table summarizes the operator precedence in Python, from
@@ -6807,8 +6807,8 @@ described in the Comparisons section.
 
 [6] The "%" operator is also used for string formatting; the same
     precedence applies.
-''',
-    'pass': r'''The "pass" statement
+""",
+    "pass": r"""The "pass" statement
 ********************
 
    pass_stmt ::= "pass"
@@ -6820,8 +6820,8 @@ but no code needs to be executed, for example:
    def f(arg): pass    # a function that does nothing (yet)
 
    class C: pass       # a class with no methods (yet)
-''',
-    'power': r'''The power operator
+""",
+    "power": r"""The power operator
 ******************
 
 The power operator binds more tightly than unary operators on its
@@ -6850,8 +6850,8 @@ number. (In earlier versions it raised a "ValueError".)
 
 This operation can be customized using the special "__pow__()" and
 "__rpow__()" methods.
-''',
-    'raise': r'''The "raise" statement
+""",
+    "raise": r"""The "raise" statement
 *********************
 
    raise_stmt ::= "raise" [expression ["from" expression]]
@@ -6952,8 +6952,8 @@ Changed in version 3.11: If the traceback of the active exception is
 modified in an "except" clause, a subsequent "raise" statement re-
 raises the exception with the modified traceback. Previously, the
 exception was re-raised with the traceback it had when it was caught.
-''',
-    'return': r'''The "return" statement
+""",
+    "return": r"""The "return" statement
 **********************
 
    return_stmt ::= "return" [expression_list]
@@ -6980,8 +6980,8 @@ In an asynchronous generator function, an empty "return" statement
 indicates that the asynchronous generator is done and will cause
 "StopAsyncIteration" to be raised.  A non-empty "return" statement is
 a syntax error in an asynchronous generator function.
-''',
-    'sequence-types': r'''Emulating container types
+""",
+    "sequence-types": r"""Emulating container types
 *************************
 
 The following methods can be defined to implement container objects.
@@ -7134,8 +7134,8 @@ object.__contains__(self, item)
    first tries iteration via "__iter__()", then the old sequence
    iteration protocol via "__getitem__()", see this section in the
    language reference.
-''',
-    'shifting': r'''Shifting operations
+""",
+    "shifting": r"""Shifting operations
 *******************
 
 The shifting operations have lower priority than the arithmetic
@@ -7154,8 +7154,8 @@ methods.
 
 A right shift by *n* bits is defined as floor division by "pow(2,n)".
 A left shift by *n* bits is defined as multiplication with "pow(2,n)".
-''',
-    'slicings': r'''Slicings
+""",
+    "slicings": r"""Slicings
 ********
 
 A slicing selects a range of items in a sequence object (e.g., a
@@ -7189,8 +7189,8 @@ slice object (see section The standard type hierarchy) whose "start",
 "stop" and "step" attributes are the values of the expressions given
 as lower bound, upper bound and stride, respectively, substituting
 "None" for missing expressions.
-''',
-    'specialattrs': r'''Special Attributes
+""",
+    "specialattrs": r"""Special Attributes
 ******************
 
 The implementation adds a few special read-only attributes to several
@@ -7225,8 +7225,8 @@ definition.__type_params__
    be an empty tuple.
 
    Added in version 3.12.
-''',
-    'specialnames': r'''Special method names
+""",
+    "specialnames": r'''Special method names
 ********************
 
 A class can implement certain operations that are invoked by special
@@ -8832,7 +8832,7 @@ the cost of some flexibility in the handling of special methods (the
 special method *must* be set on the class object itself in order to be
 consistently invoked by the interpreter).
 ''',
-    'string-methods': r'''String Methods
+    "string-methods": r"""String Methods
 **************
 
 Strings implement all of the common sequence operations, along with
@@ -9504,8 +9504,8 @@ str.zfill(width)
       '00042'
       >>> "-42".zfill(5)
       '-0042'
-''',
-    'strings': '''String and Bytes literals
+""",
+    "strings": '''String and Bytes literals
 *************************
 
 String literals are described by the following lexical definitions:
@@ -9686,7 +9686,7 @@ the following quote character).  Note also that a single backslash
 followed by a newline is interpreted as those two characters as part
 of the literal, *not* as a line continuation.
 ''',
-    'subscriptions': r'''Subscriptions
+    "subscriptions": r"""Subscriptions
 *************
 
 The subscription of an instance of a container class will generally
@@ -9742,8 +9742,8 @@ explicitly add that support.
 A "string" is a special kind of sequence whose items are *characters*.
 A character is not a separate data type but a string of exactly one
 character.
-''',
-    'truth': r'''Truth Value Testing
+""",
+    "truth": r"""Truth Value Testing
 *******************
 
 Any object can be tested for truth value, for use in an "if" or
@@ -9766,8 +9766,8 @@ Operations and built-in functions that have a Boolean result always
 return "0" or "False" for false and "1" or "True" for true, unless
 otherwise stated. (Important exception: the Boolean operations "or"
 and "and" always return one of their operands.)
-''',
-    'try': r'''The "try" statement
+""",
+    "try": r"""The "try" statement
 *******************
 
 The "try" statement specifies exception handlers and/or cleanup code
@@ -9980,8 +9980,8 @@ last one executed:
 Changed in version 3.8: Prior to Python 3.8, a "continue" statement
 was illegal in the "finally" clause due to a problem with the
 implementation.
-''',
-    'types': r'''The standard type hierarchy
+""",
+    "types": r"""The standard type hierarchy
 ***************************
 
 Below is a list of the types that are built into Python.  Extension
@@ -11262,8 +11262,8 @@ retrieved from classes and class instances. The behaviour of class
 method objects upon such retrieval is described above, under “instance
 methods”. Class method objects are created by the built-in
 "classmethod()" constructor.
-''',
-    'typesfunctions': r'''Functions
+""",
+    "typesfunctions": r"""Functions
 *********
 
 Function objects are created by function definitions.  The only
@@ -11275,8 +11275,8 @@ the function), but the implementation is different, hence the
 different object types.
 
 See Function definitions for more information.
-''',
-    'typesmapping': r'''Mapping Types — "dict"
+""",
+    "typesmapping": r"""Mapping Types — "dict"
 **********************
 
 A *mapping* object maps *hashable* values to arbitrary objects.
@@ -11661,8 +11661,8 @@ An example of dictionary view usage:
    mappingproxy({'bacon': 1, 'spam': 500})
    >>> values.mapping['spam']
    500
-''',
-    'typesmethods': r'''Methods
+""",
+    "typesmethods": r"""Methods
 *******
 
 Methods are functions that are called using the attribute notation.
@@ -11701,8 +11701,8 @@ underlying function object:
    'my name is method'
 
 See Instance methods for more information.
-''',
-    'typesmodules': r'''Modules
+""",
+    "typesmodules": r"""Modules
 *******
 
 The only special operation on a module is attribute access: "m.name",
@@ -11724,8 +11724,8 @@ recommended.
 Modules built into the interpreter are written like this: "<module
 'sys' (built-in)>".  If loaded from a file, they are written as
 "<module 'os' from '/usr/local/lib/pythonX.Y/os.pyc'>".
-''',
-    'typesseq': r'''Sequence Types — "list", "tuple", "range"
+""",
+    "typesseq": r"""Sequence Types — "list", "tuple", "range"
 *****************************************
 
 There are three basic sequence types: lists, tuples, and range
@@ -12231,8 +12231,8 @@ See also:
 
   * The linspace recipe shows how to implement a lazy version of range
     suitable for floating-point applications.
-''',
-    'typesseq-mutable': r'''Mutable Sequence Types
+""",
+    "typesseq-mutable": r"""Mutable Sequence Types
 **********************
 
 The operations in the following table are defined on mutable sequence
@@ -12320,8 +12320,8 @@ Notes:
    "__index__()".  Zero and negative values of *n* clear the sequence.
    Items in the sequence are not copied; they are referenced multiple
    times, as explained for "s * n" under Common Sequence Operations.
-''',
-    'unary': r'''Unary arithmetic and bitwise operations
+""",
+    "unary": r"""Unary arithmetic and bitwise operations
 ***************************************
 
 All unary arithmetic and bitwise operations have the same priority:
@@ -12342,8 +12342,8 @@ that override the "__invert__()" special method.
 
 In all three cases, if the argument does not have the proper type, a
 "TypeError" exception is raised.
-''',
-    'while': r'''The "while" statement
+""",
+    "while": r"""The "while" statement
 *********************
 
 The "while" statement is used for repeated execution as long as an
@@ -12361,8 +12361,8 @@ A "break" statement executed in the first suite terminates the loop
 without executing the "else" clause’s suite.  A "continue" statement
 executed in the first suite skips the rest of the suite and goes back
 to testing the expression.
-''',
-    'with': r'''The "with" statement
+""",
+    "with": r"""The "with" statement
 ********************
 
 The "with" statement is used to wrap the execution of a block with
@@ -12469,8 +12469,8 @@ See also:
   **PEP 343** - The “with” statement
      The specification, background, and examples for the Python "with"
      statement.
-''',
-    'yield': r'''The "yield" statement
+""",
+    "yield": r"""The "yield" statement
 *********************
 
    yield_stmt ::= yield_expression
@@ -12496,5 +12496,5 @@ normal function.
 
 For full details of "yield" semantics, refer to the Yield expressions
 section.
-''',
+""",
 }

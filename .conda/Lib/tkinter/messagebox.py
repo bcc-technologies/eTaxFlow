@@ -24,9 +24,16 @@
 
 from tkinter.commondialog import Dialog
 
-__all__ = ["showinfo", "showwarning", "showerror",
-           "askquestion", "askokcancel", "askyesno",
-           "askyesnocancel", "askretrycancel"]
+__all__ = [
+    "showinfo",
+    "showwarning",
+    "showerror",
+    "askquestion",
+    "askokcancel",
+    "askyesno",
+    "askyesnocancel",
+    "askretrycancel",
+]
 
 #
 # constants
@@ -58,21 +65,27 @@ NO = "no"
 #
 # message dialog class
 
+
 class Message(Dialog):
     "A message box"
 
-    command  = "tk_messageBox"
+    command = "tk_messageBox"
 
 
 #
 # convenience stuff
 
+
 # Rename _icon and _type options to allow overriding them in options
 def _show(title=None, message=None, _icon=None, _type=None, **options):
-    if _icon and "icon" not in options:    options["icon"] = _icon
-    if _type and "type" not in options:    options["type"] = _type
-    if title:   options["title"] = title
-    if message: options["message"] = message
+    if _icon and "icon" not in options:
+        options["icon"] = _icon
+    if _type and "type" not in options:
+        options["type"] = _type
+    if title:
+        options["title"] = title
+    if message:
+        options["message"] = message
     res = Message(**options).show()
     # In some Tcl installations, yes/no is converted into a boolean.
     if isinstance(res, bool):

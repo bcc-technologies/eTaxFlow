@@ -30,9 +30,16 @@ from tkinter import messagebox
 
 class SimpleDialog:
 
-    def __init__(self, master,
-                 text='', buttons=[], default=None, cancel=None,
-                 title=None, class_=None):
+    def __init__(
+        self,
+        master,
+        text="",
+        buttons=[],
+        default=None,
+        cancel=None,
+        title=None,
+        class_=None,
+    ):
         if class_:
             self.root = Toplevel(master, class_=class_)
         else:
@@ -50,15 +57,16 @@ class SimpleDialog:
         self.num = default
         self.cancel = cancel
         self.default = default
-        self.root.bind('<Return>', self.return_event)
+        self.root.bind("<Return>", self.return_event)
         for num in range(len(buttons)):
             s = buttons[num]
-            b = Button(self.frame, text=s,
-                       command=(lambda self=self, num=num: self.done(num)))
+            b = Button(
+                self.frame, text=s, command=(lambda self=self, num=num: self.done(num))
+            )
             if num == default:
                 b.config(relief=RIDGE, borderwidth=8)
             b.pack(side=LEFT, fill=BOTH, expand=1)
-        self.root.protocol('WM_DELETE_WINDOW', self.wm_delete_window)
+        self.root.protocol("WM_DELETE_WINDOW", self.wm_delete_window)
         self.root.transient(master)
         _place_window(self.root, master)
 
@@ -87,28 +95,27 @@ class SimpleDialog:
 
 
 class Dialog(Toplevel):
-
-    '''Class to open dialogs.
+    """Class to open dialogs.
 
     This class is intended as a base class for custom dialogs
-    '''
+    """
 
-    def __init__(self, parent, title = None):
-        '''Initialize a dialog.
+    def __init__(self, parent, title=None):
+        """Initialize a dialog.
 
         Arguments:
 
             parent -- a parent window (the application window)
 
             title -- the dialog title
-        '''
+        """
         master = parent
         if master is None:
             master = _get_temp_root()
 
         Toplevel.__init__(self, master)
 
-        self.withdraw() # remain invisible for now
+        self.withdraw()  # remain invisible for now
         # If the parent is not viewable, don't
         # make the child transient, or else it
         # would be opened withdrawn
@@ -145,7 +152,7 @@ class Dialog(Toplevel):
         self.wait_window(self)
 
     def destroy(self):
-        '''Destroy the window'''
+        """Destroy the window"""
         self.initial_focus = None
         Toplevel.destroy(self)
         _destroy_temp_root(self.master)
@@ -154,19 +161,19 @@ class Dialog(Toplevel):
     # construction hooks
 
     def body(self, master):
-        '''create dialog body.
+        """create dialog body.
 
         return widget that should have initial focus.
         This method should be overridden, and is called
         by the __init__ method.
-        '''
+        """
         pass
 
     def buttonbox(self):
-        '''add standard button box.
+        """add standard button box.
 
         override if you do not want the standard buttons
-        '''
+        """
 
         box = Frame(self)
 
@@ -186,7 +193,7 @@ class Dialog(Toplevel):
     def ok(self, event=None):
 
         if not self.validate():
-            self.initial_focus.focus_set() # put focus back
+            self.initial_focus.focus_set()  # put focus back
             return
 
         self.withdraw()
@@ -208,29 +215,29 @@ class Dialog(Toplevel):
     # command hooks
 
     def validate(self):
-        '''validate the data
+        """validate the data
 
         This method is called automatically to validate the data before the
         dialog is destroyed. By default, it always validates OK.
-        '''
+        """
 
-        return 1 # override
+        return 1  # override
 
     def apply(self):
-        '''process the data
+        """process the data
 
         This method is called automatically to process the data, *after*
         the dialog is destroyed. By default, it does nothing.
-        '''
+        """
 
-        pass # override
+        pass  # override
 
 
 # Place a toplevel window at the center of parent or screen
 # It is a Python implementation of ::tk::PlaceWindow.
 def _place_window(w, parent=None):
-    w.wm_withdraw() # Remain invisible while we figure out the geometry
-    w.update_idletasks() # Actualize geometry information
+    w.wm_withdraw()  # Remain invisible while we figure out the geometry
+    w.update_idletasks()  # Actualize geometry information
 
     minwidth = w.winfo_reqwidth()
     minheight = w.winfo_reqheight()
@@ -245,7 +252,7 @@ def _place_window(w, parent=None):
         x = max(x, vrootx)
         y = min(y, vrooty + maxheight - minheight)
         y = max(y, vrooty)
-        if w._windowingsystem == 'aqua':
+        if w._windowingsystem == "aqua":
             # Avoid the native menu bar which sits on top of everything.
             y = max(y, 22)
     else:
@@ -253,28 +260,34 @@ def _place_window(w, parent=None):
         y = (w.winfo_screenheight() - minheight) // 2
 
     w.wm_maxsize(maxwidth, maxheight)
-    w.wm_geometry('+%d+%d' % (x, y))
-    w.wm_deiconify() # Become visible at the desired location
+    w.wm_geometry("+%d+%d" % (x, y))
+    w.wm_deiconify()  # Become visible at the desired location
 
 
 def _setup_dialog(w):
     if w._windowingsystem == "aqua":
-        w.tk.call("::tk::unsupported::MacWindowStyle", "style",
-                  w, "moveableModal", "")
+        w.tk.call("::tk::unsupported::MacWindowStyle", "style", w, "moveableModal", "")
     elif w._windowingsystem == "x11":
         w.wm_attributes("-type", "dialog")
+
 
 # --------------------------------------------------------------------
 # convenience dialogues
 
+
 class _QueryDialog(Dialog):
 
-    def __init__(self, title, prompt,
-                 initialvalue=None,
-                 minvalue = None, maxvalue = None,
-                 parent = None):
+    def __init__(
+        self,
+        title,
+        prompt,
+        initialvalue=None,
+        minvalue=None,
+        maxvalue=None,
+        parent=None,
+    ):
 
-        self.prompt   = prompt
+        self.prompt = prompt
         self.minvalue = minvalue
         self.maxvalue = maxvalue
 
@@ -292,7 +305,7 @@ class _QueryDialog(Dialog):
         w.grid(row=0, padx=5, sticky=W)
 
         self.entry = Entry(master, name="entry")
-        self.entry.grid(row=1, padx=5, sticky=W+E)
+        self.entry.grid(row=1, padx=5, sticky=W + E)
 
         if self.initialvalue is not None:
             self.entry.insert(0, self.initialvalue)
@@ -305,27 +318,23 @@ class _QueryDialog(Dialog):
             result = self.getresult()
         except ValueError:
             messagebox.showwarning(
-                "Illegal value",
-                self.errormessage + "\nPlease try again",
-                parent = self
+                "Illegal value", self.errormessage + "\nPlease try again", parent=self
             )
             return 0
 
         if self.minvalue is not None and result < self.minvalue:
             messagebox.showwarning(
                 "Too small",
-                "The allowed minimum value is %s. "
-                "Please try again." % self.minvalue,
-                parent = self
+                "The allowed minimum value is %s. " "Please try again." % self.minvalue,
+                parent=self,
             )
             return 0
 
         if self.maxvalue is not None and result > self.maxvalue:
             messagebox.showwarning(
                 "Too large",
-                "The allowed maximum value is %s. "
-                "Please try again." % self.maxvalue,
-                parent = self
+                "The allowed maximum value is %s. " "Please try again." % self.maxvalue,
+                parent=self,
             )
             return 0
 
@@ -342,7 +351,7 @@ class _QueryInteger(_QueryDialog):
 
 
 def askinteger(title, prompt, **kw):
-    '''get an integer from the user
+    """get an integer from the user
 
     Arguments:
 
@@ -351,7 +360,7 @@ def askinteger(title, prompt, **kw):
         **kw -- see SimpleDialog class
 
     Return value is an integer
-    '''
+    """
     d = _QueryInteger(title, prompt, **kw)
     return d.result
 
@@ -364,7 +373,7 @@ class _QueryFloat(_QueryDialog):
 
 
 def askfloat(title, prompt, **kw):
-    '''get a float from the user
+    """get a float from the user
 
     Arguments:
 
@@ -373,7 +382,7 @@ def askfloat(title, prompt, **kw):
         **kw -- see SimpleDialog class
 
     Return value is a float
-    '''
+    """
     d = _QueryFloat(title, prompt, **kw)
     return d.result
 
@@ -398,7 +407,7 @@ class _QueryString(_QueryDialog):
 
 
 def askstring(title, prompt, **kw):
-    '''get a string from the user
+    """get a string from the user
 
     Arguments:
 
@@ -407,34 +416,37 @@ def askstring(title, prompt, **kw):
         **kw -- see SimpleDialog class
 
     Return value is a string
-    '''
+    """
     d = _QueryString(title, prompt, **kw)
     return d.result
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     def test():
         root = Tk()
+
         def doit(root=root):
-            d = SimpleDialog(root,
-                         text="This is a test dialog.  "
-                              "Would this have been an actual dialog, "
-                              "the buttons below would have been glowing "
-                              "in soft pink light.\n"
-                              "Do you believe this?",
-                         buttons=["Yes", "No", "Cancel"],
-                         default=0,
-                         cancel=2,
-                         title="Test Dialog")
+            d = SimpleDialog(
+                root,
+                text="This is a test dialog.  "
+                "Would this have been an actual dialog, "
+                "the buttons below would have been glowing "
+                "in soft pink light.\n"
+                "Do you believe this?",
+                buttons=["Yes", "No", "Cancel"],
+                default=0,
+                cancel=2,
+                title="Test Dialog",
+            )
             print(d.go())
-            print(askinteger("Spam", "Egg count", initialvalue=12*12))
-            print(askfloat("Spam", "Egg weight\n(in tons)", minvalue=1,
-                           maxvalue=100))
+            print(askinteger("Spam", "Egg count", initialvalue=12 * 12))
+            print(askfloat("Spam", "Egg weight\n(in tons)", minvalue=1, maxvalue=100))
             print(askstring("Spam", "Egg label"))
-        t = Button(root, text='Test', command=doit)
+
+        t = Button(root, text="Test", command=doit)
         t.pack()
-        q = Button(root, text='Quit', command=t.quit)
+        q = Button(root, text="Quit", command=t.quit)
         q.pack()
         t.mainloop()
 

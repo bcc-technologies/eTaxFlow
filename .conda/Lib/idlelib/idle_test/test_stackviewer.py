@@ -13,7 +13,7 @@ class StackBrowserTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
-        requires('gui')
+        requires("gui")
         cls.root = Tk()
         cls.root.withdraw()
 
@@ -21,8 +21,8 @@ class StackBrowserTest(unittest.TestCase):
     def tearDownClass(cls):
 
         cls.root.update_idletasks()
-##        for id in cls.root.tk.call('after', 'info'):
-##            cls.root.after_cancel(id)  # Need for EditorWindow.
+        ##        for id in cls.root.tk.call('after', 'info'):
+        ##            cls.root.after_cancel(id)  # Need for EditorWindow.
         cls.root.destroy()
         del cls.root
 
@@ -37,5 +37,5 @@ class StackBrowserTest(unittest.TestCase):
         isi(stackviewer.node, TreeNode)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

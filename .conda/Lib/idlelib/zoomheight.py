@@ -24,9 +24,10 @@ class ZoomHeight:
         if zoomed is None:
             self.top.bell()
         else:
-            menu_status = 'Restore' if zoomed else 'Zoom'
-            self.editwin.update_menu_label(menu='options', index='* Height',
-                                           label=f'{menu_status} Height')
+            menu_status = "Restore" if zoomed else "Zoom"
+            self.editwin.update_menu_label(
+                menu="options", index="* Height", label=f"{menu_status} Height"
+            )
 
         return "break"
 
@@ -35,7 +36,7 @@ class ZoomHeight:
 
         width, height, x, y = get_window_geometry(top)
 
-        if top.wm_state() != 'normal':
+        if top.wm_state() != "normal":
             # Can't zoom/restore window height for windows not in the 'normal'
             # state, e.g. maximized and full-screen windows.
             return None
@@ -54,29 +55,29 @@ class ZoomHeight:
             #
             # .wm_geometry('') makes the window revert to the size requested
             # by the widgets it contains.
-            top.wm_geometry('')
+            top.wm_geometry("")
             return False
 
     def get_max_height_and_y_coord(self):
         top = self.top
 
-        screen_dimensions = (top.winfo_screenwidth(),
-                             top.winfo_screenheight())
+        screen_dimensions = (top.winfo_screenwidth(), top.winfo_screenheight())
         if screen_dimensions not in self._max_height_and_y_coords:
             orig_state = top.wm_state()
 
             # Get window geometry info for maximized windows.
             try:
-                top.wm_state('zoomed')
+                top.wm_state("zoomed")
             except tkinter.TclError:
                 # The 'zoomed' state is not supported by some esoteric WMs,
                 # such as Xvfb.
                 raise WmInfoGatheringError(
-                    'Failed getting geometry of maximized windows, because ' +
-                    'the "zoomed" window state is unavailable.')
+                    "Failed getting geometry of maximized windows, because "
+                    + 'the "zoomed" window state is unavailable.'
+                )
             top.update()
             maxwidth, maxheight, maxx, maxy = get_window_geometry(top)
-            if sys.platform == 'win32':
+            if sys.platform == "win32":
                 # On Windows, the returned Y coordinate is the one before
                 # maximizing, so we use 0 which is correct unless a user puts
                 # their dock on the top of the screen (very rare).
@@ -87,7 +88,7 @@ class ZoomHeight:
             # y coordinate set to that of maximized windows.  This is needed
             # to properly handle different title bar heights for non-maximized
             # vs. maximized windows, as seen e.g. in Windows 10.
-            top.wm_state('normal')
+            top.wm_state("normal")
             top.update()
             orig_geom = get_window_geometry(top)
             max_y_geom = orig_geom[:3] + (maxy,)
@@ -119,6 +120,7 @@ def set_window_geometry(top, geometry):
 
 if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_zoomheight', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_zoomheight", verbosity=2, exit=False)
 
     # Add htest?

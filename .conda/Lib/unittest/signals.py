@@ -19,10 +19,13 @@ class _InterruptHandler(object):
                 # can make it: do nothing.
                 def default_handler(unused_signum, unused_frame):
                     pass
+
             else:
-                raise TypeError("expected SIGINT signal handler to be "
-                                "signal.SIG_IGN, signal.SIG_DFL, or a "
-                                "callable object")
+                raise TypeError(
+                    "expected SIGINT signal handler to be "
+                    "signal.SIG_IGN, signal.SIG_DFL, or a "
+                    "callable object"
+                )
         self.default_handler = default_handler
 
     def __call__(self, signum, frame):
@@ -38,14 +41,21 @@ class _InterruptHandler(object):
         for result in _results.keys():
             result.stop()
 
+
 _results = weakref.WeakKeyDictionary()
+
+
 def registerResult(result):
     _results[result] = 1
+
 
 def removeResult(result):
     return bool(_results.pop(result, None))
 
+
 _interrupt_handler = None
+
+
 def installHandler():
     global _interrupt_handler
     if _interrupt_handler is None:
@@ -56,6 +66,7 @@ def installHandler():
 
 def removeHandler(method=None):
     if method is not None:
+
         @wraps(method)
         def inner(*args, **kwargs):
             initial = signal.getsignal(signal.SIGINT)
@@ -64,6 +75,7 @@ def removeHandler(method=None):
                 return method(*args, **kwargs)
             finally:
                 signal.signal(signal.SIGINT, initial)
+
         return inner
 
     global _interrupt_handler

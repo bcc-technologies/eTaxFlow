@@ -32,31 +32,64 @@ DEFAULT_BUFFER_SIZE
    I/O classes. open() uses the file's blksize (as obtained by os.stat) if
    possible.
 """
+
 # New I/O library conforming to PEP 3116.
 
-__author__ = ("Guido van Rossum <guido@python.org>, "
-              "Mike Verdone <mike.verdone@gmail.com>, "
-              "Mark Russell <mark.russell@zen.co.uk>, "
-              "Antoine Pitrou <solipsis@pitrou.net>, "
-              "Amaury Forgeot d'Arc <amauryfa@gmail.com>, "
-              "Benjamin Peterson <benjamin@python.org>")
+__author__ = (
+    "Guido van Rossum <guido@python.org>, "
+    "Mike Verdone <mike.verdone@gmail.com>, "
+    "Mark Russell <mark.russell@zen.co.uk>, "
+    "Antoine Pitrou <solipsis@pitrou.net>, "
+    "Amaury Forgeot d'Arc <amauryfa@gmail.com>, "
+    "Benjamin Peterson <benjamin@python.org>"
+)
 
-__all__ = ["BlockingIOError", "open", "open_code", "IOBase", "RawIOBase",
-           "FileIO", "BytesIO", "StringIO", "BufferedIOBase",
-           "BufferedReader", "BufferedWriter", "BufferedRWPair",
-           "BufferedRandom", "TextIOBase", "TextIOWrapper",
-           "UnsupportedOperation", "SEEK_SET", "SEEK_CUR", "SEEK_END",
-           "DEFAULT_BUFFER_SIZE", "text_encoding", "IncrementalNewlineDecoder"]
+__all__ = [
+    "BlockingIOError",
+    "open",
+    "open_code",
+    "IOBase",
+    "RawIOBase",
+    "FileIO",
+    "BytesIO",
+    "StringIO",
+    "BufferedIOBase",
+    "BufferedReader",
+    "BufferedWriter",
+    "BufferedRWPair",
+    "BufferedRandom",
+    "TextIOBase",
+    "TextIOWrapper",
+    "UnsupportedOperation",
+    "SEEK_SET",
+    "SEEK_CUR",
+    "SEEK_END",
+    "DEFAULT_BUFFER_SIZE",
+    "text_encoding",
+    "IncrementalNewlineDecoder",
+]
 
 
 import _io
 import abc
 
-from _io import (DEFAULT_BUFFER_SIZE, BlockingIOError, UnsupportedOperation,
-                 open, open_code, FileIO, BytesIO, StringIO, BufferedReader,
-                 BufferedWriter, BufferedRWPair, BufferedRandom,
-                 IncrementalNewlineDecoder, text_encoding, TextIOWrapper)
-
+from _io import (
+    DEFAULT_BUFFER_SIZE,
+    BlockingIOError,
+    UnsupportedOperation,
+    open,
+    open_code,
+    FileIO,
+    BytesIO,
+    StringIO,
+    BufferedReader,
+    BufferedWriter,
+    BufferedRWPair,
+    BufferedRandom,
+    IncrementalNewlineDecoder,
+    text_encoding,
+    TextIOWrapper,
+)
 
 # Pretend this exception was created here.
 UnsupportedOperation.__module__ = "io"
@@ -66,25 +99,29 @@ SEEK_SET = 0
 SEEK_CUR = 1
 SEEK_END = 2
 
+
 # Declaring ABCs in C is tricky so we do it here.
 # Method descriptions and default implementations are inherited from the C
 # version however.
 class IOBase(_io._IOBase, metaclass=abc.ABCMeta):
     __doc__ = _io._IOBase.__doc__
 
+
 class RawIOBase(_io._RawIOBase, IOBase):
     __doc__ = _io._RawIOBase.__doc__
+
 
 class BufferedIOBase(_io._BufferedIOBase, IOBase):
     __doc__ = _io._BufferedIOBase.__doc__
 
+
 class TextIOBase(_io._TextIOBase, IOBase):
     __doc__ = _io._TextIOBase.__doc__
 
+
 RawIOBase.register(FileIO)
 
-for klass in (BytesIO, BufferedReader, BufferedWriter, BufferedRandom,
-              BufferedRWPair):
+for klass in (BytesIO, BufferedReader, BufferedWriter, BufferedRandom, BufferedRWPair):
     BufferedIOBase.register(klass)
 
 for klass in (StringIO, TextIOWrapper):

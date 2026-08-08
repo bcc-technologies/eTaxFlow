@@ -22,31 +22,36 @@ import sys as _sys
 # _curses module to the curses package's dictionary.  Don't do 'from
 # curses import *' if you'll be needing the ACS_* constants.
 
+
 def initscr():
     import _curses, curses
+
     # we call setupterm() here because it raises an error
     # instead of calling exit() in error cases.
-    setupterm(term=_os.environ.get("TERM", "unknown"),
-              fd=_sys.__stdout__.fileno())
+    setupterm(term=_os.environ.get("TERM", "unknown"), fd=_sys.__stdout__.fileno())
     stdscr = _curses.initscr()
     for key, value in _curses.__dict__.items():
-        if key[0:4] == 'ACS_' or key in ('LINES', 'COLS'):
+        if key[0:4] == "ACS_" or key in ("LINES", "COLS"):
             setattr(curses, key, value)
 
     return stdscr
+
 
 # This is a similar wrapper for start_color(), which adds the COLORS and
 # COLOR_PAIRS variables which are only available after start_color() is
 # called.
 
+
 def start_color():
     import _curses, curses
+
     retval = _curses.start_color()
-    if hasattr(_curses, 'COLORS'):
+    if hasattr(_curses, "COLORS"):
         curses.COLORS = _curses.COLORS
-    if hasattr(_curses, 'COLOR_PAIRS'):
+    if hasattr(_curses, "COLOR_PAIRS"):
         curses.COLOR_PAIRS = _curses.COLOR_PAIRS
     return retval
+
 
 # Import Python has_key() implementation if _curses doesn't contain has_key()
 
@@ -59,6 +64,7 @@ except NameError:
 # should be the rest of your curses-based application.  If the application
 # raises an exception, wrapper() will restore the terminal to a sane state so
 # you can read the resulting traceback.
+
 
 def wrapper(func, /, *args, **kwds):
     """Wrapper function that initializes curses and calls another function,
@@ -94,7 +100,7 @@ def wrapper(func, /, *args, **kwds):
         return func(stdscr, *args, **kwds)
     finally:
         # Set everything back to normal
-        if 'stdscr' in locals():
+        if "stdscr" in locals():
             stdscr.keypad(0)
             echo()
             nocbreak()

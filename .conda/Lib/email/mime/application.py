@@ -13,8 +13,15 @@ from email.mime.nonmultipart import MIMENonMultipart
 class MIMEApplication(MIMENonMultipart):
     """Class for generating application/* MIME documents."""
 
-    def __init__(self, _data, _subtype='octet-stream',
-                 _encoder=encoders.encode_base64, *, policy=None, **_params):
+    def __init__(
+        self,
+        _data,
+        _subtype="octet-stream",
+        _encoder=encoders.encode_base64,
+        *,
+        policy=None,
+        **_params
+    ):
         """Create an application/* type MIME document.
 
         _data contains the bytes for the raw application data.
@@ -30,8 +37,9 @@ class MIMEApplication(MIMENonMultipart):
         header.
         """
         if _subtype is None:
-            raise TypeError('Invalid application MIME subtype')
-        MIMENonMultipart.__init__(self, 'application', _subtype, policy=policy,
-                                  **_params)
+            raise TypeError("Invalid application MIME subtype")
+        MIMENonMultipart.__init__(
+            self, "application", _subtype, policy=policy, **_params
+        )
         self.set_payload(_data)
         _encoder(self)

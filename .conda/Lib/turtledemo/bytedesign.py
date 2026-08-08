@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""      turtle-example-suite:
+"""turtle-example-suite:
 
         tdemo_bytedesign.py
 
@@ -24,6 +24,7 @@ mode as fast as possible.
 
 from turtle import Turtle, mainloop
 from time import perf_counter as clock
+
 
 # wrapper for any additional drawing routines
 # that need to know about each other
@@ -107,42 +108,48 @@ class Designer(Turtle):
         self.getscreen().update()
 
     def pentl(self, side, ang, scale):
-        if side < (2 * scale): return
+        if side < (2 * scale):
+            return
         self.forward(side)
         self.left(ang)
-        self.pentl(side - (.38 * scale), ang, scale)
+        self.pentl(side - (0.38 * scale), ang, scale)
 
     def pentr(self, side, ang, scale):
-        if side < (2 * scale): return
+        if side < (2 * scale):
+            return
         self.forward(side)
         self.right(ang)
-        self.pentr(side - (.38 * scale), ang, scale)
+        self.pentr(side - (0.38 * scale), ang, scale)
 
     def tripolyr(self, side, scale):
-        if side < (4 * scale): return
+        if side < (4 * scale):
+            return
         self.forward(side)
         self.right(111)
         self.forward(side / 1.78)
         self.right(111)
         self.forward(side / 1.3)
         self.right(146)
-        self.tripolyr(side * .75, scale)
+        self.tripolyr(side * 0.75, scale)
 
     def tripolyl(self, side, scale):
-        if side < (4 * scale): return
+        if side < (4 * scale):
+            return
         self.forward(side)
         self.left(111)
         self.forward(side / 1.78)
         self.left(111)
         self.forward(side / 1.3)
         self.left(146)
-        self.tripolyl(side * .75, scale)
+        self.tripolyl(side * 0.75, scale)
 
     def centerpiece(self, s, a, scale):
-        self.forward(s); self.left(a)
+        self.forward(s)
+        self.left(a)
         if s < (7.5 * scale):
             return
         self.centerpiece(s - (1.2 * scale), a, scale)
+
 
 def main():
     t = Designer()
@@ -153,9 +160,10 @@ def main():
     at = clock()
     t.design(t.position(), 2)
     et = clock()
-    return "runtime: %.2f sec." % (et-at)
+    return "runtime: %.2f sec." % (et - at)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     msg = main()
     print(msg)
     mainloop()

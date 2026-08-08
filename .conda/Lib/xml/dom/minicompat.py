@@ -59,10 +59,12 @@ class NodeList(list):
 
     def _set_length(self, value):
         raise xml.dom.NoModificationAllowedErr(
-            "attempt to modify read-only attribute 'length'")
+            "attempt to modify read-only attribute 'length'"
+        )
 
-    length = property(_get_length, _set_length,
-                      doc="The number of nodes in the NodeList.")
+    length = property(
+        _get_length, _set_length, doc="The number of nodes in the NodeList."
+    )
 
     # For backward compatibility
     def __setstate__(self, state):
@@ -92,18 +94,22 @@ class EmptyNodeList(tuple):
 
     def _set_length(self, value):
         raise xml.dom.NoModificationAllowedErr(
-            "attempt to modify read-only attribute 'length'")
+            "attempt to modify read-only attribute 'length'"
+        )
 
-    length = property(_get_length, _set_length,
-                      doc="The number of nodes in the NodeList.")
+    length = property(
+        _get_length, _set_length, doc="The number of nodes in the NodeList."
+    )
 
 
 def defproperty(klass, name, doc):
     get = getattr(klass, ("_get_" + name))
+
     def set(self, value, name=name):
         raise xml.dom.NoModificationAllowedErr(
-            "attempt to modify read-only attribute " + repr(name))
-    assert not hasattr(klass, "_set_" + name), \
-           "expected not to find _set_" + name
+            "attempt to modify read-only attribute " + repr(name)
+        )
+
+    assert not hasattr(klass, "_set_" + name), "expected not to find _set_" + name
     prop = property(get, set, doc=doc)
     setattr(klass, name, prop)

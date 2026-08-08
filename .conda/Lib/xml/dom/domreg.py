@@ -9,14 +9,15 @@ registerDOMImplementation should be imported from xml.dom."""
 import sys
 
 well_known_implementations = {
-    'minidom':'xml.dom.minidom',
-    '4DOM': 'xml.dom.DOMImplementation',
-    }
+    "minidom": "xml.dom.minidom",
+    "4DOM": "xml.dom.DOMImplementation",
+}
 
 # DOM implementations not officially registered should register
 # themselves with their
 
 registered = {}
+
 
 def registerDOMImplementation(name, factory):
     """registerDOMImplementation(name, factory)
@@ -29,12 +30,14 @@ def registerDOMImplementation(name, factory):
 
     registered[name] = factory
 
+
 def _good_enough(dom, features):
     "_good_enough(dom, features) -> Return 1 if the dom offers the features"
-    for f,v in features:
-        if not dom.hasFeature(f,v):
+    for f, v in features:
+        if not dom.hasFeature(f, v):
             return 0
     return 1
+
 
 def getDOMImplementation(name=None, features=()):
     """getDOMImplementation(name = None, features = ()) -> DOM implementation.
@@ -50,15 +53,16 @@ def getDOMImplementation(name=None, features=()):
     of (feature, version) pairs which are passed to hasFeature."""
 
     import os
+
     creator = None
     mod = well_known_implementations.get(name)
     if mod:
-        mod = __import__(mod, {}, {}, ['getDOMImplementation'])
+        mod = __import__(mod, {}, {}, ["getDOMImplementation"])
         return mod.getDOMImplementation()
     elif name:
         return registered[name]()
     elif not sys.flags.ignore_environment and "PYTHON_DOM" in os.environ:
-        return getDOMImplementation(name = os.environ["PYTHON_DOM"])
+        return getDOMImplementation(name=os.environ["PYTHON_DOM"])
 
     # User did not specify a name, try implementations in arbitrary
     # order, returning the one that has the required features
@@ -71,13 +75,14 @@ def getDOMImplementation(name=None, features=()):
 
     for creator in well_known_implementations.keys():
         try:
-            dom = getDOMImplementation(name = creator)
-        except Exception: # typically ImportError, or AttributeError
+            dom = getDOMImplementation(name=creator)
+        except Exception:  # typically ImportError, or AttributeError
             continue
         if _good_enough(dom, features):
             return dom
 
     raise ImportError("no suitable DOM implementation found")
+
 
 def _parse_feature_string(s):
     features = []

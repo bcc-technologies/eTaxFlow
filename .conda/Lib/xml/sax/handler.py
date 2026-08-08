@@ -9,15 +9,16 @@ of the interfaces.
 $Id$
 """
 
-version = '2.0beta'
+version = "2.0beta"
 
-#============================================================================
+# ============================================================================
 #
 # HANDLER INTERFACES
 #
-#============================================================================
+# ============================================================================
 
 # ===== ERRORHANDLER =====
+
 
 class ErrorHandler:
     """Basic interface for SAX error handlers.
@@ -43,6 +44,7 @@ class ErrorHandler:
 
 
 # ===== CONTENTHANDLER =====
+
 
 class ContentHandler:
     """Interface for receiving logical document content events.
@@ -205,6 +207,7 @@ class ContentHandler:
 
 # ===== DTDHandler =====
 
+
 class DTDHandler:
     """Handle DTD events.
 
@@ -220,6 +223,7 @@ class DTDHandler:
 
 # ===== ENTITYRESOLVER =====
 
+
 class EntityResolver:
     """Basic interface for resolving entities. If you create an object
     implementing this interface, then register the object with your
@@ -234,11 +238,11 @@ class EntityResolver:
         return systemId
 
 
-#============================================================================
+# ============================================================================
 #
 # CORE FEATURES
 #
-#============================================================================
+# ============================================================================
 
 feature_namespaces = "http://xml.org/sax/features/namespaces"
 # true: Perform Namespace processing (default).
@@ -277,19 +281,21 @@ feature_external_pes = "http://xml.org/sax/features/external-parameter-entities"
 #        DTD subset.
 # access: (parsing) read-only; (not parsing) read/write
 
-all_features = [feature_namespaces,
-                feature_namespace_prefixes,
-                feature_string_interning,
-                feature_validation,
-                feature_external_ges,
-                feature_external_pes]
+all_features = [
+    feature_namespaces,
+    feature_namespace_prefixes,
+    feature_string_interning,
+    feature_validation,
+    feature_external_ges,
+    feature_external_pes,
+]
 
 
-#============================================================================
+# ============================================================================
 #
 # CORE PROPERTIES
 #
-#============================================================================
+# ============================================================================
 
 property_lexical_handler = "http://xml.org/sax/properties/lexical-handler"
 # data type: xml.sax.sax2lib.LexicalHandler
@@ -334,12 +340,14 @@ property_interning_dict = "http://www.python.org/sax/properties/interning-dict"
 #         read:  return the current interning dictionary, or None
 #
 
-all_properties = [property_lexical_handler,
-                  property_dom_node,
-                  property_declaration_handler,
-                  property_xml_string,
-                  property_encoding,
-                  property_interning_dict]
+all_properties = [
+    property_lexical_handler,
+    property_dom_node,
+    property_declaration_handler,
+    property_xml_string,
+    property_encoding,
+    property_interning_dict,
+]
 
 
 class LexicalHandler:

@@ -5,22 +5,22 @@
 """Miscellaneous utilities."""
 
 __all__ = [
-    'collapse_rfc2231_value',
-    'decode_params',
-    'decode_rfc2231',
-    'encode_rfc2231',
-    'formataddr',
-    'formatdate',
-    'format_datetime',
-    'getaddresses',
-    'make_msgid',
-    'mktime_tz',
-    'parseaddr',
-    'parsedate',
-    'parsedate_tz',
-    'parsedate_to_datetime',
-    'unquote',
-    ]
+    "collapse_rfc2231_value",
+    "decode_params",
+    "decode_rfc2231",
+    "encode_rfc2231",
+    "formataddr",
+    "formatdate",
+    "format_datetime",
+    "getaddresses",
+    "make_msgid",
+    "mktime_tz",
+    "parseaddr",
+    "parsedate",
+    "parsedate_tz",
+    "parsedate_to_datetime",
+    "unquote",
+]
 
 import os
 import re
@@ -39,10 +39,10 @@ from email._parseaddr import parsedate, parsedate_tz, _parsedate_tz
 # Intrapackage imports
 from email.charset import Charset
 
-COMMASPACE = ', '
-EMPTYSTRING = ''
-UEMPTYSTRING = ''
-CRLF = '\r\n'
+COMMASPACE = ", "
+EMPTYSTRING = ""
+UEMPTYSTRING = ""
+CRLF = "\r\n"
 TICK = "'"
 
 specialsre = re.compile(r'[][\\()<>@,:;".]')
@@ -60,6 +60,7 @@ def _has_surrogates(s):
     except UnicodeEncodeError:
         return True
 
+
 # How to deal with a string containing bytes before handing it to the
 # application through the 'normal' interface.
 def _sanitize(string):
@@ -67,14 +68,14 @@ def _sanitize(string):
     # bytes happen to be utf-8 they will instead get decoded, even if they
     # were invalid in the charset the source was supposed to be in.  This
     # seems like it is not a bad thing; a defect was still registered.
-    original_bytes = string.encode('utf-8', 'surrogateescape')
-    return original_bytes.decode('utf-8', 'replace')
-
+    original_bytes = string.encode("utf-8", "surrogateescape")
+    return original_bytes.decode("utf-8", "replace")
 
 
 # Helpers
 
-def formataddr(pair, charset='utf-8'):
+
+def formataddr(pair, charset="utf-8"):
     """The inverse of parseaddr(), this takes a 2-tuple of the form
     (realname, email_address) and returns the string value suitable
     for an RFC 2822 From, To or Cc header.
@@ -89,21 +90,21 @@ def formataddr(pair, charset='utf-8'):
     """
     name, address = pair
     # The address MUST (per RFC) be ascii, so raise a UnicodeError if it isn't.
-    address.encode('ascii')
+    address.encode("ascii")
     if name:
         try:
-            name.encode('ascii')
+            name.encode("ascii")
         except UnicodeEncodeError:
             if isinstance(charset, str):
                 charset = Charset(charset)
             encoded_name = charset.header_encode(name)
             return "%s <%s>" % (encoded_name, address)
         else:
-            quotes = ''
+            quotes = ""
             if specialsre.search(name):
                 quotes = '"'
-            name = escapesre.sub(r'\\\g<0>', name)
-            return '%s%s%s <%s>' % (quotes, name, quotes, address)
+            name = escapesre.sub(r"\\\g<0>", name)
+            return "%s%s%s <%s>" % (quotes, name, quotes, address)
     return address
 
 
@@ -112,14 +113,14 @@ def _iter_escaped_chars(addr):
     escape = False
     for pos, ch in enumerate(addr):
         if escape:
-            yield (pos, '\\' + ch)
+            yield (pos, "\\" + ch)
             escape = False
-        elif ch == '\\':
+        elif ch == "\\":
             escape = True
         else:
             yield (pos, ch)
     if escape:
-        yield (pos, '\\')
+        yield (pos, "\\")
 
 
 def _strip_quoted_realnames(addr):
@@ -144,10 +145,11 @@ def _strip_quoted_realnames(addr):
     if start < len(addr):
         result.append(addr[start:])
 
-    return ''.join(result)
+    return "".join(result)
 
 
 supports_strict_parsing = True
+
 
 def getaddresses(fieldvalues, *, strict=True):
     """Return a list of (REALNAME, EMAIL) or ('','') for each fieldvalue.
@@ -186,9 +188,9 @@ def getaddresses(fieldvalues, *, strict=True):
         # So strip those out before counting the commas.
         v = _strip_quoted_realnames(v)
         # Expected number of addresses: 1 + number of commas
-        n += 1 + v.count(',')
+        n += 1 + v.count(",")
     if len(result) != n:
-        return [('', '')]
+        return [("", "")]
 
     return result
 
@@ -199,13 +201,13 @@ def _check_parenthesis(addr):
 
     opens = 0
     for pos, ch in _iter_escaped_chars(addr):
-        if ch == '(':
+        if ch == "(":
             opens += 1
-        elif ch == ')':
+        elif ch == ")":
             opens -= 1
             if opens < 0:
                 return False
-    return (opens == 0)
+    return opens == 0
 
 
 def _pre_parse_validation(email_header_fields):
@@ -223,21 +225,38 @@ def _post_parse_validation(parsed_email_header_tuples):
     # The parser would have parsed a correctly formatted domain-literal
     # The existence of an [ after parsing indicates a parsing failure
     for v in parsed_email_header_tuples:
-        if '[' in v[1]:
-            v = ('', '')
+        if "[" in v[1]:
+            v = ("", "")
         accepted_values.append(v)
 
     return accepted_values
 
 
 def _format_timetuple_and_zone(timetuple, zone):
-    return '%s, %02d %s %04d %02d:%02d:%02d %s' % (
-        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][timetuple[6]],
+    return "%s, %02d %s %04d %02d:%02d:%02d %s" % (
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][timetuple[6]],
         timetuple[2],
-        ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][timetuple[1] - 1],
-        timetuple[0], timetuple[3], timetuple[4], timetuple[5],
-        zone)
+        [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ][timetuple[1] - 1],
+        timetuple[0],
+        timetuple[3],
+        timetuple[4],
+        timetuple[5],
+        zone,
+    )
+
 
 def formatdate(timeval=None, localtime=False, usegmt=False):
     """Returns a date string as specified by RFC 2822, e.g.:
@@ -268,6 +287,7 @@ def formatdate(timeval=None, localtime=False, usegmt=False):
         dt = dt.replace(tzinfo=None)
     return format_datetime(dt, usegmt)
 
+
 def format_datetime(dt, usegmt=False):
     """Turn a datetime into a date string as specified in RFC 2822.
 
@@ -279,9 +299,9 @@ def format_datetime(dt, usegmt=False):
     if usegmt:
         if dt.tzinfo is None or dt.tzinfo != datetime.timezone.utc:
             raise ValueError("usegmt option requires a UTC datetime")
-        zone = 'GMT'
+        zone = "GMT"
     elif dt.tzinfo is None:
-        zone = '-0000'
+        zone = "-0000"
     else:
         zone = dt.strftime("%z")
     return _format_timetuple_and_zone(now, zone)
@@ -297,16 +317,16 @@ def make_msgid(idstring=None, domain=None):
     portion of the message id after the '@'.  It defaults to the locally
     defined hostname.
     """
-    timeval = int(time.time()*100)
+    timeval = int(time.time() * 100)
     pid = os.getpid()
     randint = random.getrandbits(64)
     if idstring is None:
-        idstring = ''
+        idstring = ""
     else:
-        idstring = '.' + idstring
+        idstring = "." + idstring
     if domain is None:
         domain = socket.getfqdn()
-    msgid = '<%d.%d.%d%s@%s>' % (timeval, pid, randint, idstring, domain)
+    msgid = "<%d.%d.%d%s@%s>" % (timeval, pid, randint, idstring, domain)
     return msgid
 
 
@@ -317,8 +337,9 @@ def parsedate_to_datetime(data):
     *dtuple, tz = parsed_date_tz
     if tz is None:
         return datetime.datetime(*dtuple[:6])
-    return datetime.datetime(*dtuple[:6],
-            tzinfo=datetime.timezone(datetime.timedelta(seconds=tz)))
+    return datetime.datetime(
+        *dtuple[:6], tzinfo=datetime.timezone(datetime.timedelta(seconds=tz))
+    )
 
 
 def parseaddr(addr, *, strict=True):
@@ -333,20 +354,20 @@ def parseaddr(addr, *, strict=True):
     if not strict:
         addrs = _AddressList(addr).addresslist
         if not addrs:
-            return ('', '')
+            return ("", "")
         return addrs[0]
 
     if isinstance(addr, list):
         addr = addr[0]
 
     if not isinstance(addr, str):
-        return ('', '')
+        return ("", "")
 
     addr = _pre_parse_validation([addr])[0]
     addrs = _post_parse_validation(_AddressList(addr).addresslist)
 
     if not addrs or len(addrs) > 1:
-        return ('', '')
+        return ("", "")
 
     return addrs[0]
 
@@ -356,11 +377,10 @@ def unquote(str):
     """Remove quotes from a string."""
     if len(str) > 1:
         if str.startswith('"') and str.endswith('"'):
-            return str[1:-1].replace('\\\\', '\\').replace('\\"', '"')
-        if str.startswith('<') and str.endswith('>'):
+            return str[1:-1].replace("\\\\", "\\").replace('\\"', '"')
+        if str.startswith("<") and str.endswith(">"):
             return str[1:-1]
     return str
-
 
 
 # RFC2231-related functions - parameter encoding and decoding
@@ -379,16 +399,16 @@ def encode_rfc2231(s, charset=None, language=None):
     charset is given but not language, the string is encoded using the empty
     string for language.
     """
-    s = urllib.parse.quote(s, safe='', encoding=charset or 'ascii')
+    s = urllib.parse.quote(s, safe="", encoding=charset or "ascii")
     if charset is None and language is None:
         return s
     if language is None:
-        language = ''
+        language = ""
     return "%s'%s'%s" % (charset, language, s)
 
 
-rfc2231_continuation = re.compile(r'^(?P<name>\w+)\*((?P<num>[0-9]+)\*?)?$',
-    re.ASCII)
+rfc2231_continuation = re.compile(r"^(?P<name>\w+)\*((?P<num>[0-9]+)\*?)?$", re.ASCII)
+
 
 def decode_params(params):
     """Decode parameters list according to RFC 2231.
@@ -401,11 +421,11 @@ def decode_params(params):
     # specifying whether a particular segment is %-encoded.
     rfc2231_params = {}
     for name, value in params[1:]:
-        encoded = name.endswith('*')
+        encoded = name.endswith("*")
         value = unquote(value)
         mo = rfc2231_continuation.match(name)
         if mo:
-            name, num = mo.group('name', 'num')
+            name, num = mo.group("name", "num")
             if num is not None:
                 num = int(num)
             rfc2231_params.setdefault(name, []).append((num, value, encoded))
@@ -438,8 +458,8 @@ def decode_params(params):
                 new_params.append((name, '"%s"' % value))
     return new_params
 
-def collapse_rfc2231_value(value, errors='replace',
-                           fallback_charset='us-ascii'):
+
+def collapse_rfc2231_value(value, errors="replace", fallback_charset="us-ascii"):
     if not isinstance(value, tuple) or len(value) != 3:
         return unquote(value)
     # While value comes to us as a unicode string, we need it to be a bytes
@@ -450,7 +470,7 @@ def collapse_rfc2231_value(value, errors='replace',
         # Issue 17369: if charset/lang is None, decode_rfc2231 couldn't parse
         # the value, so use the fallback_charset.
         charset = fallback_charset
-    rawbytes = bytes(text, 'raw-unicode-escape')
+    rawbytes = bytes(text, "raw-unicode-escape")
     try:
         return str(rawbytes, charset, errors)
     except LookupError:
@@ -464,6 +484,7 @@ def collapse_rfc2231_value(value, errors='replace',
 # better than not having it.
 #
 
+
 def localtime(dt=None, isdst=None):
     """Return local time as an aware datetime object.
 
@@ -476,11 +497,12 @@ def localtime(dt=None, isdst=None):
     """
     if isdst is not None:
         import warnings
+
         warnings._deprecated(
             "The 'isdst' parameter to 'localtime'",
-            message='{name} is deprecated and slated for removal in Python {remove}',
+            message="{name} is deprecated and slated for removal in Python {remove}",
             remove=(3, 14),
-            )
+        )
     if dt is None:
         dt = datetime.datetime.now()
     return dt.astimezone()

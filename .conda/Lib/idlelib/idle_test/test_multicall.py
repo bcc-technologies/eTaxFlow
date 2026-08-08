@@ -11,7 +11,7 @@ class MultiCallTest(unittest.TestCase, ExtraAssertions):
 
     @classmethod
     def setUpClass(cls):
-        requires('gui')
+        requires("gui")
         cls.root = Tk()
         cls.root.withdraw()
         cls.mc = multicall.MultiCallCreator(Text)
@@ -20,8 +20,8 @@ class MultiCallTest(unittest.TestCase, ExtraAssertions):
     def tearDownClass(cls):
         del cls.mc
         cls.root.update_idletasks()
-##        for id in cls.root.tk.call('after', 'info'):
-##            cls.root.after_cancel(id)  # Need for EditorWindow.
+        ##        for id in cls.root.tk.call('after', 'info'):
+        ##            cls.root.after_cancel(id)  # Need for EditorWindow.
         cls.root.destroy()
         del cls.root
 
@@ -45,5 +45,5 @@ class MultiCallTest(unittest.TestCase, ExtraAssertions):
         self.assertIs(mctext.yview.__func__, Text.yview)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

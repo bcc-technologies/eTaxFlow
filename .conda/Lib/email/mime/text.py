@@ -4,7 +4,7 @@
 
 """Class representing text/* type MIME documents."""
 
-__all__ = ['MIMEText']
+__all__ = ["MIMEText"]
 
 from email.mime.nonmultipart import MIMENonMultipart
 
@@ -12,7 +12,7 @@ from email.mime.nonmultipart import MIMENonMultipart
 class MIMEText(MIMENonMultipart):
     """Class for generating text/* type MIME documents."""
 
-    def __init__(self, _text, _subtype='plain', _charset=None, *, policy=None):
+    def __init__(self, _text, _subtype="plain", _charset=None, *, policy=None):
         """Create a text/* type MIME document.
 
         _text is the string for this message object.
@@ -29,12 +29,13 @@ class MIMEText(MIMENonMultipart):
         # XXX: This can be removed once #7304 is fixed.
         if _charset is None:
             try:
-                _text.encode('us-ascii')
-                _charset = 'us-ascii'
+                _text.encode("us-ascii")
+                _charset = "us-ascii"
             except UnicodeEncodeError:
-                _charset = 'utf-8'
+                _charset = "utf-8"
 
-        MIMENonMultipart.__init__(self, 'text', _subtype, policy=policy,
-                                  charset=str(_charset))
+        MIMENonMultipart.__init__(
+            self, "text", _subtype, policy=policy, charset=str(_charset)
+        )
 
         self.set_payload(_text, _charset)

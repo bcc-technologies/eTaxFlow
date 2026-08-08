@@ -7,8 +7,9 @@ from modules.client import Client
 logging.basicConfig(
     filename="logs/app.log",
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
+
 
 def main():
     print("=== Sistema de Facturación Electrónica (eTaxFlow) ===")
@@ -17,7 +18,7 @@ def main():
     cliente = Client(
         nombre="Juan Pérez",
         rnc="123456789",
-        direccion="Av. Independencia #123, Santo Domingo"
+        direccion="Av. Independencia #123, Santo Domingo",
     )
 
     # Ejemplo: crear una factura
@@ -26,9 +27,9 @@ def main():
         cliente=cliente,
         items=[
             {"descripcion": "Laptop Lenovo", "cantidad": 1, "precio": 45000},
-            {"descripcion": "Mouse inalámbrico", "cantidad": 2, "precio": 800}
+            {"descripcion": "Mouse inalámbrico", "cantidad": 2, "precio": 800},
         ],
-        impuestos={"ITBIS": 0.18}
+        impuestos={"ITBIS": 0.18},
     )
 
     # Calcular totales
@@ -42,6 +43,7 @@ def main():
     factura.exportar("xml", "factura_0001.xml")
 
     logging.info("Factura generada exitosamente")
+
 
 if __name__ == "__main__":
     try:

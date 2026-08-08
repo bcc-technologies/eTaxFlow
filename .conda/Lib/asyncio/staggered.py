@@ -1,6 +1,6 @@
 """Support for running coroutines in parallel with staggered start times."""
 
-__all__ = 'staggered_race',
+__all__ = ("staggered_race",)
 
 import contextlib
 

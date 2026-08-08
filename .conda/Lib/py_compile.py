@@ -43,16 +43,15 @@ class PyCompileError(Exception):
 
     """
 
-    def __init__(self, exc_type, exc_value, file, msg=''):
+    def __init__(self, exc_type, exc_value, file, msg=""):
         exc_type_name = exc_type.__name__
         if exc_type is SyntaxError:
-            tbtext = ''.join(traceback.format_exception_only(
-                exc_type, exc_value))
+            tbtext = "".join(traceback.format_exception_only(exc_type, exc_value))
             errmsg = tbtext.replace('File "<string>"', 'File "%s"' % file)
         else:
-            errmsg = "Sorry: %s: %s" % (exc_type_name,exc_value)
+            errmsg = "Sorry: %s: %s" % (exc_type_name, exc_value)
 
-        Exception.__init__(self,msg or errmsg,exc_type_name,exc_value,file)
+        Exception.__init__(self, msg or errmsg, exc_type_name, exc_value, file)
 
         self.exc_type_name = exc_type_name
         self.exc_value = exc_value
@@ -70,14 +69,21 @@ class PycInvalidationMode(enum.Enum):
 
 
 def _get_default_invalidation_mode():
-    if os.environ.get('SOURCE_DATE_EPOCH'):
+    if os.environ.get("SOURCE_DATE_EPOCH"):
         return PycInvalidationMode.CHECKED_HASH
     else:
         return PycInvalidationMode.TIMESTAMP
 
 
-def compile(file, cfile=None, dfile=None, doraise=False, optimize=-1,
-            invalidation_mode=None, quiet=0):
+def compile(
+    file,
+    cfile=None,
+    dfile=None,
+    doraise=False,
+    optimize=-1,
+    invalidation_mode=None,
+    quiet=0,
+):
     """Byte-compile one Python source file to Python bytecode.
 
     :param file: The source file name.
@@ -125,31 +131,33 @@ def compile(file, cfile=None, dfile=None, doraise=False, optimize=-1,
         invalidation_mode = _get_default_invalidation_mode()
     if cfile is None:
         if optimize >= 0:
-            optimization = optimize if optimize >= 1 else ''
-            cfile = importlib.util.cache_from_source(file,
-                                                     optimization=optimization)
+            optimization = optimize if optimize >= 1 else ""
+            cfile = importlib.util.cache_from_source(file, optimization=optimization)
         else:
             cfile = importlib.util.cache_from_source(file)
     if os.path.islink(cfile):
-        msg = ('{} is a symlink and will be changed into a regular file if '
-               'import writes a byte-compiled file to it')
+        msg = (
+            "{} is a symlink and will be changed into a regular file if "
+            "import writes a byte-compiled file to it"
+        )
         raise FileExistsError(msg.format(cfile))
     elif os.path.exists(cfile) and not os.path.isfile(cfile):
-        msg = ('{} is a non-regular file and will be changed into a regular '
-               'one if import writes a byte-compiled file to it')
+        msg = (
+            "{} is a non-regular file and will be changed into a regular "
+            "one if import writes a byte-compiled file to it"
+        )
         raise FileExistsError(msg.format(cfile))
-    loader = importlib.machinery.SourceFileLoader('<py_compile>', file)
+    loader = importlib.machinery.SourceFileLoader("<py_compile>", file)
     source_bytes = loader.get_data(file)
     try:
-        code = loader.source_to_code(source_bytes, dfile or file,
-                                     _optimize=optimize)
+        code = loader.source_to_code(source_bytes, dfile or file, _optimize=optimize)
     except Exception as err:
         py_exc = PyCompileError(err.__class__, err, dfile or file)
         if quiet < 2:
             if doraise:
                 raise py_exc
             else:
-                sys.stderr.write(py_exc.msg + '\n')
+                sys.stderr.write(py_exc.msg + "\n")
         return
     try:
         dirname = os.path.dirname(cfile)
@@ -160,7 +168,8 @@ def compile(file, cfile=None, dfile=None, doraise=False, optimize=-1,
     if invalidation_mode == PycInvalidationMode.TIMESTAMP:
         source_stats = loader.path_stats(file)
         bytecode = importlib._bootstrap_external._code_to_timestamp_pyc(
-            code, source_stats['mtime'], source_stats['size'])
+            code, source_stats["mtime"], source_stats["size"]
+        )
     else:
         source_hash = importlib.util.source_hash(source_bytes)
         bytecode = importlib._bootstrap_external._code_to_hash_pyc(
@@ -176,21 +185,22 @@ def compile(file, cfile=None, dfile=None, doraise=False, optimize=-1,
 def main():
     import argparse
 
-    description = 'A simple command-line interface for py_compile module.'
+    description = "A simple command-line interface for py_compile module."
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
-        '-q', '--quiet',
-        action='store_true',
-        help='Suppress error output',
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Suppress error output",
     )
     parser.add_argument(
-        'filenames',
-        nargs='+',
-        help='Files to compile',
+        "filenames",
+        nargs="+",
+        help="Files to compile",
     )
     args = parser.parse_args()
-    if args.filenames == ['-']:
-        filenames = [filename.rstrip('\n') for filename in sys.stdin.readlines()]
+    if args.filenames == ["-"]:
+        filenames = [filename.rstrip("\n") for filename in sys.stdin.readlines()]
     else:
         filenames = args.filenames
     for filename in filenames:

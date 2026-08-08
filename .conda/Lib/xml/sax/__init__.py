@@ -21,9 +21,13 @@ expatreader -- Driver that allows use of the Expat parser with SAX.
 
 from .xmlreader import InputSource
 from .handler import ContentHandler, ErrorHandler
-from ._exceptions import SAXException, SAXNotRecognizedException, \
-                        SAXParseException, SAXNotSupportedException, \
-                        SAXReaderNotAvailable
+from ._exceptions import (
+    SAXException,
+    SAXNotRecognizedException,
+    SAXParseException,
+    SAXNotSupportedException,
+    SAXReaderNotAvailable,
+)
 
 
 def parse(source, handler, errorHandler=ErrorHandler()):
@@ -32,8 +36,10 @@ def parse(source, handler, errorHandler=ErrorHandler()):
     parser.setErrorHandler(errorHandler)
     parser.parse(source)
 
+
 def parseString(string, handler, errorHandler=ErrorHandler()):
     import io
+
     if errorHandler is None:
         errorHandler = ErrorHandler()
     parser = make_parser()
@@ -47,6 +53,7 @@ def parseString(string, handler, errorHandler=ErrorHandler()):
         inpsrc.setByteStream(io.BytesIO(string))
     parser.parse(inpsrc)
 
+
 # this is the parser list used by the make_parser function if no
 # alternatives are given as parameters to the function
 
@@ -58,6 +65,7 @@ if _false:
     import xml.sax.expatreader
 
 import os, sys
+
 if not sys.flags.ignore_environment and "PY_SAX_PARSER" in os.environ:
     default_parser_list = os.environ["PY_SAX_PARSER"].split(",")
 del os, sys
@@ -76,6 +84,7 @@ def make_parser(parser_list=()):
             return _create_parser(parser_name)
         except ImportError:
             import sys
+
             if parser_name in sys.modules:
                 # The parser module was found, but importing it
                 # failed unexpectedly, pass this exception through
@@ -87,8 +96,10 @@ def make_parser(parser_list=()):
 
     raise SAXReaderNotAvailable("No parsers found", None)
 
+
 # --- Internal utility methods used by make_parser
 
+
 def _create_parser(parser_name):
-    drv_module = __import__(parser_name,{},{},['create_parser'])
+    drv_module = __import__(parser_name, {}, {}, ["create_parser"])
     return drv_module.create_parser()

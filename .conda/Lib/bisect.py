@@ -32,7 +32,7 @@ def bisect_right(a, x, lo=0, hi=None, *, key=None):
     """
 
     if lo < 0:
-        raise ValueError('lo must be non-negative')
+        raise ValueError("lo must be non-negative")
     if hi is None:
         hi = len(a)
     # Note, the comparison uses "<" to match the
@@ -71,6 +71,7 @@ def insort_left(a, x, lo=0, hi=None, *, key=None):
         lo = bisect_left(a, key(x), lo, hi, key=key)
     a.insert(lo, x)
 
+
 def bisect_left(a, x, lo=0, hi=None, *, key=None):
     """Return the index where to insert item x in list a, assuming a is sorted.
 
@@ -85,7 +86,7 @@ def bisect_left(a, x, lo=0, hi=None, *, key=None):
     """
 
     if lo < 0:
-        raise ValueError('lo must be non-negative')
+        raise ValueError("lo must be non-negative")
     if hi is None:
         hi = len(a)
     # Note, the comparison uses "<" to match the

@@ -7,8 +7,8 @@ import tkinter as tk
 import unittest.mock as mock
 from idlelib.filelist import FileList
 
-mactypes = {'carbon', 'cocoa', 'xquartz'}
-nontypes = {'other'}
+mactypes = {"carbon", "cocoa", "xquartz"}
+nontypes = {"other"}
 alltypes = mactypes | nontypes
 
 
@@ -26,7 +26,7 @@ class InitTktypeTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        requires('gui')
+        requires("gui")
         cls.root = tk.Tk()
         cls.root.withdraw()
         cls.orig_platform = macosx.platform
@@ -40,7 +40,7 @@ class InitTktypeTest(unittest.TestCase):
 
     def test_init_sets_tktype(self):
         "Test that _init_tk_type sets _tk_type according to platform."
-        for platform, types in ('darwin', alltypes), ('other', nontypes):
+        for platform, types in ("darwin", alltypes), ("other", nontypes):
             with self.subTest(platform=platform):
                 macosx.platform = platform
                 macosx._tk_type = None
@@ -50,13 +50,15 @@ class InitTktypeTest(unittest.TestCase):
 
 class IsTypeTkTest(unittest.TestCase):
     "Test each of the four isTypeTk predecates."
-    isfuncs = ((macosx.isAquaTk, ('carbon', 'cocoa')),
-               (macosx.isCarbonTk, ('carbon')),
-               (macosx.isCocoaTk, ('cocoa')),
-               (macosx.isXQuartz, ('xquartz')),
-               )
 
-    @mock.patch('idlelib.macosx._init_tk_type')
+    isfuncs = (
+        (macosx.isAquaTk, ("carbon", "cocoa")),
+        (macosx.isCarbonTk, ("carbon")),
+        (macosx.isCocoaTk, ("cocoa")),
+        (macosx.isXQuartz, ("xquartz")),
+    )
+
+    @mock.patch("idlelib.macosx._init_tk_type")
     def test_is_calls_init(self, mockinit):
         "Test that each isTypeTk calls _init_tk_type when _tk_type is None."
         macosx._tk_type = None
@@ -72,8 +74,9 @@ class IsTypeTkTest(unittest.TestCase):
             for tktype in alltypes:
                 with self.subTest(func=func, whentrue=whentrue, tktype=tktype):
                     macosx._tk_type = tktype
-                    (self.assertTrue if tktype in whentrue else self.assertFalse)\
-                                     (func())
+                    (self.assertTrue if tktype in whentrue else self.assertFalse)(
+                        func()
+                    )
 
 
 class SetupTest(unittest.TestCase):
@@ -81,12 +84,14 @@ class SetupTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        requires('gui')
+        requires("gui")
         cls.root = tk.Tk()
         cls.root.withdraw()
+
         def cmd(tkpath, func):
             assert isinstance(tkpath, str)
             assert isinstance(func, type(cmd))
+
         cls.root.createcommand = cmd
 
     @classmethod
@@ -95,7 +100,7 @@ class SetupTest(unittest.TestCase):
         cls.root.destroy()
         del cls.root
 
-    @mock.patch('idlelib.macosx.overrideRootMenu')  #27312
+    @mock.patch("idlelib.macosx.overrideRootMenu")  # 27312
     def test_setupapp(self, overrideRootMenu):
         "Call setupApp with each possible graphics type."
         root = self.root
@@ -104,10 +109,10 @@ class SetupTest(unittest.TestCase):
             with self.subTest(tktype=tktype):
                 macosx._tk_type = tktype
                 macosx.setupApp(root, flist)
-                if tktype in ('carbon', 'cocoa'):
+                if tktype in ("carbon", "cocoa"):
                     self.assertTrue(overrideRootMenu.called)
                 overrideRootMenu.reset_mock()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

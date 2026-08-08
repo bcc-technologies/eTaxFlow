@@ -67,7 +67,8 @@ class Command:
 
     user_options: ClassVar[
         # Specifying both because list is invariant. Avoids mypy override assignment issues
-        list[tuple[str, str, str]] | list[tuple[str, str | None, str]]
+        list[tuple[str, str, str]]
+        | list[tuple[str, str | None, str]]
     ] = []
 
     # -- Creation/initialization methods -------------------------------
@@ -121,7 +122,7 @@ class Command:
 
     # XXX A more explicit way to customize dry_run would be better.
     def __getattr__(self, attr):
-        if attr == 'dry_run':
+        if attr == "dry_run":
             myval = getattr(self, "_" + attr)
             if myval is None:
                 return getattr(self.distribution, attr)
@@ -259,7 +260,7 @@ class Command:
         if val is None:
             return
         elif isinstance(val, str):
-            setattr(self, option, re.split(r',\s*|\s+', val))
+            setattr(self, option, re.split(r",\s*|\s+", val))
         else:
             if isinstance(val, list):
                 ok = all(isinstance(v, str) for v in val)
@@ -294,7 +295,7 @@ class Command:
     # -- Convenience methods for commands ------------------------------
 
     def get_command_name(self) -> str:
-        if hasattr(self, 'command_name'):
+        if hasattr(self, "command_name"):
             return self.command_name
         else:
             return self.__class__.__name__
@@ -542,7 +543,7 @@ class Command:
             raise TypeError("'infiles' must be a string, or a list or tuple of strings")
 
         if exec_msg is None:
-            exec_msg = "generating {} from {}".format(outfile, ', '.join(infiles))
+            exec_msg = "generating {} from {}".format(outfile, ", ".join(infiles))
 
         # If 'outfile' must be regenerated (either because it doesn't
         # exist, is out-of-date, or the 'force' flag is true) then

@@ -8,7 +8,9 @@ written by Barry Warsaw.
 # Regular expression that matches `special' characters in parameters, the
 # existence of which force quoting of the parameter value.
 import re
+
 tspecials = re.compile(r'[ \(\)<>@,;:\\"/\[\]\?=]')
+
 
 def _formatparam(param, value=None, quote=1):
     """Convenience function to format and return a key=value pair.
@@ -17,10 +19,10 @@ def _formatparam(param, value=None, quote=1):
     """
     if value is not None and len(value) > 0:
         if quote or tspecials.search(value):
-            value = value.replace('\\', '\\\\').replace('"', r'\"')
+            value = value.replace("\\", "\\\\").replace('"', r"\"")
             return '%s="%s"' % (param, value)
         else:
-            return '%s=%s' % (param, value)
+            return "%s=%s" % (param, value)
     else:
         return param
 
@@ -42,8 +44,9 @@ class Headers:
         """Convert/check value type."""
         if type(value) is str:
             return value
-        raise AssertionError("Header names/values must be"
-            " of type str (got {0})".format(repr(value)))
+        raise AssertionError(
+            "Header names/values must be" " of type str (got {0})".format(repr(value))
+        )
 
     def __len__(self):
         """Return the total number of headers, including duplicates."""
@@ -53,9 +56,10 @@ class Headers:
         """Set the value of a header."""
         del self[name]
         self._headers.append(
-            (self._convert_string_type(name), self._convert_string_type(val)))
+            (self._convert_string_type(name), self._convert_string_type(val))
+        )
 
-    def __delitem__(self,name):
+    def __delitem__(self, name):
         """Delete all occurrences of a header, if present.
 
         Does *not* raise an exception if the header is missing.
@@ -63,7 +67,7 @@ class Headers:
         name = self._convert_string_type(name.lower())
         self._headers[:] = [kv for kv in self._headers if kv[0].lower() != name]
 
-    def __getitem__(self,name):
+    def __getitem__(self, name):
         """Get the first header value for 'name'
 
         Return None if the header is missing instead of raising an exception.
@@ -78,7 +82,6 @@ class Headers:
         """Return true if the message contains the header."""
         return self.get(name) is not None
 
-
     def get_all(self, name):
         """Return a list of all the values for the named field.
 
@@ -88,17 +91,15 @@ class Headers:
         If no fields exist with the given name, returns an empty list.
         """
         name = self._convert_string_type(name.lower())
-        return [kv[1] for kv in self._headers if kv[0].lower()==name]
+        return [kv[1] for kv in self._headers if kv[0].lower() == name]
 
-
-    def get(self,name,default=None):
+    def get(self, name, default=None):
         """Get the first header value for 'name', or return 'default'"""
         name = self._convert_string_type(name.lower())
-        for k,v in self._headers:
-            if k.lower()==name:
+        for k, v in self._headers:
+            if k.lower() == name:
                 return v
         return default
-
 
     def keys(self):
         """Return a list of all the header field names.
@@ -136,20 +137,21 @@ class Headers:
     def __str__(self):
         """str() returns the formatted headers, complete with end line,
         suitable for direct HTTP transmission."""
-        return '\r\n'.join(["%s: %s" % kv for kv in self._headers]+['',''])
+        return "\r\n".join(["%s: %s" % kv for kv in self._headers] + ["", ""])
 
     def __bytes__(self):
-        return str(self).encode('iso-8859-1')
+        return str(self).encode("iso-8859-1")
 
-    def setdefault(self,name,value):
+    def setdefault(self, name, value):
         """Return first matching header value for 'name', or 'value'
 
         If there is no header named 'name', add a new header with name 'name'
         and value 'value'."""
         result = self.get(name)
         if result is None:
-            self._headers.append((self._convert_string_type(name),
-                self._convert_string_type(value)))
+            self._headers.append(
+                (self._convert_string_type(name), self._convert_string_type(value))
+            )
             return value
         else:
             return result
@@ -177,8 +179,8 @@ class Headers:
         for k, v in _params.items():
             k = self._convert_string_type(k)
             if v is None:
-                parts.append(k.replace('_', '-'))
+                parts.append(k.replace("_", "-"))
             else:
                 v = self._convert_string_type(v)
-                parts.append(_formatparam(k.replace('_', '-'), v))
+                parts.append(_formatparam(k.replace("_", "-"), v))
         self._headers.append((self._convert_string_type(_name), "; ".join(parts)))

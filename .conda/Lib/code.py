@@ -1,6 +1,4 @@
-"""Utilities needed to emulate Python's interactive interpreter.
-
-"""
+"""Utilities needed to emulate Python's interactive interpreter."""
 
 # Inspired by similar code by Jeff Epler and Fredrik Lundh.
 
@@ -9,8 +7,13 @@ import sys
 import traceback
 from codeop import CommandCompiler, compile_command
 
-__all__ = ["InteractiveInterpreter", "InteractiveConsole", "interact",
-           "compile_command"]
+__all__ = [
+    "InteractiveInterpreter",
+    "InteractiveConsole",
+    "interact",
+    "compile_command",
+]
+
 
 class InteractiveInterpreter:
     """Base class for InteractiveConsole.
@@ -141,7 +144,7 @@ class InteractiveInterpreter:
         sys.last_exc = sys.last_value = value = value.with_traceback(tb)
         if sys.excepthook is sys.__excepthook__:
             lines = traceback.format_exception(typ, value, tb)
-            self.write(''.join(lines))
+            self.write("".join(lines))
         else:
             # If someone has set sys.excepthook, we let that take precedence
             # over self.write
@@ -152,10 +155,10 @@ class InteractiveInterpreter:
             except BaseException as e:
                 e.__context__ = None
                 e = e.with_traceback(e.__traceback__.tb_next)
-                print('Error in sys.excepthook:', file=sys.stderr)
+                print("Error in sys.excepthook:", file=sys.stderr)
                 sys.__excepthook__(type(e), e, e.__traceback__)
                 print(file=sys.stderr)
-                print('Original exception was:', file=sys.stderr)
+                print("Original exception was:", file=sys.stderr)
                 sys.__excepthook__(typ, value, tb)
 
     def write(self, data):
@@ -220,9 +223,10 @@ class InteractiveConsole(InteractiveInterpreter):
             sys.ps2 = "... "
         cprt = 'Type "help", "copyright", "credits" or "license" for more information.'
         if banner is None:
-            self.write("Python %s on %s\n%s\n(%s)\n" %
-                       (sys.version, sys.platform, cprt,
-                        self.__class__.__name__))
+            self.write(
+                "Python %s on %s\n%s\n(%s)\n"
+                % (sys.version, sys.platform, cprt, self.__class__.__name__)
+            )
         elif banner:
             self.write("%s\n" % str(banner))
         more = 0
@@ -244,9 +248,9 @@ class InteractiveConsole(InteractiveInterpreter):
                 self.resetbuffer()
                 more = 0
         if exitmsg is None:
-            self.write('now exiting %s...\n' % self.__class__.__name__)
-        elif exitmsg != '':
-            self.write('%s\n' % exitmsg)
+            self.write("now exiting %s...\n" % self.__class__.__name__)
+        elif exitmsg != "":
+            self.write("%s\n" % exitmsg)
 
     def push(self, line):
         """Push a line to the interpreter.
@@ -283,7 +287,6 @@ class InteractiveConsole(InteractiveInterpreter):
         return input(prompt)
 
 
-
 def interact(banner=None, readfunc=None, local=None, exitmsg=None):
     """Closely emulate the interactive Python interpreter.
 
@@ -314,11 +317,12 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-q', action='store_true',
-                       help="don't print version and copyright messages")
+    parser.add_argument(
+        "-q", action="store_true", help="don't print version and copyright messages"
+    )
     args = parser.parse_args()
     if args.q or sys.flags.quiet:
-        banner = ''
+        banner = ""
     else:
         banner = None
     interact(banner)

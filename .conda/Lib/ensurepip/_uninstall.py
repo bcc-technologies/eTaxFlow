@@ -14,12 +14,14 @@ def _main(argv=None):
         help="Show the version of pip this will attempt to uninstall.",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="count",
         default=0,
         dest="verbosity",
-        help=("Give more output. Option is additive, and can be used up to 3 "
-              "times."),
+        help=(
+            "Give more output. Option is additive, and can be used up to 3 " "times."
+        ),
     )
 
     args = parser.parse_args(argv)

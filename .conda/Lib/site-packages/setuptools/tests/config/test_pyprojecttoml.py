@@ -216,12 +216,10 @@ class TestClassifiers:
         # Let's create a project example that has dynamic classifiers
         # coming from a txt file.
         create_example(tmp_path, "src")
-        classifiers = cleandoc(
-            """
+        classifiers = cleandoc("""
             Framework :: Flask
             Programming Language :: Haskell
-            """
-        )
+            """)
         (tmp_path / "classifiers.txt").write_text(classifiers, encoding="utf-8")
 
         pyproject = tmp_path / "pyproject.toml"

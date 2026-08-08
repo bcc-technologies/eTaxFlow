@@ -15,19 +15,24 @@ from . import resource_tracker
 from . import spawn
 from . import util
 
-__all__ = ['ensure_running', 'get_inherited_fds', 'connect_to_new_process',
-           'set_forkserver_preload']
+__all__ = [
+    "ensure_running",
+    "get_inherited_fds",
+    "connect_to_new_process",
+    "set_forkserver_preload",
+]
 
 #
 #
 #
 
 MAXFDS_TO_SEND = 256
-SIGNED_STRUCT = struct.Struct('q')     # large enough for pid_t
+SIGNED_STRUCT = struct.Struct("q")  # large enough for pid_t
 
 #
 # Forkserver class
 #
+
 
 class ForkServer(object):
 
@@ -37,7 +42,7 @@ class ForkServer(object):
         self._forkserver_pid = None
         self._inherited_fds = None
         self._lock = threading.Lock()
-        self._preload_modules = ['__main__']
+        self._preload_modules = ["__main__"]
 
     def _stop(self):
         # Method used by unit tests to stop the server
@@ -60,36 +65,40 @@ class ForkServer(object):
         self._forkserver_address = None
 
     def set_forkserver_preload(self, modules_names):
-        '''Set list of module names to try to load in forkserver process.'''
+        """Set list of module names to try to load in forkserver process."""
         if not all(type(mod) is str for mod in modules_names):
-            raise TypeError('module_names must be a list of strings')
+            raise TypeError("module_names must be a list of strings")
         self._preload_modules = modules_names
 
     def get_inherited_fds(self):
-        '''Return list of fds inherited from parent process.
+        """Return list of fds inherited from parent process.
 
         This returns None if the current process was not started by fork
         server.
-        '''
+        """
         return self._inherited_fds
 
     def connect_to_new_process(self, fds):
-        '''Request forkserver to create a child process.
+        """Request forkserver to create a child process.
 
         Returns a pair of fds (status_r, data_w).  The calling process can read
         the child process's pid and (eventually) its returncode from status_r.
         The calling process should write to data_w the pickled preparation and
         process data.
-        '''
+        """
         self.ensure_running()
         if len(fds) + 4 >= MAXFDS_TO_SEND:
-            raise ValueError('too many fds')
+            raise ValueError("too many fds")
         with socket.socket(socket.AF_UNIX) as client:
             client.connect(self._forkserver_address)
             parent_r, child_w = os.pipe()
             child_r, parent_w = os.pipe()
-            allfds = [child_r, child_w, self._forkserver_alive_fd,
-                      resource_tracker.getfd()]
+            allfds = [
+                child_r,
+                child_w,
+                self._forkserver_alive_fd,
+                resource_tracker.getfd(),
+            ]
             allfds += fds
             try:
                 reduction.sendfds(client, allfds)
@@ -103,12 +112,12 @@ class ForkServer(object):
                 os.close(child_w)
 
     def ensure_running(self):
-        '''Make sure that a fork server is running.
+        """Make sure that a fork server is running.
 
         This can be called from any process.  Note that usually a child
         process will just reuse the forkserver started by its parent, so
         ensure_running() will do nothing.
-        '''
+        """
         with self._lock:
             resource_tracker.ensure_running()
             if self._forkserver_pid is not None:
@@ -123,18 +132,20 @@ class ForkServer(object):
                 self._forkserver_alive_fd = None
                 self._forkserver_pid = None
 
-            cmd = ('from multiprocessing.forkserver import main; ' +
-                   'main(%d, %d, %r, **%r)')
+            cmd = (
+                "from multiprocessing.forkserver import main; "
+                + "main(%d, %d, %r, **%r)"
+            )
 
             if self._preload_modules:
-                desired_keys = {'main_path', 'sys_path'}
-                data = spawn.get_preparation_data('ignore')
+                desired_keys = {"main_path", "sys_path"}
+                data = spawn.get_preparation_data("ignore")
                 data = {x: y for x, y in data.items() if x in desired_keys}
             else:
                 data = {}
 
             with socket.socket(socket.AF_UNIX) as listener:
-                address = connection.arbitrary_address('AF_UNIX')
+                address = connection.arbitrary_address("AF_UNIX")
                 listener.bind(address)
                 if not util.is_abstract_socket_namespace(address):
                     os.chmod(address, 0o600)
@@ -145,11 +156,10 @@ class ForkServer(object):
                 alive_r, alive_w = os.pipe()
                 try:
                     fds_to_pass = [listener.fileno(), alive_r]
-                    cmd %= (listener.fileno(), alive_r, self._preload_modules,
-                            data)
+                    cmd %= (listener.fileno(), alive_r, self._preload_modules, data)
                     exe = spawn.get_executable()
                     args = [exe] + util._args_from_interpreter_flags()
-                    args += ['-c', cmd]
+                    args += ["-c", cmd]
                     pid = util.spawnv_passfds(exe, args, fds_to_pass)
                 except:
                     os.close(alive_w)
@@ -160,16 +170,18 @@ class ForkServer(object):
                 self._forkserver_alive_fd = alive_w
                 self._forkserver_pid = pid
 
+
 #
 #
 #
 
+
 def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
-    '''Run forkserver.'''
+    """Run forkserver."""
     if preload:
         if sys_path is not None:
             sys.path[:] = sys_path
-        if '__main__' in preload and main_path is not None:
+        if "__main__" in preload and main_path is not None:
             process.current_process()._inheriting = True
             try:
                 spawn.import_main_path(main_path)
@@ -196,9 +208,8 @@ def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
         signal.SIGCHLD: sigchld_handler,
         # protect the process from ^C
         signal.SIGINT: signal.SIG_IGN,
-        }
-    old_handlers = {sig: signal.signal(sig, val)
-                    for (sig, val) in handlers.items()}
+    }
+    old_handlers = {sig: signal.signal(sig, val) for (sig, val) in handlers.items()}
 
     # calling os.write() in the Python signal handler is racy
     signal.set_wakeup_fd(sig_w)
@@ -206,8 +217,9 @@ def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
     # map child pids to client fds
     pid_to_fd = {}
 
-    with socket.socket(socket.AF_UNIX, fileno=listener_fd) as listener, \
-         selectors.DefaultSelector() as selector:
+    with socket.socket(
+        socket.AF_UNIX, fileno=listener_fd
+    ) as listener, selectors.DefaultSelector() as selector:
         _forkserver._forkserver_address = listener.getsockname()
 
         selector.register(listener, selectors.EVENT_READ)
@@ -223,7 +235,7 @@ def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
 
                 if alive_r in rfds:
                     # EOF because no more client processes left
-                    assert os.read(alive_r, 1) == b'', "Not at EOF?"
+                    assert os.read(alive_r, 1) == b"", "Not at EOF?"
                     raise SystemExit
 
                 if sig_r in rfds:
@@ -250,8 +262,10 @@ def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
                             os.close(child_w)
                         else:
                             # This shouldn't happen really
-                            warnings.warn('forkserver: waitpid returned '
-                                          'unexpected pid %d' % pid)
+                            warnings.warn(
+                                "forkserver: waitpid returned "
+                                "unexpected pid %d" % pid
+                            )
 
                 if listener in rfds:
                     # Incoming fork request
@@ -260,8 +274,8 @@ def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
                         fds = reduction.recvfds(s, MAXFDS_TO_SEND + 1)
                         if len(fds) > MAXFDS_TO_SEND:
                             raise RuntimeError(
-                                "Too many ({0:n}) fds to send".format(
-                                    len(fds)))
+                                "Too many ({0:n}) fds to send".format(len(fds))
+                            )
                         child_r, child_w, *fds = fds
                         s.close()
                         pid = os.fork()
@@ -273,9 +287,9 @@ def main(listener_fd, alive_r, preload, main_path=None, sys_path=None):
                                 selector.close()
                                 unused_fds = [alive_r, child_w, sig_r, sig_w]
                                 unused_fds.extend(pid_to_fd.values())
-                                code = _serve_one(child_r, fds,
-                                                  unused_fds,
-                                                  old_handlers)
+                                code = _serve_one(
+                                    child_r, fds, unused_fds, old_handlers
+                                )
                             except Exception:
                                 sys.excepthook(*sys.exc_info())
                                 sys.stderr.flush()
@@ -306,9 +320,11 @@ def _serve_one(child_r, fds, unused_fds, handlers):
     for fd in unused_fds:
         os.close(fd)
 
-    (_forkserver._forkserver_alive_fd,
-     resource_tracker._resource_tracker._fd,
-     *_forkserver._inherited_fds) = fds
+    (
+        _forkserver._forkserver_alive_fd,
+        resource_tracker._resource_tracker._fd,
+        *_forkserver._inherited_fds,
+    ) = fds
 
     # Run process object received over pipe
     parent_sentinel = os.dup(child_r)
@@ -321,23 +337,26 @@ def _serve_one(child_r, fds, unused_fds, handlers):
 # Read and write signed numbers
 #
 
+
 def read_signed(fd):
-    data = b''
+    data = b""
     length = SIGNED_STRUCT.size
     while len(data) < length:
         s = os.read(fd, length - len(data))
         if not s:
-            raise EOFError('unexpected EOF')
+            raise EOFError("unexpected EOF")
         data += s
     return SIGNED_STRUCT.unpack(data)[0]
+
 
 def write_signed(fd, n):
     msg = SIGNED_STRUCT.pack(n)
     while msg:
         nbytes = os.write(fd, msg)
         if nbytes == 0:
-            raise RuntimeError('should not get here')
+            raise RuntimeError("should not get here")
         msg = msg[nbytes:]
+
 
 #
 #

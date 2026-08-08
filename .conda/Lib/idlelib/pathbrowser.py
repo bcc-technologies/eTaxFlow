@@ -73,7 +73,7 @@ class DirBrowserTreeItem(TreeItem):
         return sublist
 
     def ispackagedir(self, file):
-        " Return true for directories that are packages."
+        "Return true for directories that are packages."
         if not os.path.isdir(file):
             return False
         init = os.path.join(file, "__init__.py")
@@ -101,7 +101,9 @@ class DirBrowserTreeItem(TreeItem):
 
 if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_pathbrowser', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_pathbrowser", verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
+
     run(PathBrowser)

@@ -32,8 +32,7 @@ def given(*_args, **_kwargs):
             # is applied after @given, it will re-wrap the test to remove the
             # skip decorator.
             test_function = unittest.skip(
-                "Hypothesis required for property test with no " +
-                "specified examples"
+                "Hypothesis required for property test with no " + "specified examples"
             )(f)
 
         test_function._given = True

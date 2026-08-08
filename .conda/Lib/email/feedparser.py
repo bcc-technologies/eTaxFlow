@@ -19,7 +19,7 @@ the current message.  Defects are just instances that live on the message
 object's .defects attribute.
 """
 
-__all__ = ['FeedParser', 'BytesFeedParser']
+__all__ = ["FeedParser", "BytesFeedParser"]
 
 import re
 
@@ -28,15 +28,15 @@ from email._policybase import compat32
 from collections import deque
 from io import StringIO
 
-NLCRE = re.compile(r'\r\n|\r|\n')
-NLCRE_bol = re.compile(r'(\r\n|\r|\n)')
-NLCRE_eol = re.compile(r'(\r\n|\r|\n)\Z')
-NLCRE_crack = re.compile(r'(\r\n|\r|\n)')
+NLCRE = re.compile(r"\r\n|\r|\n")
+NLCRE_bol = re.compile(r"(\r\n|\r|\n)")
+NLCRE_eol = re.compile(r"(\r\n|\r|\n)\Z")
+NLCRE_crack = re.compile(r"(\r\n|\r|\n)")
 # RFC 2822 $3.6.8 Optional fields.  ftext is %d33-57 / %d59-126, Any character
 # except controls, SP, and ":".
-headerRE = re.compile(r'^(From |[\041-\071\073-\176]*:|[\t ])')
-EMPTYSTRING = ''
-NL = '\n'
+headerRE = re.compile(r"^(From |[\041-\071\073-\176]*:|[\t ])")
+EMPTYSTRING = ""
+NL = "\n"
 
 NeedMoreData = object()
 
@@ -49,10 +49,11 @@ class BufferedSubFile(object):
     (i.e. empty string) is returned instead.  This lets the parser adhere to a
     simple abstraction -- it parses until EOF closes the current message.
     """
+
     def __init__(self):
         # Text stream of the last partial line pushed into this object.
         # See issue 22233 for why this is a text stream and not a list.
-        self._partial = StringIO(newline='')
+        self._partial = StringIO(newline="")
         # A deque of full, pushed lines
         self._lines = deque()
         # The stack of false-EOF checking predicates.
@@ -77,7 +78,7 @@ class BufferedSubFile(object):
     def readline(self):
         if not self._lines:
             if self._closed:
-                return ''
+                return ""
             return NeedMoreData
         # Pop the line off the stack and see if it matches the current
         # false-EOF predicate.
@@ -89,7 +90,7 @@ class BufferedSubFile(object):
             if ateof(line):
                 # We're at the false EOF.  But push the last line back first.
                 self._lines.appendleft(line)
-                return ''
+                return ""
         return line
 
     def unreadline(self, line):
@@ -100,7 +101,7 @@ class BufferedSubFile(object):
     def push(self, data):
         """Push some new data into this object."""
         self._partial.write(data)
-        if '\n' not in data and '\r' not in data:
+        if "\n" not in data and "\r" not in data:
             # No new complete lines, wait for more.
             return
 
@@ -114,7 +115,7 @@ class BufferedSubFile(object):
         # it as a partial line.  We only check for '\n' here because a line
         # ending with '\r' might be a line that was split in the middle of a
         # '\r\n' sequence (see bugs 1555570 and 1721862).
-        if not parts[-1].endswith('\n'):
+        if not parts[-1].endswith("\n"):
             self._partial.write(parts.pop())
         self.pushlines(parts)
 
@@ -126,7 +127,7 @@ class BufferedSubFile(object):
 
     def __next__(self):
         line = self.readline()
-        if line == '':
+        if line == "":
             raise StopIteration
         return line
 
@@ -147,6 +148,7 @@ class FeedParser:
         if _factory is None:
             if policy.message_factory is None:
                 from email.message import Message
+
                 self._factory = Message
             else:
                 self._factory = policy.message_factory
@@ -186,8 +188,11 @@ class FeedParser:
         root = self._pop_message()
         assert not self._msgstack
         # Look for final set of defects
-        if root.get_content_maintype() == 'multipart' \
-               and not root.is_multipart() and not self._headersonly:
+        if (
+            root.get_content_maintype() == "multipart"
+            and not root.is_multipart()
+            and not self._headersonly
+        ):
             defect = errors.MultipartInvariantViolationDefect()
             self.policy.handle_defect(root, defect)
         return root
@@ -197,8 +202,8 @@ class FeedParser:
             msg = self._factory()
         else:
             msg = self._factory(policy=self.policy)
-        if self._cur and self._cur.get_content_type() == 'multipart/digest':
-            msg.set_default_type('message/rfc822')
+        if self._cur and self._cur.get_content_type() == "multipart/digest":
+            msg.set_default_type("message/rfc822")
         if self._msgstack:
             self._msgstack[-1].attach(msg)
         self._msgstack.append(msg)
@@ -246,12 +251,12 @@ class FeedParser:
                 if line is NeedMoreData:
                     yield NeedMoreData
                     continue
-                if line == '':
+                if line == "":
                     break
                 lines.append(line)
             self._cur.set_payload(EMPTYSTRING.join(lines))
             return
-        if self._cur.get_content_type() == 'message/delivery-status':
+        if self._cur.get_content_type() == "message/delivery-status":
             # message/delivery-status contains blocks of headers separated by
             # a blank line.  We'll represent each header block as a separate
             # nested message object, but the processing is a bit different
@@ -285,12 +290,12 @@ class FeedParser:
                         yield NeedMoreData
                         continue
                     break
-                if line == '':
+                if line == "":
                     break
                 # Not at EOF so this is a line we're going to need.
                 self._input.unreadline(line)
             return
-        if self._cur.get_content_maintype() == 'message':
+        if self._cur.get_content_maintype() == "message":
             # The message claims to be a message/* type, then what follows is
             # another RFC 2822 message.
             for retval in self._parsegen():
@@ -300,7 +305,7 @@ class FeedParser:
                 break
             self._pop_message()
             return
-        if self._cur.get_content_maintype() == 'multipart':
+        if self._cur.get_content_maintype() == "multipart":
             boundary = self._cur.get_boundary()
             if boundary is None:
                 # The message /claims/ to be a multipart but it has not
@@ -318,18 +323,23 @@ class FeedParser:
                 self._cur.set_payload(EMPTYSTRING.join(lines))
                 return
             # Make sure a valid content type was specified per RFC 2045:6.4.
-            if (str(self._cur.get('content-transfer-encoding', '8bit')).lower()
-                    not in ('7bit', '8bit', 'binary')):
+            if str(self._cur.get("content-transfer-encoding", "8bit")).lower() not in (
+                "7bit",
+                "8bit",
+                "binary",
+            ):
                 defect = errors.InvalidMultipartContentTransferEncodingDefect()
                 self.policy.handle_defect(self._cur, defect)
             # Create a line match predicate which matches the inter-part
             # boundary as well as the end-of-multipart boundary.  Don't push
             # this onto the input stream until we've scanned past the
             # preamble.
-            separator = '--' + boundary
+            separator = "--" + boundary
             boundaryre = re.compile(
-                '(?P<sep>' + re.escape(separator) +
-                r')(?P<end>--)?(?P<ws>[ \t]*)(?P<linesep>\r\n|\r|\n)?$')
+                "(?P<sep>"
+                + re.escape(separator)
+                + r")(?P<end>--)?(?P<ws>[ \t]*)(?P<linesep>\r\n|\r|\n)?$"
+            )
             capturing_preamble = True
             preamble = []
             linesep = False
@@ -339,7 +349,7 @@ class FeedParser:
                 if line is NeedMoreData:
                     yield NeedMoreData
                     continue
-                if line == '':
+                if line == "":
                     break
                 mo = boundaryre.match(line)
                 if mo:
@@ -347,9 +357,9 @@ class FeedParser:
                     # this multipart.  If there was a newline at the end of
                     # the closing boundary, then we need to initialize the
                     # epilogue with the empty string (see below).
-                    if mo.group('end'):
+                    if mo.group("end"):
                         close_boundary_seen = True
-                        linesep = mo.group('linesep')
+                        linesep = mo.group("linesep")
                         break
                     # We saw an inter-part boundary.  Were we in the preamble?
                     if capturing_preamble:
@@ -359,7 +369,7 @@ class FeedParser:
                             lastline = preamble[-1]
                             eolmo = NLCRE_eol.search(lastline)
                             if eolmo:
-                                preamble[-1] = lastline[:-len(eolmo.group(0))]
+                                preamble[-1] = lastline[: -len(eolmo.group(0))]
                             self._cur.preamble = EMPTYSTRING.join(preamble)
                         capturing_preamble = False
                         self._input.unreadline(line)
@@ -389,9 +399,9 @@ class FeedParser:
                     # separator actually belongs to the boundary, not the
                     # previous subpart's payload (or epilogue if the previous
                     # part is a multipart).
-                    if self._last.get_content_maintype() == 'multipart':
+                    if self._last.get_content_maintype() == "multipart":
                         epilogue = self._last.epilogue
-                        if epilogue == '':
+                        if epilogue == "":
                             self._last.epilogue = None
                         elif epilogue is not None:
                             mo = NLCRE_eol.search(epilogue)
@@ -403,7 +413,7 @@ class FeedParser:
                         if isinstance(payload, str):
                             mo = NLCRE_eol.search(payload)
                             if mo:
-                                payload = payload[:-len(mo.group(0))]
+                                payload = payload[: -len(mo.group(0))]
                                 self._last._payload = payload
                     self._input.pop_eof_matcher()
                     self._pop_message()
@@ -438,7 +448,7 @@ class FeedParser:
             # ended in a newline, we'll need to make sure the epilogue isn't
             # None
             if linesep:
-                epilogue = ['']
+                epilogue = [""]
             else:
                 epilogue = []
             for line in self._input:
@@ -453,7 +463,7 @@ class FeedParser:
                 firstline = epilogue[0]
                 bolmo = NLCRE_bol.match(firstline)
                 if bolmo:
-                    epilogue[0] = firstline[len(bolmo.group(0)):]
+                    epilogue[0] = firstline[len(bolmo.group(0)) :]
             self._cur.epilogue = EMPTYSTRING.join(epilogue)
             return
         # Otherwise, it's some non-multipart type, so the entire rest of the
@@ -468,11 +478,11 @@ class FeedParser:
 
     def _parse_headers(self, lines):
         # Passed a list of lines that make up the headers for the current msg
-        lastheader = ''
+        lastheader = ""
         lastvalue = []
         for lineno, line in enumerate(lines):
             # Check for continuation
-            if line[0] in ' \t':
+            if line[0] in " \t":
                 if not lastheader:
                     # The first line of the headers was a continuation.  This
                     # is illegal, so let's note the defect, store the illegal
@@ -484,14 +494,14 @@ class FeedParser:
                 continue
             if lastheader:
                 self._cur.set_raw(*self.policy.header_source_parse(lastvalue))
-                lastheader, lastvalue = '', []
+                lastheader, lastvalue = "", []
             # Check for envelope header, i.e. unix-from
-            if line.startswith('From '):
+            if line.startswith("From "):
                 if lineno == 0:
                     # Strip off the trailing newline
                     mo = NLCRE_eol.search(line)
                     if mo:
-                        line = line[:-len(mo.group(0))]
+                        line = line[: -len(mo.group(0))]
                     self._cur.set_unixfrom(line)
                     continue
                 elif lineno == len(lines) - 1:
@@ -509,7 +519,7 @@ class FeedParser:
             # Split the line on the colon separating field name from value.
             # There will always be a colon, because if there wasn't the part of
             # the parser that calls us would have started parsing the body.
-            i = line.find(':')
+            i = line.find(":")
 
             # If the colon is on the start of the line the header is clearly
             # malformed, but we might be able to salvage the rest of the
@@ -519,7 +529,7 @@ class FeedParser:
                 self._cur.defects.append(defect)
                 continue
 
-            assert i>0, "_parse_headers fed line with no : and no leading WS"
+            assert i > 0, "_parse_headers fed line with no : and no leading WS"
             lastheader = line[:i]
             lastvalue = [line]
         # Done with all the lines, so handle the last header.
@@ -531,4 +541,4 @@ class BytesFeedParser(FeedParser):
     """Like FeedParser, but feed accepts bytes."""
 
     def feed(self, data):
-        super().feed(data.decode('ascii', 'surrogateescape'))
+        super().feed(data.decode("ascii", "surrogateescape"))

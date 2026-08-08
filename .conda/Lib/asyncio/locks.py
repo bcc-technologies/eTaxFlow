@@ -1,13 +1,13 @@
 """Synchronization primitives."""
 
-__all__ = ('Lock', 'Event', 'Condition', 'Semaphore',
-           'BoundedSemaphore', 'Barrier')
+__all__ = ("Lock", "Event", "Condition", "Semaphore", "BoundedSemaphore", "Barrier")
 
 import collections
 import enum
 
 from . import exceptions
 from . import mixins
+
 
 class _ContextManagerMixin:
     async def __aenter__(self):
@@ -80,10 +80,10 @@ class Lock(_ContextManagerMixin, mixins._LoopBoundMixin):
 
     def __repr__(self):
         res = super().__repr__()
-        extra = 'locked' if self._locked else 'unlocked'
+        extra = "locked" if self._locked else "unlocked"
         if self._waiters:
-            extra = f'{extra}, waiters:{len(self._waiters)}'
-        return f'<{res[1:-1]} [{extra}]>'
+            extra = f"{extra}, waiters:{len(self._waiters)}"
+        return f"<{res[1:-1]} [{extra}]>"
 
     def locked(self):
         """Return True if lock is acquired."""
@@ -95,8 +95,9 @@ class Lock(_ContextManagerMixin, mixins._LoopBoundMixin):
         This method blocks until the lock is unlocked, then sets it to
         locked and returns True.
         """
-        if (not self._locked and (self._waiters is None or
-                all(w.cancelled() for w in self._waiters))):
+        if not self._locked and (
+            self._waiters is None or all(w.cancelled() for w in self._waiters)
+        ):
             self._locked = True
             return True
 
@@ -136,7 +137,7 @@ class Lock(_ContextManagerMixin, mixins._LoopBoundMixin):
             self._locked = False
             self._wake_up_first()
         else:
-            raise RuntimeError('Lock is not acquired.')
+            raise RuntimeError("Lock is not acquired.")
 
     def _wake_up_first(self):
         """Wake up the first waiter if it isn't done."""
@@ -169,10 +170,10 @@ class Event(mixins._LoopBoundMixin):
 
     def __repr__(self):
         res = super().__repr__()
-        extra = 'set' if self._value else 'unset'
+        extra = "set" if self._value else "unset"
         if self._waiters:
-            extra = f'{extra}, waiters:{len(self._waiters)}'
-        return f'<{res[1:-1]} [{extra}]>'
+            extra = f"{extra}, waiters:{len(self._waiters)}"
+        return f"<{res[1:-1]} [{extra}]>"
 
     def is_set(self):
         """Return True if and only if the internal flag is true."""
@@ -239,10 +240,10 @@ class Condition(_ContextManagerMixin, mixins._LoopBoundMixin):
 
     def __repr__(self):
         res = super().__repr__()
-        extra = 'locked' if self.locked() else 'unlocked'
+        extra = "locked" if self.locked() else "unlocked"
         if self._waiters:
-            extra = f'{extra}, waiters:{len(self._waiters)}'
-        return f'<{res[1:-1]} [{extra}]>'
+            extra = f"{extra}, waiters:{len(self._waiters)}"
+        return f"<{res[1:-1]} [{extra}]>"
 
     async def wait(self):
         """Wait until notified.
@@ -256,7 +257,7 @@ class Condition(_ContextManagerMixin, mixins._LoopBoundMixin):
         awakened, it re-acquires the lock and returns True.
         """
         if not self.locked():
-            raise RuntimeError('cannot wait on un-acquired lock')
+            raise RuntimeError("cannot wait on un-acquired lock")
 
         self.release()
         try:
@@ -307,7 +308,7 @@ class Condition(_ContextManagerMixin, mixins._LoopBoundMixin):
         not release the lock, its caller should.
         """
         if not self.locked():
-            raise RuntimeError('cannot notify on un-acquired lock')
+            raise RuntimeError("cannot notify on un-acquired lock")
 
         idx = 0
         for fut in self._waiters:
@@ -350,15 +351,16 @@ class Semaphore(_ContextManagerMixin, mixins._LoopBoundMixin):
 
     def __repr__(self):
         res = super().__repr__()
-        extra = 'locked' if self.locked() else f'unlocked, value:{self._value}'
+        extra = "locked" if self.locked() else f"unlocked, value:{self._value}"
         if self._waiters:
-            extra = f'{extra}, waiters:{len(self._waiters)}'
-        return f'<{res[1:-1]} [{extra}]>'
+            extra = f"{extra}, waiters:{len(self._waiters)}"
+        return f"<{res[1:-1]} [{extra}]>"
 
     def locked(self):
         """Returns True if semaphore cannot be acquired immediately."""
         return self._value == 0 or (
-            any(not w.cancelled() for w in (self._waiters or ())))
+            any(not w.cancelled() for w in (self._waiters or ()))
+        )
 
     async def acquire(self):
         """Acquire a semaphore.
@@ -430,16 +432,15 @@ class BoundedSemaphore(Semaphore):
 
     def release(self):
         if self._value >= self._bound_value:
-            raise ValueError('BoundedSemaphore released too many times')
+            raise ValueError("BoundedSemaphore released too many times")
         super().release()
 
 
-
 class _BarrierState(enum.Enum):
-    FILLING = 'filling'
-    DRAINING = 'draining'
-    RESETTING = 'resetting'
-    BROKEN = 'broken'
+    FILLING = "filling"
+    DRAINING = "draining"
+    RESETTING = "resetting"
+    BROKEN = "broken"
 
 
 class Barrier(mixins._LoopBoundMixin):
@@ -454,20 +455,20 @@ class Barrier(mixins._LoopBoundMixin):
     def __init__(self, parties):
         """Create a barrier, initialised to 'parties' tasks."""
         if parties < 1:
-            raise ValueError('parties must be >= 1')
+            raise ValueError("parties must be >= 1")
 
-        self._cond = Condition() # notify all tasks when state changes
+        self._cond = Condition()  # notify all tasks when state changes
 
         self._parties = parties
         self._state = _BarrierState.FILLING
-        self._count = 0       # count tasks in Barrier
+        self._count = 0  # count tasks in Barrier
 
     def __repr__(self):
         res = super().__repr__()
-        extra = f'{self._state.value}'
+        extra = f"{self._state.value}"
         if not self.broken:
-            extra += f', waiters:{self.n_waiting}/{self.parties}'
-        return f'<{res[1:-1]} [{extra}]>'
+            extra += f", waiters:{self.n_waiting}/{self.parties}"
+        return f"<{res[1:-1]} [{extra}]>"
 
     async def __aenter__(self):
         # wait for the barrier reaches the parties number
@@ -485,7 +486,7 @@ class Barrier(mixins._LoopBoundMixin):
         Returns an unique and individual index number from 0 to 'parties-1'.
         """
         async with self._cond:
-            await self._block() # Block while the barrier drains or resets.
+            await self._block()  # Block while the barrier drains or resets.
             try:
                 index = self._count
                 self._count += 1
@@ -507,9 +508,7 @@ class Barrier(mixins._LoopBoundMixin):
         # It is draining or resetting, wait until done
         # unless a CancelledError occurs
         await self._cond.wait_for(
-            lambda: self._state not in (
-                _BarrierState.DRAINING, _BarrierState.RESETTING
-            )
+            lambda: self._state not in (_BarrierState.DRAINING, _BarrierState.RESETTING)
         )
 
         # see if the barrier is in a broken state
@@ -552,7 +551,7 @@ class Barrier(mixins._LoopBoundMixin):
         async with self._cond:
             if self._count > 0:
                 if self._state is not _BarrierState.RESETTING:
-                    #reset the barrier, waking up tasks
+                    # reset the barrier, waking up tasks
                     self._state = _BarrierState.RESETTING
             else:
                 self._state = _BarrierState.FILLING

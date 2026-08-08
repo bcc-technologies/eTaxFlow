@@ -30,7 +30,7 @@ def getline(filename, lineno, module_globals=None):
     lines = getlines(filename, module_globals)
     if 1 <= lineno <= len(lines):
         return lines[lineno - 1]
-    return ''
+    return ""
 
 
 def getlines(filename, module_globals=None):
@@ -70,7 +70,7 @@ def checkcache(filename=None):
             continue
         size, mtime, lines, fullname = entry
         if mtime is None:
-            continue   # no-op for files loaded via a __loader__
+            continue  # no-op for files loaded via a __loader__
         try:
             stat = os.stat(fullname)
         except (OSError, ValueError):
@@ -88,7 +88,7 @@ def updatecache(filename, module_globals=None):
     if filename in cache:
         if len(cache[filename]) != 1:
             cache.pop(filename, None)
-    if not filename or (filename.startswith('<') and filename.endswith('>')):
+    if not filename or (filename.startswith("<") and filename.endswith(">")):
         return []
 
     fullname = filename
@@ -112,8 +112,8 @@ def updatecache(filename, module_globals=None):
                 cache[filename] = (
                     len(data),
                     None,
-                    [line + '\n' for line in data.splitlines()],
-                    fullname
+                    [line + "\n" for line in data.splitlines()],
+                    fullname,
                 )
                 return cache[filename][2]
 
@@ -142,8 +142,8 @@ def updatecache(filename, module_globals=None):
             lines = fp.readlines()
     except (OSError, UnicodeDecodeError, SyntaxError):
         return []
-    if lines and not lines[-1].endswith('\n'):
-        lines[-1] += '\n'
+    if lines and not lines[-1].endswith("\n"):
+        lines[-1] += "\n"
     size, mtime = stat.st_size, stat.st_mtime
     cache[filename] = size, mtime, lines, fullname
     return lines
@@ -167,16 +167,16 @@ def lazycache(filename, module_globals):
             return True
         else:
             return False
-    if not filename or (filename.startswith('<') and filename.endswith('>')):
+    if not filename or (filename.startswith("<") and filename.endswith(">")):
         return False
     # Try for a __loader__, if available
-    if module_globals and '__name__' in module_globals:
-        spec = module_globals.get('__spec__')
-        name = getattr(spec, 'name', None) or module_globals['__name__']
-        loader = getattr(spec, 'loader', None)
+    if module_globals and "__name__" in module_globals:
+        spec = module_globals.get("__spec__")
+        name = getattr(spec, "name", None) or module_globals["__name__"]
+        loader = getattr(spec, "loader", None)
         if loader is None:
-            loader = module_globals.get('__loader__')
-        get_source = getattr(loader, 'get_source', None)
+            loader = module_globals.get("__loader__")
+        get_source = getattr(loader, "get_source", None)
 
         if name and get_source:
             get_lines = functools.partial(get_source, name)

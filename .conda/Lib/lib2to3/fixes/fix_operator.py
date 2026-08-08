@@ -20,6 +20,7 @@ def invocation(s):
     def dec(f):
         f.invocation = s
         return f
+
     return dec
 
 

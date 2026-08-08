@@ -28,12 +28,13 @@ Examples:
                                        in MyTestCase
 """
 
+
 def _convert_name(name):
     # on Linux / Mac OS X 'foo.PY' is not importable, but on
     # Windows it is. Simpler to do a case insensitive match
     # a better check would be to check that the name is a
     # valid Python module name.
-    if os.path.isfile(name) and name.lower().endswith('.py'):
+    if os.path.isfile(name) and name.lower().endswith(".py"):
         if os.path.isabs(name):
             rel_path = os.path.relpath(name, os.getcwd())
             if os.path.isabs(rel_path) or rel_path.startswith(os.pardir):
@@ -41,37 +42,51 @@ def _convert_name(name):
             name = rel_path
         # on Windows both '\' and '/' are used as path
         # separators. Better to replace both than rely on os.path.sep
-        return os.path.normpath(name)[:-3].replace('\\', '.').replace('/', '.')
+        return os.path.normpath(name)[:-3].replace("\\", ".").replace("/", ".")
     return name
+
 
 def _convert_names(names):
     return [_convert_name(name) for name in names]
 
 
 def _convert_select_pattern(pattern):
-    if not '*' in pattern:
-        pattern = '*%s*' % pattern
+    if not "*" in pattern:
+        pattern = "*%s*" % pattern
     return pattern
 
 
 class TestProgram(object):
     """A command-line program that runs a set of tests; this is primarily
-       for making test modules conveniently executable.
+    for making test modules conveniently executable.
     """
+
     # defaults for testing
-    module=None
+    module = None
     verbosity = 1
     failfast = catchbreak = buffer = progName = warnings = testNamePatterns = None
     _discovery_parser = None
 
-    def __init__(self, module='__main__', defaultTest=None, argv=None,
-                    testRunner=None, testLoader=loader.defaultTestLoader,
-                    exit=True, verbosity=1, failfast=None, catchbreak=None,
-                    buffer=None, warnings=None, *, tb_locals=False,
-                    durations=None):
+    def __init__(
+        self,
+        module="__main__",
+        defaultTest=None,
+        argv=None,
+        testRunner=None,
+        testLoader=loader.defaultTestLoader,
+        exit=True,
+        verbosity=1,
+        failfast=None,
+        catchbreak=None,
+        buffer=None,
+        warnings=None,
+        *,
+        tb_locals=False,
+        durations=None
+    ):
         if isinstance(module, str):
             self.module = __import__(module)
-            for part in module.split('.')[1:]:
+            for part in module.split(".")[1:]:
                 self.module = getattr(self.module, part)
         else:
             self.module = module
@@ -89,7 +104,7 @@ class TestProgram(object):
             # even if DeprecationWarnings are ignored by default
             # print them anyway unless other warnings settings are
             # specified by the warnings arg or the -W python flag
-            self.warnings = 'default'
+            self.warnings = "default"
         else:
             # here self.warnings is set either to the value passed
             # to the warnings args or to None.
@@ -105,8 +120,11 @@ class TestProgram(object):
         self.runTests()
 
     def usageExit(self, msg=None):
-        warnings.warn("TestProgram.usageExit() is deprecated and will be"
-                      " removed in Python 3.13", DeprecationWarning)
+        warnings.warn(
+            "TestProgram.usageExit() is deprecated and will be"
+            " removed in Python 3.13",
+            DeprecationWarning,
+        )
         if msg:
             print(msg)
         if self._discovery_parser is None:
@@ -117,16 +135,16 @@ class TestProgram(object):
     def _print_help(self, *args, **kwargs):
         if self.module is None:
             print(self._main_parser.format_help())
-            print(MAIN_EXAMPLES % {'prog': self.progName})
+            print(MAIN_EXAMPLES % {"prog": self.progName})
             self._discovery_parser.print_help()
         else:
             print(self._main_parser.format_help())
-            print(MODULE_EXAMPLES % {'prog': self.progName})
+            print(MODULE_EXAMPLES % {"prog": self.progName})
 
     def parseArgs(self, argv):
         self._initArgParsers()
         if self.module is None:
-            if len(argv) > 1 and argv[1].lower() == 'discover':
+            if len(argv) > 1 and argv[1].lower() == "discover":
                 self._do_discovery(argv[2:])
                 return
             self._main_parser.parse_args(argv[1:], self)
@@ -140,7 +158,7 @@ class TestProgram(object):
 
         if self.tests:
             self.testNames = _convert_names(self.tests)
-            if __name__ == '__main__':
+            if __name__ == "__main__":
                 # to support python -m unittest ...
                 self.module = None
         elif self.defaultTest is None:
@@ -161,8 +179,7 @@ class TestProgram(object):
         elif self.testNames is None:
             self.test = self.testLoader.loadTestsFromModule(self.module)
         else:
-            self.test = self.testLoader.loadTestsFromNames(self.testNames,
-                                                           self.module)
+            self.test = self.testLoader.loadTestsFromNames(self.testNames, self.module)
 
     def _initArgParsers(self):
         parent_parser = self._getParentArgParser()
@@ -172,37 +189,71 @@ class TestProgram(object):
     def _getParentArgParser(self):
         parser = argparse.ArgumentParser(add_help=False)
 
-        parser.add_argument('-v', '--verbose', dest='verbosity',
-                            action='store_const', const=2,
-                            help='Verbose output')
-        parser.add_argument('-q', '--quiet', dest='verbosity',
-                            action='store_const', const=0,
-                            help='Quiet output')
-        parser.add_argument('--locals', dest='tb_locals',
-                            action='store_true',
-                            help='Show local variables in tracebacks')
-        parser.add_argument('--durations', dest='durations', type=int,
-                            default=None, metavar="N",
-                            help='Show the N slowest test cases (N=0 for all)')
+        parser.add_argument(
+            "-v",
+            "--verbose",
+            dest="verbosity",
+            action="store_const",
+            const=2,
+            help="Verbose output",
+        )
+        parser.add_argument(
+            "-q",
+            "--quiet",
+            dest="verbosity",
+            action="store_const",
+            const=0,
+            help="Quiet output",
+        )
+        parser.add_argument(
+            "--locals",
+            dest="tb_locals",
+            action="store_true",
+            help="Show local variables in tracebacks",
+        )
+        parser.add_argument(
+            "--durations",
+            dest="durations",
+            type=int,
+            default=None,
+            metavar="N",
+            help="Show the N slowest test cases (N=0 for all)",
+        )
         if self.failfast is None:
-            parser.add_argument('-f', '--failfast', dest='failfast',
-                                action='store_true',
-                                help='Stop on first fail or error')
+            parser.add_argument(
+                "-f",
+                "--failfast",
+                dest="failfast",
+                action="store_true",
+                help="Stop on first fail or error",
+            )
             self.failfast = False
         if self.catchbreak is None:
-            parser.add_argument('-c', '--catch', dest='catchbreak',
-                                action='store_true',
-                                help='Catch Ctrl-C and display results so far')
+            parser.add_argument(
+                "-c",
+                "--catch",
+                dest="catchbreak",
+                action="store_true",
+                help="Catch Ctrl-C and display results so far",
+            )
             self.catchbreak = False
         if self.buffer is None:
-            parser.add_argument('-b', '--buffer', dest='buffer',
-                                action='store_true',
-                                help='Buffer stdout and stderr during tests')
+            parser.add_argument(
+                "-b",
+                "--buffer",
+                dest="buffer",
+                action="store_true",
+                help="Buffer stdout and stderr during tests",
+            )
             self.buffer = False
         if self.testNamePatterns is None:
-            parser.add_argument('-k', dest='testNamePatterns',
-                                action='append', type=_convert_select_pattern,
-                                help='Only run tests which match the given substring')
+            parser.add_argument(
+                "-k",
+                dest="testNamePatterns",
+                action="append",
+                type=_convert_select_pattern,
+                help="Only run tests which match the given substring",
+            )
             self.testNamePatterns = []
 
         return parser
@@ -212,36 +263,51 @@ class TestProgram(object):
         parser.prog = self.progName
         parser.print_help = self._print_help
 
-        parser.add_argument('tests', nargs='*',
-                            help='a list of any number of test modules, '
-                            'classes and test methods.')
+        parser.add_argument(
+            "tests",
+            nargs="*",
+            help="a list of any number of test modules, " "classes and test methods.",
+        )
 
         return parser
 
     def _getDiscoveryArgParser(self, parent):
         parser = argparse.ArgumentParser(parents=[parent])
-        parser.prog = '%s discover' % self.progName
-        parser.epilog = ('For test discovery all test modules must be '
-                         'importable from the top level directory of the '
-                         'project.')
+        parser.prog = "%s discover" % self.progName
+        parser.epilog = (
+            "For test discovery all test modules must be "
+            "importable from the top level directory of the "
+            "project."
+        )
 
-        parser.add_argument('-s', '--start-directory', dest='start',
-                            help="Directory to start discovery ('.' default)")
-        parser.add_argument('-p', '--pattern', dest='pattern',
-                            help="Pattern to match tests ('test*.py' default)")
-        parser.add_argument('-t', '--top-level-directory', dest='top',
-                            help='Top level directory of project (defaults to '
-                                 'start directory)')
-        for arg in ('start', 'pattern', 'top'):
-            parser.add_argument(arg, nargs='?',
-                                default=argparse.SUPPRESS,
-                                help=argparse.SUPPRESS)
+        parser.add_argument(
+            "-s",
+            "--start-directory",
+            dest="start",
+            help="Directory to start discovery ('.' default)",
+        )
+        parser.add_argument(
+            "-p",
+            "--pattern",
+            dest="pattern",
+            help="Pattern to match tests ('test*.py' default)",
+        )
+        parser.add_argument(
+            "-t",
+            "--top-level-directory",
+            dest="top",
+            help="Top level directory of project (defaults to " "start directory)",
+        )
+        for arg in ("start", "pattern", "top"):
+            parser.add_argument(
+                arg, nargs="?", default=argparse.SUPPRESS, help=argparse.SUPPRESS
+            )
 
         return parser
 
     def _do_discovery(self, argv, Loader=None):
-        self.start = '.'
-        self.pattern = 'test*.py'
+        self.start = "."
+        self.pattern = "test*.py"
         self.top = None
         if argv is not None:
             # handle command line args for test discovery
@@ -260,18 +326,22 @@ class TestProgram(object):
         if isinstance(self.testRunner, type):
             try:
                 try:
-                    testRunner = self.testRunner(verbosity=self.verbosity,
-                                                 failfast=self.failfast,
-                                                 buffer=self.buffer,
-                                                 warnings=self.warnings,
-                                                 tb_locals=self.tb_locals,
-                                                 durations=self.durations)
+                    testRunner = self.testRunner(
+                        verbosity=self.verbosity,
+                        failfast=self.failfast,
+                        buffer=self.buffer,
+                        warnings=self.warnings,
+                        tb_locals=self.tb_locals,
+                        durations=self.durations,
+                    )
                 except TypeError:
                     # didn't accept the tb_locals or durations argument
-                    testRunner = self.testRunner(verbosity=self.verbosity,
-                                                 failfast=self.failfast,
-                                                 buffer=self.buffer,
-                                                 warnings=self.warnings)
+                    testRunner = self.testRunner(
+                        verbosity=self.verbosity,
+                        failfast=self.failfast,
+                        buffer=self.buffer,
+                        warnings=self.warnings,
+                    )
             except TypeError:
                 # didn't accept the verbosity, buffer or failfast arguments
                 testRunner = self.testRunner()

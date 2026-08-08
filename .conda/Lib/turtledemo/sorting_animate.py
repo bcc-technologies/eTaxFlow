@@ -15,6 +15,7 @@ stretched to rectangles by shapesize()
        To exit press space button
  ---------------------------------------
 """
+
 from turtle import *
 import random
 
@@ -25,7 +26,7 @@ class Block(Turtle):
         self.size = size
         Turtle.__init__(self, shape="square", visible=False)
         self.pu()
-        self.shapesize(size * 1.5, 1.5, 2) # square-->rectangle
+        self.shapesize(size * 1.5, 1.5, 2)  # square-->rectangle
         self.fillcolor("black")
         self.st()
 
@@ -81,6 +82,7 @@ class Shelf(list):
         b.sety(self.y + y_offset)
         b.unglow()
 
+
 def isort(shelf):
     length = len(shelf)
     for i in range(1, length):
@@ -89,6 +91,7 @@ def isort(shelf):
             hole = hole - 1
         shelf.insert(hole, shelf.pop(i))
     return
+
 
 def ssort(shelf):
     length = len(shelf)
@@ -100,16 +103,18 @@ def ssort(shelf):
         if imin != j:
             shelf.insert(j, shelf.pop(imin))
 
+
 def partition(shelf, left, right, pivot_index):
     pivot = shelf[pivot_index]
     shelf.insert(right, shelf.pop(pivot_index))
     store_index = left
-    for i in range(left, right): # range is non-inclusive of ending value
+    for i in range(left, right):  # range is non-inclusive of ending value
         if shelf[i].size < pivot.size:
             shelf.insert(store_index, shelf.pop(i))
             store_index = store_index + 1
-    shelf.insert(store_index, shelf.pop(right)) # move pivot to correct position
+    shelf.insert(store_index, shelf.pop(right))  # move pivot to correct position
     return store_index
+
 
 def qsort(shelf, left, right):
     if left < right:
@@ -117,6 +122,7 @@ def qsort(shelf, left, right):
         pivot_new_index = partition(shelf, left, right, pivot_index)
         qsort(shelf, left, pivot_new_index - 1)
         qsort(shelf, pivot_new_index + 1, right)
+
 
 def randomize():
     disable_keys()
@@ -131,10 +137,12 @@ def randomize():
     show_text(instructions2, line=1)
     enable_keys()
 
+
 def show_text(text, line=0):
     line = 20 * line
-    goto(0,-250 - line)
+    goto(0, -250 - line)
     write(text, align="center", font=("Courier", 16, "bold"))
+
 
 def start_ssort():
     disable_keys()
@@ -146,6 +154,7 @@ def start_ssort():
     show_text(instructions2, line=1)
     enable_keys()
 
+
 def start_isort():
     disable_keys()
     clear()
@@ -155,6 +164,7 @@ def start_isort():
     show_text(instructions1)
     show_text(instructions2, line=1)
     enable_keys()
+
 
 def start_qsort():
     disable_keys()
@@ -166,6 +176,7 @@ def start_qsort():
     show_text(instructions2, line=1)
     enable_keys()
 
+
 def init_shelf():
     global s
     s = Shelf(-200)
@@ -173,11 +184,13 @@ def init_shelf():
     for i in vals:
         s.push(Block(i))
 
+
 def disable_keys():
     onkey(None, "s")
     onkey(None, "i")
     onkey(None, "q")
     onkey(None, "r")
+
 
 def enable_keys():
     onkey(start_isort, "i")
@@ -186,9 +199,11 @@ def enable_keys():
     onkey(randomize, "r")
     onkey(bye, "space")
 
+
 def main():
     getscreen().clearscreen()
-    ht(); penup()
+    ht()
+    penup()
     init_shelf()
     show_text(instructions1)
     show_text(instructions2, line=1)
@@ -196,9 +211,10 @@ def main():
     listen()
     return "EVENTLOOP"
 
+
 instructions1 = "press i for insertion sort, s for selection sort, q for quicksort"
 instructions2 = "spacebar to quit, r to randomize"
 
-if __name__=="__main__":
+if __name__ == "__main__":
     msg = main()
     mainloop()

@@ -1,4 +1,4 @@
-'''Complete the current word before the cursor with words in the editor.
+"""Complete the current word before the cursor with words in the editor.
 
 Each menu selection or shortcut key selection replaces the word with a
 different word with the same prefix. The search for matches begins
@@ -11,7 +11,8 @@ place before requesting the next selection causes AutoExpand to reset
 its state.
 
 There is only one instance of Autoexpand.
-'''
+"""
+
 import re
 import string
 
@@ -44,7 +45,7 @@ class AutoExpand:
         newword = words[index]
         index = (index + 1) % len(words)
         if index == 0:
-            self.bell()            # Warn we cycled around
+            self.bell()  # Warn we cycled around
         self.text.insert("insert", newword)
         curinsert = self.text.index("insert")
         curline = self.text.get("insert linestart", "insert lineend")
@@ -86,11 +87,12 @@ class AutoExpand:
         "Return the word prefix before the cursor."
         line = self.text.get("insert linestart", "insert")
         i = len(line)
-        while i > 0 and line[i-1] in self.wordchars:
-            i = i-1
+        while i > 0 and line[i - 1] in self.wordchars:
+            i = i - 1
         return line[i:]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_autoexpand', verbosity=2)
+
+    main("idlelib.idle_test.test_autoexpand", verbosity=2)

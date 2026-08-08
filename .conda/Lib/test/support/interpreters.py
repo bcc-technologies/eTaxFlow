@@ -7,17 +7,26 @@ import _xxinterpchannels as _channels
 # aliases:
 from _xxsubinterpreters import is_shareable, RunFailedError
 from _xxinterpchannels import (
-    ChannelError, ChannelNotFoundError, ChannelEmptyError,
+    ChannelError,
+    ChannelNotFoundError,
+    ChannelEmptyError,
 )
 
-
 __all__ = [
-    'Interpreter', 'get_current', 'get_main', 'create', 'list_all',
-    'SendChannel', 'RecvChannel',
-    'create_channel', 'list_all_channels', 'is_shareable',
-    'ChannelError', 'ChannelNotFoundError',
-    'ChannelEmptyError',
-    ]
+    "Interpreter",
+    "get_current",
+    "get_main",
+    "create",
+    "list_all",
+    "SendChannel",
+    "RecvChannel",
+    "create_channel",
+    "list_all_channels",
+    "is_shareable",
+    "ChannelError",
+    "ChannelNotFoundError",
+    "ChannelEmptyError",
+]
 
 
 def create(*, isolated=True):
@@ -48,13 +57,13 @@ class Interpreter:
 
     def __init__(self, id, *, isolated=None):
         if not isinstance(id, (int, _interpreters.InterpreterID)):
-            raise TypeError(f'id must be an int, got {id!r}')
+            raise TypeError(f"id must be an int, got {id!r}")
         self._id = id
         self._isolated = isolated
 
     def __repr__(self):
         data = dict(id=int(self._id), isolated=self._isolated)
-        kwargs = (f'{k}={v!r}' for k, v in data.items())
+        kwargs = (f"{k}={v!r}" for k, v in data.items())
         return f'{type(self).__name__}({", ".join(kwargs)})'
 
     def __hash__(self):
@@ -110,8 +119,7 @@ def create_channel():
 
 def list_all_channels():
     """Return a list of (recv, send) for all open channels."""
-    return [(RecvChannel(cid), SendChannel(cid))
-            for cid in _channels.list_all()]
+    return [(RecvChannel(cid), SendChannel(cid)) for cid in _channels.list_all()]
 
 
 class _ChannelEnd:
@@ -119,11 +127,11 @@ class _ChannelEnd:
 
     def __init__(self, id):
         if not isinstance(id, (int, _channels.ChannelID)):
-            raise TypeError(f'id must be an int, got {id!r}')
+            raise TypeError(f"id must be an int, got {id!r}")
         self._id = id
 
     def __repr__(self):
-        return f'{type(self).__name__}(id={int(self._id)})'
+        return f"{type(self).__name__}(id={int(self._id)})"
 
     def __hash__(self):
         return hash(self._id)

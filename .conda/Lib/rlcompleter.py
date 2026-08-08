@@ -38,8 +38,9 @@ import __main__
 
 __all__ = ["Completer"]
 
+
 class Completer:
-    def __init__(self, namespace = None):
+    def __init__(self, namespace=None):
         """Create a new completer for the command line.
 
         Completer([namespace]) -> completer instance.
@@ -55,7 +56,7 @@ class Completer:
         """
 
         if namespace and not isinstance(namespace, dict):
-            raise TypeError('namespace must be a dictionary')
+            raise TypeError("namespace must be a dictionary")
 
         # Don't bind to namespace quite yet, but flag whether the user wants a
         # specific namespace or to use __main__.__dict__. This will allow us
@@ -79,11 +80,11 @@ class Completer:
         if not text.strip():
             if state == 0:
                 if _readline_available:
-                    readline.insert_text('\t')
+                    readline.insert_text("\t")
                     readline.redisplay()
-                    return ''
+                    return ""
                 else:
-                    return '\t'
+                    return "\t"
             else:
                 return None
 
@@ -121,12 +122,19 @@ class Completer:
         for word in keyword.kwlist + keyword.softkwlist:
             if word[:n] == text:
                 seen.add(word)
-                if word in {'finally', 'try'}:
-                    word = word + ':'
-                elif word not in {'False', 'None', 'True',
-                                  'break', 'continue', 'pass',
-                                  'else', '_'}:
-                    word = word + ' '
+                if word in {"finally", "try"}:
+                    word = word + ":"
+                elif word not in {
+                    "False",
+                    "None",
+                    "True",
+                    "break",
+                    "continue",
+                    "pass",
+                    "else",
+                    "_",
+                }:
+                    word = word + " "
                 matches.append(word)
         for nspace in [self.namespace, builtins.__dict__]:
             for word, val in nspace.items():
@@ -160,24 +168,22 @@ class Completer:
         words = set(dir(thisobject))
         words.discard("__builtins__")
 
-        if hasattr(thisobject, '__class__'):
-            words.add('__class__')
+        if hasattr(thisobject, "__class__"):
+            words.add("__class__")
             words.update(get_class_members(thisobject.__class__))
         matches = []
         n = len(attr)
-        if attr == '':
-            noprefix = '_'
-        elif attr == '_':
-            noprefix = '__'
+        if attr == "":
+            noprefix = "_"
+        elif attr == "_":
+            noprefix = "__"
         else:
             noprefix = None
         while True:
             for word in words:
-                if (word[:n] == attr and
-                    not (noprefix and word[:n+1] == noprefix)):
+                if word[:n] == attr and not (noprefix and word[: n + 1] == noprefix):
                     match = "%s.%s" % (expr, word)
-                    if isinstance(getattr(type(thisobject), word, None),
-                                  property):
+                    if isinstance(getattr(type(thisobject), word, None), property):
                         # bpo-44752: thisobject.word is a method decorated by
                         # `@property`. What follows applies a postfix if
                         # thisobject.word is callable, but know we know that
@@ -192,19 +198,21 @@ class Completer:
                         matches.append(match)
             if matches or not noprefix:
                 break
-            if noprefix == '_':
-                noprefix = '__'
+            if noprefix == "_":
+                noprefix = "__"
             else:
                 noprefix = None
         matches.sort()
         return matches
 
+
 def get_class_members(klass):
     ret = dir(klass)
-    if hasattr(klass,'__bases__'):
+    if hasattr(klass, "__bases__"):
         for base in klass.__bases__:
             ret = ret + get_class_members(base)
     return ret
+
 
 try:
     import readline

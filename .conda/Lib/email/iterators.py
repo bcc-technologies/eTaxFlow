@@ -5,11 +5,11 @@
 """Various types of useful iterators and generators."""
 
 __all__ = [
-    'body_line_iterator',
-    'typed_subpart_iterator',
-    'walk',
+    "body_line_iterator",
+    "typed_subpart_iterator",
+    "walk",
     # Do not include _structure() since it's part of the debugging API.
-    ]
+]
 
 import sys
 from io import StringIO
@@ -40,7 +40,7 @@ def body_line_iterator(msg, decode=False):
             yield from StringIO(payload)
 
 
-def typed_subpart_iterator(msg, maintype='text', subtype=None):
+def typed_subpart_iterator(msg, maintype="text", subtype=None):
     """Iterate over the subparts with a given MIME type.
 
     Use `maintype' as the main MIME type to match against; this defaults to
@@ -57,12 +57,12 @@ def _structure(msg, fp=None, level=0, include_default=False):
     """A handy debugging aid"""
     if fp is None:
         fp = sys.stdout
-    tab = ' ' * (level * 4)
-    print(tab + msg.get_content_type(), end='', file=fp)
+    tab = " " * (level * 4)
+    print(tab + msg.get_content_type(), end="", file=fp)
     if include_default:
-        print(' [%s]' % msg.get_default_type(), file=fp)
+        print(" [%s]" % msg.get_default_type(), file=fp)
     else:
         print(file=fp)
     if msg.is_multipart():
         for subpart in msg.get_payload():
-            _structure(subpart, fp, level+1, include_default)
+            _structure(subpart, fp, level + 1, include_default)

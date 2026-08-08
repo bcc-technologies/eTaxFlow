@@ -31,10 +31,10 @@ class FileReader(abc.TraversableResources):
 
 class ZipReader(abc.TraversableResources):
     def __init__(self, loader, module):
-        self.prefix = loader.prefix.replace('\\', '/')
+        self.prefix = loader.prefix.replace("\\", "/")
         if loader.is_package(module):
-            _, _, name = module.rpartition('.')
-            self.prefix += name + '/'
+            _, _, name = module.rpartition(".")
+            self.prefix += name + "/"
         self.archive = loader.archive
 
     def open_resource(self, resource):
@@ -66,22 +66,22 @@ class MultiplexedPath(abc.Traversable):
     def __init__(self, *paths):
         self._paths = list(map(pathlib.Path, remove_duplicates(paths)))
         if not self._paths:
-            message = 'MultiplexedPath must contain at least one path'
+            message = "MultiplexedPath must contain at least one path"
             raise FileNotFoundError(message)
         if not all(path.is_dir() for path in self._paths):
-            raise NotADirectoryError('MultiplexedPath only supports directories')
+            raise NotADirectoryError("MultiplexedPath only supports directories")
 
     def iterdir(self):
         children = (child for path in self._paths for child in path.iterdir())
-        by_name = operator.attrgetter('name')
+        by_name = operator.attrgetter("name")
         groups = itertools.groupby(sorted(children, key=by_name), key=by_name)
         return map(self._follow, (locs for name, locs in groups))
 
     def read_bytes(self):
-        raise FileNotFoundError(f'{self} is not a file')
+        raise FileNotFoundError(f"{self} is not a file")
 
     def read_text(self, *args, **kwargs):
-        raise FileNotFoundError(f'{self} is not a file')
+        raise FileNotFoundError(f"{self} is not a file")
 
     def is_dir(self):
         return True
@@ -117,21 +117,21 @@ class MultiplexedPath(abc.Traversable):
                 return next(one_file)
 
     def open(self, *args, **kwargs):
-        raise FileNotFoundError(f'{self} is not a file')
+        raise FileNotFoundError(f"{self} is not a file")
 
     @property
     def name(self):
         return self._paths[0].name
 
     def __repr__(self):
-        paths = ', '.join(f"'{path}'" for path in self._paths)
-        return f'MultiplexedPath({paths})'
+        paths = ", ".join(f"'{path}'" for path in self._paths)
+        return f"MultiplexedPath({paths})"
 
 
 class NamespaceReader(abc.TraversableResources):
     def __init__(self, namespace_path):
-        if 'NamespacePath' not in str(namespace_path):
-            raise ValueError('Invalid path')
+        if "NamespacePath" not in str(namespace_path):
+            raise ValueError("Invalid path")
         self.path = MultiplexedPath(*list(namespace_path))
 
     def resource_path(self, resource):

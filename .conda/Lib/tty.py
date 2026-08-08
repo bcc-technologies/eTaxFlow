@@ -15,13 +15,26 @@ ISPEED = 4
 OSPEED = 5
 CC = 6
 
+
 def cfmakeraw(mode):
     """Make termios mode raw."""
     # Clear all POSIX.1-2017 input mode flags.
     # See chapter 11 "General Terminal Interface"
     # of POSIX.1-2017 Base Definitions.
-    mode[IFLAG] &= ~(IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK | ISTRIP |
-                     INLCR | IGNCR | ICRNL | IXON | IXANY | IXOFF)
+    mode[IFLAG] &= ~(
+        IGNBRK
+        | BRKINT
+        | IGNPAR
+        | PARMRK
+        | INPCK
+        | ISTRIP
+        | INLCR
+        | IGNCR
+        | ICRNL
+        | IXON
+        | IXANY
+        | IXOFF
+    )
 
     # Do not post-process output.
     mode[OFLAG] &= ~OPOST
@@ -32,8 +45,9 @@ def cfmakeraw(mode):
     mode[CFLAG] |= CS8
 
     # Clear all POSIX.1-2017 local mode flags.
-    mode[LFLAG] &= ~(ECHO | ECHOE | ECHOK | ECHONL | ICANON |
-                     IEXTEN | ISIG | NOFLSH | TOSTOP)
+    mode[LFLAG] &= ~(
+        ECHO | ECHOE | ECHOK | ECHONL | ICANON | IEXTEN | ISIG | NOFLSH | TOSTOP
+    )
 
     # POSIX.1-2017, 11.1.7 Non-Canonical Mode Input Processing,
     # Case B: MIN>0, TIME=0
@@ -42,6 +56,7 @@ def cfmakeraw(mode):
     mode[CC] = list(mode[CC])
     mode[CC][VMIN] = 1
     mode[CC][VTIME] = 0
+
 
 def cfmakecbreak(mode):
     """Make termios mode cbreak."""
@@ -56,6 +71,7 @@ def cfmakecbreak(mode):
     mode[CC][VMIN] = 1
     mode[CC][VTIME] = 0
 
+
 def setraw(fd, when=TCSAFLUSH):
     """Put terminal into raw mode."""
     mode = tcgetattr(fd)
@@ -63,6 +79,7 @@ def setraw(fd, when=TCSAFLUSH):
     cfmakeraw(new)
     tcsetattr(fd, when, new)
     return mode
+
 
 def setcbreak(fd, when=TCSAFLUSH):
     """Put terminal into cbreak mode."""

@@ -52,5 +52,5 @@ def main():
         probe_den(nd)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

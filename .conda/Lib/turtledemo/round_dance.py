@@ -1,4 +1,4 @@
-"""      turtle-example-suite:
+"""turtle-example-suite:
 
          tdemo_round_dance.py
 
@@ -24,9 +24,11 @@ controlled through update().
 
 from turtle import *
 
+
 def stop():
     global running
     running = False
+
 
 def main():
     global running
@@ -34,7 +36,7 @@ def main():
     bgcolor("gray10")
     tracer(False)
     shape("triangle")
-    f =   0.793402
+    f = 0.793402
     phi = 9.064678
     s = 5
     c = 1
@@ -42,11 +44,11 @@ def main():
     sh = Shape("compound")
     for i in range(10):
         shapesize(s)
-        p =get_shapepoly()
+        p = get_shapepoly()
         s *= f
         c *= f
         tilt(-phi)
-        sh.addcomponent(p, (c, 0.25, 1-c), "black")
+        sh.addcomponent(p, (c, 0.25, 1 - c), "black")
     register_shape("multitri", sh)
     # create dancers
     shapesize(1)
@@ -81,6 +83,7 @@ def main():
         update()
     return "DONE!"
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     print(main())
     mainloop()

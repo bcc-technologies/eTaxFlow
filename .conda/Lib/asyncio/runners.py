@@ -1,4 +1,4 @@
-__all__ = ('Runner', 'run')
+__all__ = ("Runner", "run")
 
 import contextvars
 import enum
@@ -10,6 +10,7 @@ from . import events
 from . import exceptions
 from . import tasks
 from . import constants
+
 
 class _State(enum.Enum):
     CREATED = "created"
@@ -70,7 +71,8 @@ class Runner:
             _cancel_all_tasks(loop)
             loop.run_until_complete(loop.shutdown_asyncgens())
             loop.run_until_complete(
-                loop.shutdown_default_executor(constants.THREAD_JOIN_TIMEOUT))
+                loop.shutdown_default_executor(constants.THREAD_JOIN_TIMEOUT)
+            )
         finally:
             if self._set_event_loop:
                 events.set_event_loop(None)
@@ -91,7 +93,8 @@ class Runner:
         if events._get_running_loop() is not None:
             # fail fast with short traceback
             raise RuntimeError(
-                "Runner.run() cannot be called from a running event loop")
+                "Runner.run() cannot be called from a running event loop"
+            )
 
         self._lazy_init()
 
@@ -99,7 +102,8 @@ class Runner:
             context = self._context
         task = self._loop.create_task(coro, context=context)
 
-        if (threading.current_thread() is threading.main_thread()
+        if (
+            threading.current_thread() is threading.main_thread()
             and signal.getsignal(signal.SIGINT) is signal.default_int_handler
         ):
             sigint_handler = functools.partial(self._on_sigint, main_task=task)
@@ -123,7 +127,8 @@ class Runner:
                     raise KeyboardInterrupt()
             raise  # CancelledError
         finally:
-            if (sigint_handler is not None
+            if (
+                sigint_handler is not None
                 and signal.getsignal(signal.SIGINT) is sigint_handler
             ):
                 signal.signal(signal.SIGINT, signal.default_int_handler)
@@ -188,8 +193,7 @@ def run(main, *, debug=None, loop_factory=None):
     """
     if events._get_running_loop() is not None:
         # fail fast with short traceback
-        raise RuntimeError(
-            "asyncio.run() cannot be called from a running event loop")
+        raise RuntimeError("asyncio.run() cannot be called from a running event loop")
 
     with Runner(debug=debug, loop_factory=loop_factory) as runner:
         return runner.run(main)
@@ -209,8 +213,10 @@ def _cancel_all_tasks(loop):
         if task.cancelled():
             continue
         if task.exception() is not None:
-            loop.call_exception_handler({
-                'message': 'unhandled exception during asyncio.run() shutdown',
-                'exception': task.exception(),
-                'task': task,
-            })
+            loop.call_exception_handler(
+                {
+                    "message": "unhandled exception during asyncio.run() shutdown",
+                    "exception": task.exception(),
+                    "task": task,
+                }
+            )

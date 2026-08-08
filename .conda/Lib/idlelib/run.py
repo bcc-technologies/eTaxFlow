@@ -1,9 +1,10 @@
-""" idlelib.run
+"""idlelib.run
 
 Simplified, pyshell.ModifiedInterpreter spawns a subprocess with
 f'''{sys.executable} -c "__import__('idlelib.run').run.main()"'''
 '.run' is needed because __import__ returns idlelib, not idlelib.run.
 """
+
 import contextlib
 import functools
 import io
@@ -28,23 +29,30 @@ from idlelib import stackviewer  # StackTreeItem
 import __main__
 
 import tkinter  # Use tcl and, if startup fails, messagebox.
-if not hasattr(sys.modules['idlelib.run'], 'firstrun'):
-    # Undo modifications of tkinter by idlelib imports; see bpo-25507.
-    for mod in ('simpledialog', 'messagebox', 'font',
-                'dialog', 'filedialog', 'commondialog',
-                'ttk'):
-        delattr(tkinter, mod)
-        del sys.modules['tkinter.' + mod]
-    # Avoid AttributeError if run again; see bpo-37038.
-    sys.modules['idlelib.run'].firstrun = False
 
-LOCALHOST = '127.0.0.1'
+if not hasattr(sys.modules["idlelib.run"], "firstrun"):
+    # Undo modifications of tkinter by idlelib imports; see bpo-25507.
+    for mod in (
+        "simpledialog",
+        "messagebox",
+        "font",
+        "dialog",
+        "filedialog",
+        "commondialog",
+        "ttk",
+    ):
+        delattr(tkinter, mod)
+        del sys.modules["tkinter." + mod]
+    # Avoid AttributeError if run again; see bpo-37038.
+    sys.modules["idlelib.run"].firstrun = False
+
+LOCALHOST = "127.0.0.1"
 
 try:
-    eof = 'Ctrl-D (end-of-file)'
+    eof = "Ctrl-D (end-of-file)"
     exit.eof = eof
     quit.eof = eof
-except NameError: # In case subprocess started with -S (maybe in future).
+except NameError:  # In case subprocess started with -S (maybe in future).
     pass
 
 
@@ -52,7 +60,7 @@ def idle_formatwarning(message, category, filename, lineno, line=None):
     """Format warnings the IDLE way."""
 
     s = "\nWarning (from warnings module):\n"
-    s += f'  File \"{filename}\", line {lineno}\n'
+    s += f'  File "{filename}", line {lineno}\n'
     if line is None:
         line = linecache.getline(filename, lineno)
     line = line.strip()
@@ -61,8 +69,8 @@ def idle_formatwarning(message, category, filename, lineno, line=None):
     s += f"{category.__name__}: {message}\n"
     return s
 
-def idle_showwarning_subproc(
-        message, category, filename, lineno, file=None, line=None):
+
+def idle_showwarning_subproc(message, category, filename, lineno, file=None, line=None):
     """Show Idle-format warning after replacing warnings.showwarning.
 
     The only difference is the formatter called.
@@ -70,12 +78,13 @@ def idle_showwarning_subproc(
     if file is None:
         file = sys.stderr
     try:
-        file.write(idle_formatwarning(
-                message, category, filename, lineno, line))
+        file.write(idle_formatwarning(message, category, filename, lineno, line))
     except OSError:
-        pass # the file (probably stderr) is invalid - this warning gets lost.
+        pass  # the file (probably stderr) is invalid - this warning gets lost.
+
 
 _warnings_showwarning = None
+
 
 def capture_warnings(capture):
     "Replace warning.showwarning with idle_showwarning_subproc, or reverse."
@@ -90,14 +99,17 @@ def capture_warnings(capture):
             warnings.showwarning = _warnings_showwarning
             _warnings_showwarning = None
 
+
 capture_warnings(True)
 tcl = tkinter.Tcl()
+
 
 def handle_tk_events(tcl=tcl):
     """Process any tk events that are ready to be dispatched if tkinter
     has been imported, a tcl interpreter has been created and tk has been
     loaded."""
     tcl.eval("update")
+
 
 # Thread shared globals: Establish a queue between a subthread (which handles
 # the socket) and the main thread (which runs user code), plus global
@@ -106,6 +118,7 @@ def handle_tk_events(tcl=tcl):
 exit_now = False
 quitting = False
 interruptible = False
+
 
 def main(del_exitfunc=False):
     """Start the Python execution server in a subprocess
@@ -129,22 +142,22 @@ def main(del_exitfunc=False):
     global quitting
     global no_exitfunc
     no_exitfunc = del_exitfunc
-    #time.sleep(15) # test subprocess not responding
+    # time.sleep(15) # test subprocess not responding
     try:
-        assert(len(sys.argv) > 1)
+        assert len(sys.argv) > 1
         port = int(sys.argv[-1])
     except:
-        print("IDLE Subprocess: no IP port passed in sys.argv.",
-              file=sys.__stderr__)
+        print("IDLE Subprocess: no IP port passed in sys.argv.", file=sys.__stderr__)
         return
 
     capture_warnings(True)
     sys.argv[:] = [""]
-    threading.Thread(target=manage_socket,
-                     name='SockThread',
-                     args=((LOCALHOST, port),),
-                     daemon=True,
-                    ).start()
+    threading.Thread(
+        target=manage_socket,
+        name="SockThread",
+        args=((LOCALHOST, port),),
+        daemon=True,
+    ).start()
 
     while True:
         try:
@@ -185,6 +198,7 @@ def main(del_exitfunc=False):
             else:
                 continue
 
+
 def manage_socket(address):
     for i in range(3):
         time.sleep(i)
@@ -192,32 +206,39 @@ def manage_socket(address):
             server = MyRPCServer(address, MyHandler)
             break
         except OSError as err:
-            print("IDLE Subprocess: OSError: " + err.args[1] +
-                  ", retrying....", file=sys.__stderr__)
+            print(
+                "IDLE Subprocess: OSError: " + err.args[1] + ", retrying....",
+                file=sys.__stderr__,
+            )
             socket_error = err
     else:
-        print("IDLE Subprocess: Connection to "
-              "IDLE GUI failed, exiting.", file=sys.__stderr__)
+        print(
+            "IDLE Subprocess: Connection to " "IDLE GUI failed, exiting.",
+            file=sys.__stderr__,
+        )
         show_socket_error(socket_error, address)
         global exit_now
         exit_now = True
         return
-    server.handle_request() # A single request only
+    server.handle_request()  # A single request only
+
 
 def show_socket_error(err, address):
     "Display socket error from manage_socket."
     import tkinter
     from tkinter.messagebox import showerror
+
     root = tkinter.Tk()
     fix_scaling(root)
     root.withdraw()
     showerror(
-            "Subprocess Connection Error",
-            f"IDLE's subprocess can't connect to {address[0]}:{address[1]}.\n"
-            f"Fatal OSError #{err.errno}: {err.strerror}.\n"
-            "See the 'Startup failure' section of the IDLE doc, online at\n"
-            "https://docs.python.org/3/library/idle.html#startup-failure",
-            parent=root)
+        "Subprocess Connection Error",
+        f"IDLE's subprocess can't connect to {address[0]}:{address[1]}.\n"
+        f"Fatal OSError #{err.errno}: {err.strerror}.\n"
+        "See the 'Startup failure' section of the IDLE doc, online at\n"
+        "https://docs.python.org/3/library/idle.html#startup-failure",
+        parent=root,
+    )
     root.destroy()
 
 
@@ -235,6 +256,7 @@ def get_message_lines(typ, exc, tb):
 
 def print_exception():
     import linecache
+
     linecache.checkcache()
     flush_stdout()
     efile = sys.stderr
@@ -249,26 +271,41 @@ def print_exception():
         cause = exc.__cause__
         if cause is not None and id(cause) not in seen:
             print_exc(type(cause), cause, cause.__traceback__)
-            print("\nThe above exception was the direct cause "
-                  "of the following exception:\n", file=efile)
-        elif (context is not None and
-              not exc.__suppress_context__ and
-              id(context) not in seen):
+            print(
+                "\nThe above exception was the direct cause "
+                "of the following exception:\n",
+                file=efile,
+            )
+        elif (
+            context is not None
+            and not exc.__suppress_context__
+            and id(context) not in seen
+        ):
             print_exc(type(context), context, context.__traceback__)
-            print("\nDuring handling of the above exception, "
-                  "another exception occurred:\n", file=efile)
+            print(
+                "\nDuring handling of the above exception, "
+                "another exception occurred:\n",
+                file=efile,
+            )
         if tb:
             tbe = traceback.extract_tb(tb)
-            print('Traceback (most recent call last):', file=efile)
-            exclude = ("run.py", "rpc.py", "threading.py", "queue.py",
-                       "debugger_r.py", "bdb.py")
+            print("Traceback (most recent call last):", file=efile)
+            exclude = (
+                "run.py",
+                "rpc.py",
+                "threading.py",
+                "queue.py",
+                "debugger_r.py",
+                "bdb.py",
+            )
             cleanup_traceback(tbe, exclude)
             traceback.print_list(tbe, file=efile)
         lines = get_message_lines(typ, exc, tb)
         for line in lines:
-            print(line, end='', file=efile)
+            print(line, end="", file=efile)
 
     print_exc(typ, val, tb)
+
 
 def cleanup_traceback(tb, exclude):
     "Remove excluded traces from beginning/end of tb; get cached lines"
@@ -276,9 +313,9 @@ def cleanup_traceback(tb, exclude):
     while tb:
         for rpcfile in exclude:
             if tb[0][0].count(rpcfile):
-                break    # found an exclude, break for: and delete tb[0]
+                break  # found an exclude, break for: and delete tb[0]
         else:
-            break        # no excludes, have left RPC code, break while:
+            break  # no excludes, have left RPC code, break while:
         del tb[0]
     while tb:
         for rpcfile in exclude:
@@ -291,18 +328,19 @@ def cleanup_traceback(tb, exclude):
         # exception was in IDLE internals, don't prune!
         tb[:] = orig_tb[:]
         print("** IDLE Internal Exception: ", file=sys.stderr)
-    rpchandler = rpc.objecttable['exec'].rpchandler
+    rpchandler = rpc.objecttable["exec"].rpchandler
     for i in range(len(tb)):
         fn, ln, nm, line = tb[i]
-        if nm == '?':
+        if nm == "?":
             nm = "-toplevel-"
         if not line and fn.startswith("<pyshell#"):
-            line = rpchandler.remotecall('linecache', 'getline',
-                                              (fn, ln), {})
+            line = rpchandler.remotecall("linecache", "getline", (fn, ln), {})
         tb[i] = fn, ln, nm, line
+
 
 def flush_stdout():
     """XXX How to do this now?"""
+
 
 def exit():
     """Exit subprocess, possibly after first clearing exit functions.
@@ -314,6 +352,7 @@ def exit():
     """
     if no_exitfunc:
         import atexit
+
         atexit._clear()
     capture_warnings(False)
     sys.exit(0)
@@ -322,20 +361,23 @@ def exit():
 def fix_scaling(root):
     """Scale fonts on HiDPI displays."""
     import tkinter.font
-    scaling = float(root.tk.call('tk', 'scaling'))
+
+    scaling = float(root.tk.call("tk", "scaling"))
     if scaling > 1.4:
         for name in tkinter.font.names(root):
             font = tkinter.font.Font(root=root, name=name, exists=True)
-            size = int(font['size'])
+            size = int(font["size"])
             if size < 0:
-                font['size'] = round(-0.75*size)
+                font["size"] = round(-0.75 * size)
 
 
 def fixdoc(fun, text):
-    tem = (fun.__doc__ + '\n\n') if fun.__doc__ is not None else ''
+    tem = (fun.__doc__ + "\n\n") if fun.__doc__ is not None else ""
     fun.__doc__ = tem + textwrap.fill(textwrap.dedent(text))
 
+
 RECURSIONLIMIT_DELTA = 30
+
 
 def install_recursionlimit_wrappers():
     """Install wrappers to always add 30 to the recursion limit."""
@@ -345,30 +387,36 @@ def install_recursionlimit_wrappers():
     def setrecursionlimit(*args, **kwargs):
         # mimic the original sys.setrecursionlimit()'s input handling
         if kwargs:
-            raise TypeError(
-                "setrecursionlimit() takes no keyword arguments")
+            raise TypeError("setrecursionlimit() takes no keyword arguments")
         try:
-            limit, = args
+            (limit,) = args
         except ValueError:
-            raise TypeError(f"setrecursionlimit() takes exactly one "
-                            f"argument ({len(args)} given)")
+            raise TypeError(
+                f"setrecursionlimit() takes exactly one "
+                f"argument ({len(args)} given)"
+            )
         if not limit > 0:
-            raise ValueError(
-                "recursion limit must be greater or equal than 1")
+            raise ValueError("recursion limit must be greater or equal than 1")
 
         return setrecursionlimit.__wrapped__(limit + RECURSIONLIMIT_DELTA)
 
-    fixdoc(setrecursionlimit, f"""\
+    fixdoc(
+        setrecursionlimit,
+        f"""\
             This IDLE wrapper adds {RECURSIONLIMIT_DELTA} to prevent possible
-            uninterruptible loops.""")
+            uninterruptible loops.""",
+    )
 
     @functools.wraps(sys.getrecursionlimit)
     def getrecursionlimit():
         return getrecursionlimit.__wrapped__() - RECURSIONLIMIT_DELTA
 
-    fixdoc(getrecursionlimit, f"""\
+    fixdoc(
+        getrecursionlimit,
+        f"""\
             This IDLE wrapper subtracts {RECURSIONLIMIT_DELTA} to compensate
-            for the {RECURSIONLIMIT_DELTA} IDLE adds when setting the limit.""")
+            for the {RECURSIONLIMIT_DELTA} IDLE adds when setting the limit.""",
+    )
 
     # add the delta to the default recursion limit, to compensate
     sys.setrecursionlimit(sys.getrecursionlimit() + RECURSIONLIMIT_DELTA)
@@ -383,9 +431,8 @@ def uninstall_recursionlimit_wrappers():
     IDLE only uses this for tests. Users can import run and call
     this to remove the wrapping.
     """
-    if (
-            getattr(sys.setrecursionlimit, '__wrapped__', None) and
-            getattr(sys.getrecursionlimit, '__wrapped__', None)
+    if getattr(sys.setrecursionlimit, "__wrapped__", None) and getattr(
+        sys.getrecursionlimit, "__wrapped__", None
     ):
         sys.setrecursionlimit = sys.setrecursionlimit.__wrapped__
         sys.getrecursionlimit = sys.getrecursionlimit.__wrapped__
@@ -411,34 +458,41 @@ class MyRPCServer(rpc.RPCServer):
             thread.interrupt_main()
         except:
             erf = sys.__stderr__
-            print(textwrap.dedent(f"""
+            print(
+                textwrap.dedent(f"""
             {'-'*40}
             Unhandled exception in user code execution server!'
             Thread: {threading.current_thread().name}
             IDLE Client Address: {client_address}
             Request: {request!r}
-            """), file=erf)
+            """),
+                file=erf,
+            )
             traceback.print_exc(limit=-20, file=erf)
-            print(textwrap.dedent(f"""
+            print(
+                textwrap.dedent(f"""
             *** Unrecoverable, server exiting!
 
             Users should never see this message; it is likely transient.
             If this recurs, report this with a copy of the message
             and an explanation of how to make it repeat.
-            {'-'*40}"""), file=erf)
+            {'-'*40}"""),
+                file=erf,
+            )
             quitting = True
             thread.interrupt_main()
 
 
 # Pseudofiles for shell-remote communication (also used in pyshell)
 
+
 class StdioFile(io.TextIOBase):
 
-    def __init__(self, shell, tags, encoding='utf-8', errors='strict'):
+    def __init__(self, shell, tags, encoding="utf-8", errors="strict"):
         self.shell = shell
         # GH-78889: accessing unpickleable attributes freezes Shell.
         # IDLE only needs methods; allow 'width' for possible use.
-        self.shell._RPCProxy__attributes = {'width': 1}
+        self.shell._RPCProxy__attributes = {"width": 1}
         self.tags = tags
         self._encoding = encoding
         self._errors = errors
@@ -453,7 +507,7 @@ class StdioFile(io.TextIOBase):
 
     @property
     def name(self):
-        return '<%s>' % self.tags
+        return "<%s>" % self.tags
 
     def isatty(self):
         return True
@@ -472,7 +526,7 @@ class StdOutputFile(StdioFile):
 
 
 class StdInputFile(StdioFile):
-    _line_buffer = ''
+    _line_buffer = ""
 
     def readable(self):
         return True
@@ -483,16 +537,17 @@ class StdInputFile(StdioFile):
         if size is None:
             size = -1
         elif not isinstance(size, int):
-            raise TypeError('must be int, not ' + type(size).__name__)
+            raise TypeError("must be int, not " + type(size).__name__)
         result = self._line_buffer
-        self._line_buffer = ''
+        self._line_buffer = ""
         if size < 0:
             while line := self.shell.readline():
                 result += line
         else:
             while len(result) < size:
                 line = self.shell.readline()
-                if not line: break
+                if not line:
+                    break
                 result += line
             self._line_buffer = result[size:]
             result = result[:size]
@@ -504,11 +559,11 @@ class StdInputFile(StdioFile):
         if size is None:
             size = -1
         elif not isinstance(size, int):
-            raise TypeError('must be int, not ' + type(size).__name__)
+            raise TypeError("must be int, not " + type(size).__name__)
         line = self._line_buffer or self.shell.readline()
         if size < 0:
             size = len(line)
-        eol = line.find('\n', 0, size)
+        eol = line.find("\n", 0, size)
         if eol >= 0:
             size = eol + 1
         self._line_buffer = line[size:]
@@ -525,16 +580,18 @@ class MyHandler(rpc.RPCHandler):
         executive = Executive(self)
         self.register("exec", executive)
         self.console = self.get_remote_proxy("console")
-        sys.stdin = StdInputFile(self.console, "stdin",
-                                 iomenu.encoding, iomenu.errors)
-        sys.stdout = StdOutputFile(self.console, "stdout",
-                                   iomenu.encoding, iomenu.errors)
-        sys.stderr = StdOutputFile(self.console, "stderr",
-                                   iomenu.encoding, "backslashreplace")
+        sys.stdin = StdInputFile(self.console, "stdin", iomenu.encoding, iomenu.errors)
+        sys.stdout = StdOutputFile(
+            self.console, "stdout", iomenu.encoding, iomenu.errors
+        )
+        sys.stderr = StdOutputFile(
+            self.console, "stderr", iomenu.encoding, "backslashreplace"
+        )
 
         sys.displayhook = rpc.displayhook
         # page help() text to shell.
-        import pydoc # import must be done here to capture i/o binding
+        import pydoc  # import must be done here to capture i/o binding
+
         pydoc.pager = pydoc.plainpager
 
         # Keep a reference to stdin so that it won't try to exit IDLE if
@@ -587,7 +644,7 @@ class Executive:
             if e.args:  # SystemExit called with an argument.
                 ob = e.args[0]
                 if not isinstance(ob, (type(None), int)):
-                    print('SystemExit: ' + str(ob), file=sys.stderr)
+                    print("SystemExit: " + str(ob), file=sys.stderr)
             # Return to the interactive prompt.
         except:
             self.user_exc_info = sys.exc_info()  # For testing, hook, viewer.
@@ -639,8 +696,9 @@ class Executive:
         return debugobj_r.remote_object_tree_item(item)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_run', verbosity=2)
+
+    main("idlelib.idle_test.test_run", verbosity=2)
 
 capture_warnings(False)  # Make sure turned off; see bpo-18081.

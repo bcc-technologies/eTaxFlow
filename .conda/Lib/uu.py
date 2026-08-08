@@ -39,8 +39,10 @@ warnings._deprecated(__name__, remove=(3, 13))
 
 __all__ = ["Error", "encode", "decode"]
 
+
 class Error(Exception):
     pass
+
 
 def encode(in_file, out_file, name=None, mode=None, *, backtick=False):
     """Uuencode file"""
@@ -49,7 +51,7 @@ def encode(in_file, out_file, name=None, mode=None, *, backtick=False):
     #
     opened_files = []
     try:
-        if in_file == '-':
+        if in_file == "-":
             in_file = sys.stdin.buffer
         elif isinstance(in_file, str):
             if name is None:
@@ -59,42 +61,42 @@ def encode(in_file, out_file, name=None, mode=None, *, backtick=False):
                     mode = os.stat(in_file).st_mode
                 except AttributeError:
                     pass
-            in_file = open(in_file, 'rb')
+            in_file = open(in_file, "rb")
             opened_files.append(in_file)
         #
         # Open out_file if it is a pathname
         #
-        if out_file == '-':
+        if out_file == "-":
             out_file = sys.stdout.buffer
         elif isinstance(out_file, str):
-            out_file = open(out_file, 'wb')
+            out_file = open(out_file, "wb")
             opened_files.append(out_file)
         #
         # Set defaults for name and mode
         #
         if name is None:
-            name = '-'
+            name = "-"
         if mode is None:
             mode = 0o666
 
         #
         # Remove newline chars from name
         #
-        name = name.replace('\n','\\n')
-        name = name.replace('\r','\\r')
+        name = name.replace("\n", "\\n")
+        name = name.replace("\r", "\\r")
 
         #
         # Write the data
         #
-        out_file.write(('begin %o %s\n' % ((mode & 0o777), name)).encode("ascii"))
+        out_file.write(("begin %o %s\n" % ((mode & 0o777), name)).encode("ascii"))
         data = in_file.read(45)
         while len(data) > 0:
             out_file.write(binascii.b2a_uu(data, backtick=backtick))
             data = in_file.read(45)
         if backtick:
-            out_file.write(b'`\nend\n')
+            out_file.write(b"`\nend\n")
         else:
-            out_file.write(b' \nend\n')
+            out_file.write(b" \nend\n")
     finally:
         for f in opened_files:
             f.close()
@@ -106,10 +108,10 @@ def decode(in_file, out_file=None, mode=None, quiet=False):
     # Open the input file, if needed.
     #
     opened_files = []
-    if in_file == '-':
+    if in_file == "-":
         in_file = sys.stdin.buffer
     elif isinstance(in_file, str):
-        in_file = open(in_file, 'rb')
+        in_file = open(in_file, "rb")
         opened_files.append(in_file)
 
     try:
@@ -119,11 +121,11 @@ def decode(in_file, out_file=None, mode=None, quiet=False):
         while True:
             hdr = in_file.readline()
             if not hdr:
-                raise Error('No valid begin line found in input file')
-            if not hdr.startswith(b'begin'):
+                raise Error("No valid begin line found in input file")
+            if not hdr.startswith(b"begin"):
                 continue
-            hdrfields = hdr.split(b' ', 2)
-            if len(hdrfields) == 3 and hdrfields[0] == b'begin':
+            hdrfields = hdr.split(b" ", 2)
+            if len(hdrfields) == 3 and hdrfields[0] == b"begin":
                 try:
                     int(hdrfields[1], 8)
                     break
@@ -131,25 +133,29 @@ def decode(in_file, out_file=None, mode=None, quiet=False):
                     pass
         if out_file is None:
             # If the filename isn't ASCII, what's up with that?!?
-            out_file = hdrfields[2].rstrip(b' \t\r\n\f').decode("ascii")
+            out_file = hdrfields[2].rstrip(b" \t\r\n\f").decode("ascii")
             if os.path.exists(out_file):
-                raise Error(f'Cannot overwrite existing file: {out_file}')
-            if (out_file.startswith(os.sep) or
-                f'..{os.sep}' in out_file or (
-                    os.altsep and
-                    (out_file.startswith(os.altsep) or
-                     f'..{os.altsep}' in out_file))
-               ):
-                raise Error(f'Refusing to write to {out_file} due to directory traversal')
+                raise Error(f"Cannot overwrite existing file: {out_file}")
+            if (
+                out_file.startswith(os.sep)
+                or f"..{os.sep}" in out_file
+                or (
+                    os.altsep
+                    and (out_file.startswith(os.altsep) or f"..{os.altsep}" in out_file)
+                )
+            ):
+                raise Error(
+                    f"Refusing to write to {out_file} due to directory traversal"
+                )
         if mode is None:
             mode = int(hdrfields[1], 8)
         #
         # Open the output file
         #
-        if out_file == '-':
+        if out_file == "-":
             out_file = sys.stdout.buffer
         elif isinstance(out_file, str):
-            fp = open(out_file, 'wb')
+            fp = open(out_file, "wb")
             os.chmod(out_file, mode)
             out_file = fp
             opened_files.append(out_file)
@@ -157,34 +163,50 @@ def decode(in_file, out_file=None, mode=None, quiet=False):
         # Main decoding loop
         #
         s = in_file.readline()
-        while s and s.strip(b' \t\r\n\f') != b'end':
+        while s and s.strip(b" \t\r\n\f") != b"end":
             try:
                 data = binascii.a2b_uu(s)
             except binascii.Error as v:
                 # Workaround for broken uuencoders by /Fredrik Lundh
-                nbytes = (((s[0]-32) & 63) * 4 + 5) // 3
+                nbytes = (((s[0] - 32) & 63) * 4 + 5) // 3
                 data = binascii.a2b_uu(s[:nbytes])
                 if not quiet:
                     sys.stderr.write("Warning: %s\n" % v)
             out_file.write(data)
             s = in_file.readline()
         if not s:
-            raise Error('Truncated input file')
+            raise Error("Truncated input file")
     finally:
         for f in opened_files:
             f.close()
+
 
 def test():
     """uuencode/uudecode main program"""
 
     import optparse
-    parser = optparse.OptionParser(usage='usage: %prog [-d] [-t] [input [output]]')
-    parser.add_option('-d', '--decode', dest='decode', help='Decode (instead of encode)?', default=False, action='store_true')
-    parser.add_option('-t', '--text', dest='text', help='data is text, encoded format unix-compatible text?', default=False, action='store_true')
 
-    (options, args) = parser.parse_args()
+    parser = optparse.OptionParser(usage="usage: %prog [-d] [-t] [input [output]]")
+    parser.add_option(
+        "-d",
+        "--decode",
+        dest="decode",
+        help="Decode (instead of encode)?",
+        default=False,
+        action="store_true",
+    )
+    parser.add_option(
+        "-t",
+        "--text",
+        dest="text",
+        help="data is text, encoded format unix-compatible text?",
+        default=False,
+        action="store_true",
+    )
+
+    options, args = parser.parse_args()
     if len(args) > 2:
-        parser.error('incorrect number of arguments')
+        parser.error("incorrect number of arguments")
         sys.exit(1)
 
     # Use the binary streams underlying stdin/stdout
@@ -198,19 +220,20 @@ def test():
     if options.decode:
         if options.text:
             if isinstance(output, str):
-                output = open(output, 'wb')
+                output = open(output, "wb")
             else:
-                print(sys.argv[0], ': cannot do -t to stdout')
+                print(sys.argv[0], ": cannot do -t to stdout")
                 sys.exit(1)
         decode(input, output)
     else:
         if options.text:
             if isinstance(input, str):
-                input = open(input, 'rb')
+                input = open(input, "rb")
             else:
-                print(sys.argv[0], ': cannot do -t from stdin')
+                print(sys.argv[0], ": cannot do -t from stdin")
                 sys.exit(1)
         encode(input, output)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test()

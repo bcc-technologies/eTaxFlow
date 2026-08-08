@@ -1,7 +1,9 @@
 """A Future class similar to the one in PEP 3148."""
 
 __all__ = (
-    'Future', 'wrap_future', 'isfuture',
+    "Future",
+    "wrap_future",
+    "isfuture",
 )
 
 import concurrent.futures
@@ -14,7 +16,6 @@ from . import base_futures
 from . import events
 from . import exceptions
 from . import format_helpers
-
 
 isfuture = base_futures.isfuture
 
@@ -82,8 +83,7 @@ class Future:
             self._loop = loop
         self._callbacks = []
         if self._loop.get_debug():
-            self._source_traceback = format_helpers.extract_stack(
-                sys._getframe(1))
+            self._source_traceback = format_helpers.extract_stack(sys._getframe(1))
 
     def __repr__(self):
         return base_futures._future_repr(self)
@@ -95,13 +95,12 @@ class Future:
             return
         exc = self._exception
         context = {
-            'message':
-                f'{self.__class__.__name__} exception was never retrieved',
-            'exception': exc,
-            'future': self,
+            "message": f"{self.__class__.__name__} exception was never retrieved",
+            "exception": exc,
+            "future": self,
         }
         if self._source_traceback:
-            context['source_traceback'] = self._source_traceback
+            context["source_traceback"] = self._source_traceback
         self._loop.call_exception_handler(context)
 
     __class_getitem__ = classmethod(GenericAlias)
@@ -113,7 +112,7 @@ class Future:
     @_log_traceback.setter
     def _log_traceback(self, val):
         if val:
-            raise ValueError('_log_traceback can only be set to False')
+            raise ValueError("_log_traceback can only be set to False")
         self.__log_traceback = False
 
     def get_loop(self):
@@ -196,7 +195,7 @@ class Future:
         if self._state == _CANCELLED:
             raise self._make_cancelled_error()
         if self._state != _FINISHED:
-            raise exceptions.InvalidStateError('Result is not ready.')
+            raise exceptions.InvalidStateError("Result is not ready.")
         self.__log_traceback = False
         if self._exception is not None:
             raise self._exception.with_traceback(self._exception_tb)
@@ -213,7 +212,7 @@ class Future:
         if self._state == _CANCELLED:
             raise self._make_cancelled_error()
         if self._state != _FINISHED:
-            raise exceptions.InvalidStateError('Exception is not set.')
+            raise exceptions.InvalidStateError("Exception is not set.")
         self.__log_traceback = False
         return self._exception
 
@@ -238,9 +237,7 @@ class Future:
 
         Returns the number of callbacks removed.
         """
-        filtered_callbacks = [(f, ctx)
-                              for (f, ctx) in self._callbacks
-                              if f != fn]
+        filtered_callbacks = [(f, ctx) for (f, ctx) in self._callbacks if f != fn]
         removed_count = len(self._callbacks) - len(filtered_callbacks)
         if removed_count:
             self._callbacks[:] = filtered_callbacks
@@ -255,7 +252,7 @@ class Future:
         InvalidStateError.
         """
         if self._state != _PENDING:
-            raise exceptions.InvalidStateError(f'{self._state}: {self!r}')
+            raise exceptions.InvalidStateError(f"{self._state}: {self!r}")
         self._result = result
         self._state = _FINISHED
         self.__schedule_callbacks()
@@ -267,13 +264,15 @@ class Future:
         InvalidStateError.
         """
         if self._state != _PENDING:
-            raise exceptions.InvalidStateError(f'{self._state}: {self!r}')
+            raise exceptions.InvalidStateError(f"{self._state}: {self!r}")
         if isinstance(exception, type):
             exception = exception()
         if isinstance(exception, StopIteration):
-            new_exc = RuntimeError("StopIteration interacts badly with "
-                                   "generators and cannot be raised into a "
-                                   "Future")
+            new_exc = RuntimeError(
+                "StopIteration interacts badly with "
+                "generators and cannot be raised into a "
+                "Future"
+            )
             new_exc.__cause__ = exception
             new_exc.__context__ = exception
             exception = new_exc
@@ -371,12 +370,12 @@ def _chain_future(source, destination):
     If destination is cancelled, source gets cancelled too.
     Compatible with both asyncio.Future and concurrent.futures.Future.
     """
-    if not isfuture(source) and not isinstance(source,
-                                               concurrent.futures.Future):
-        raise TypeError('A future is required for source argument')
-    if not isfuture(destination) and not isinstance(destination,
-                                                    concurrent.futures.Future):
-        raise TypeError('A future is required for destination argument')
+    if not isfuture(source) and not isinstance(source, concurrent.futures.Future):
+        raise TypeError("A future is required for source argument")
+    if not isfuture(destination) and not isinstance(
+        destination, concurrent.futures.Future
+    ):
+        raise TypeError("A future is required for destination argument")
     source_loop = _get_loop(source) if isfuture(source) else None
     dest_loop = _get_loop(destination) if isfuture(destination) else None
 
@@ -394,8 +393,7 @@ def _chain_future(source, destination):
                 source_loop.call_soon_threadsafe(source.cancel)
 
     def _call_set_state(source):
-        if (destination.cancelled() and
-                dest_loop is not None and dest_loop.is_closed()):
+        if destination.cancelled() and dest_loop is not None and dest_loop.is_closed():
             return
         if dest_loop is None or dest_loop is source_loop:
             _set_state(destination, source)
@@ -412,8 +410,9 @@ def wrap_future(future, *, loop=None):
     """Wrap concurrent.futures.Future object."""
     if isfuture(future):
         return future
-    assert isinstance(future, concurrent.futures.Future), \
-        f'concurrent.futures.Future is expected, got {future!r}'
+    assert isinstance(
+        future, concurrent.futures.Future
+    ), f"concurrent.futures.Future is expected, got {future!r}"
     if loop is None:
         loop = events.get_event_loop()
     new_future = loop.create_future()

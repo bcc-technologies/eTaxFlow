@@ -14,6 +14,7 @@ Additionally, any output can be manually "squeezed" by the user. This includes
 output written to the standard error stream ("stderr"), such as exception
 messages and their tracebacks.
 """
+
 import re
 
 import tkinter as tk
@@ -45,7 +46,7 @@ def count_lines_with_wrapping(s, linewidth=80):
         current_column += numchars
 
         # Deal with tab or newline.
-        if s[pos] == '\n':
+        if s[pos] == "\n":
             # Avoid the `current_column == 0` edge-case, and while we're
             # at it, don't bother adding 0.
             if current_column > linewidth:
@@ -58,7 +59,7 @@ def count_lines_with_wrapping(s, linewidth=80):
             linecount += 1
             current_column = 0
         else:
-            assert s[pos] == '\t'
+            assert s[pos] == "\t"
             current_column += tabwidth - (current_column % tabwidth)
 
             # If a tab passes the end of the line, consider the entire
@@ -67,7 +68,7 @@ def count_lines_with_wrapping(s, linewidth=80):
                 linecount += 1
                 current_column = tabwidth
 
-        pos += 1 # After the tab or newline.
+        pos += 1  # After the tab or newline.
 
     # Process remaining chars (no more tabs or newlines).
     current_column += len(s) - pos
@@ -92,6 +93,7 @@ class ExpandingButton(tk.Button):
     Each button is tied to a Squeezer instance, and it knows to update the
     Squeezer instance when it is expanded (and therefore removed).
     """
+
     def __init__(self, s, tags, numoflines, squeezer):
         self.s = s
         self.tags = tags
@@ -104,12 +106,15 @@ class ExpandingButton(tk.Button):
 
         line_plurality = "lines" if numoflines != 1 else "line"
         button_text = f"Squeezed text ({numoflines} {line_plurality})."
-        tk.Button.__init__(self, text, text=button_text,
-                           background="#FFFFC0", activebackground="#FFFFE0")
-
-        button_tooltip_text = (
-            "Double-click to expand, right-click for more options."
+        tk.Button.__init__(
+            self,
+            text,
+            text=button_text,
+            background="#FFFFC0",
+            activebackground="#FFFFE0",
         )
+
+        button_tooltip_text = "Double-click to expand, right-click for more options."
         Hovertip(self, button_tooltip_text, hover_delay=80)
 
         self.bind("<Double-Button-1>", self.expand)
@@ -119,7 +124,8 @@ class ExpandingButton(tk.Button):
         else:
             self.bind("<Button-3>", self.context_menu_event)
         self.selection_handle(  # X windows only.
-            lambda offset, length: s[int(offset):int(offset) + int(length)])
+            lambda offset, length: s[int(offset) : int(offset) + int(length)]
+        )
 
         self.is_dangerous = None
         self.after_idle(self.set_is_dangerous)
@@ -127,11 +133,11 @@ class ExpandingButton(tk.Button):
     def set_is_dangerous(self):
         dangerous_line_len = 50 * self.text.winfo_width()
         self.is_dangerous = (
-            self.numoflines > 1000 or
-            len(self.s) > 50000 or
-            any(
+            self.numoflines > 1000
+            or len(self.s) > 50000
+            or any(
                 len(line_match.group(0)) >= dangerous_line_len
-                for line_match in re.finditer(r'[^\n]+', self.s)
+                for line_match in re.finditer(r"[^\n]+", self.s)
             )
         )
 
@@ -149,14 +155,18 @@ class ExpandingButton(tk.Button):
         if self.is_dangerous:
             confirm = messagebox.askokcancel(
                 title="Expand huge output?",
-                message="\n\n".join([
-                    "The squeezed output is very long: %d lines, %d chars.",
-                    "Expanding it could make IDLE slow or unresponsive.",
-                    "It is recommended to view or copy the output instead.",
-                    "Really expand?"
-                ]) % (self.numoflines, len(self.s)),
+                message="\n\n".join(
+                    [
+                        "The squeezed output is very long: %d lines, %d chars.",
+                        "Expanding it could make IDLE slow or unresponsive.",
+                        "It is recommended to view or copy the output instead.",
+                        "Really expand?",
+                    ]
+                )
+                % (self.numoflines, len(self.s)),
                 default=messagebox.CANCEL,
-                parent=self.text)
+                parent=self.text,
+            )
             if not confirm:
                 return "break"
 
@@ -179,13 +189,12 @@ class ExpandingButton(tk.Button):
 
         View the original text in a separate text viewer window.
         """
-        view_text(self.text, "Squeezed Output Viewer", self.s,
-                  modal=False, wrap='none')
+        view_text(self.text, "Squeezed Output Viewer", self.s, modal=False, wrap="none")
 
     rmenu_specs = (
         # Item structure: (label, method_name).
-        ('copy', 'copy'),
-        ('view', 'view'),
+        ("copy", "copy"),
+        ("view", "view"),
     )
 
     def context_menu_event(self, event):
@@ -203,12 +212,16 @@ class Squeezer:
     This avoids IDLE's shell slowing down considerably, and even becoming
     completely unresponsive, when very long outputs are written.
     """
+
     @classmethod
     def reload(cls):
         """Load class variables from config."""
         cls.auto_squeeze_min_lines = idleConf.GetOption(
-            "main", "PyShell", "auto-squeeze-min-lines",
-            type="int", default=50,
+            "main",
+            "PyShell",
+            "auto-squeeze-min-lines",
+            type="int",
+            default=50,
         )
 
     def __init__(self, editwin):
@@ -234,8 +247,7 @@ class Squeezer:
         # Twice the text widget's border width and internal padding;
         # pre-calculated here for the get_line_width() method.
         self.window_width_delta = 2 * (
-            int(text.cget('border')) +
-            int(text.cget('padx'))
+            int(text.cget("border")) + int(text.cget("padx"))
         )
 
         self.expandingbuttons = []
@@ -263,8 +275,7 @@ class Squeezer:
 
             # Insert the ExpandingButton into the Text widget.
             text.mark_gravity("iomark", tk.RIGHT)
-            text.window_create("iomark", window=expandingbutton,
-                               padx=3, pady=5)
+            text.window_create("iomark", window=expandingbutton, padx=3, pady=5)
             text.see("iomark")
             text.update()
             text.mark_gravity("iomark", tk.LEFT)
@@ -308,7 +319,7 @@ class Squeezer:
         s = self.text.get(start, end)
 
         # If the last char is a newline, remove it from the range.
-        if len(s) > 0 and s[-1] == '\n':
+        if len(s) > 0 and s[-1] == "\n":
             end = self.text.index("%s-1c" % end)
             s = s[:-1]
 
@@ -320,15 +331,15 @@ class Squeezer:
         expandingbutton = ExpandingButton(s, tag_name, numoflines, self)
 
         # insert the ExpandingButton to the Text
-        self.text.window_create(start, window=expandingbutton,
-                                padx=3, pady=5)
+        self.text.window_create(start, window=expandingbutton, padx=3, pady=5)
 
         # Insert the ExpandingButton to the list of ExpandingButtons,
         # while keeping the list ordered according to the position of
         # the buttons in the Text widget.
         i = len(self.expandingbuttons)
-        while i > 0 and self.text.compare(self.expandingbuttons[i-1],
-                                          ">", expandingbutton):
+        while i > 0 and self.text.compare(
+            self.expandingbuttons[i - 1], ">", expandingbutton
+        ):
             i -= 1
         self.expandingbuttons.insert(i, expandingbutton)
 
@@ -340,6 +351,7 @@ Squeezer.reload()
 
 if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_squeezer', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_squeezer", verbosity=2, exit=False)
 
     # Add htest.

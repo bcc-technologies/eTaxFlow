@@ -1,4 +1,5 @@
 """Utility code for constructing importers, etc."""
+
 from ._abc import Loader
 from ._bootstrap import module_from_spec
 from ._bootstrap import _resolve_name
@@ -23,14 +24,16 @@ def source_hash(source_bytes):
 
 def resolve_name(name, package):
     """Resolve a relative module name to an absolute one."""
-    if not name.startswith('.'):
+    if not name.startswith("."):
         return name
     elif not package:
-        raise ImportError(f'no package specified for {repr(name)} '
-                          '(required for relative module names)')
+        raise ImportError(
+            f"no package specified for {repr(name)} "
+            "(required for relative module names)"
+        )
     level = 0
     for character in name:
-        if character != '.':
+        if character != ".":
             break
         level += 1
     return _resolve_name(name[level:], package, level)
@@ -60,10 +63,10 @@ def _find_spec_from_path(name, path=None):
         try:
             spec = module.__spec__
         except AttributeError:
-            raise ValueError(f'{name}.__spec__ is not set') from None
+            raise ValueError(f"{name}.__spec__ is not set") from None
         else:
             if spec is None:
-                raise ValueError(f'{name}.__spec__ is None')
+                raise ValueError(f"{name}.__spec__ is None")
             return spec
 
 
@@ -84,17 +87,19 @@ def find_spec(name, package=None):
     In other words, relative module names (with leading dots) work.
 
     """
-    fullname = resolve_name(name, package) if name.startswith('.') else name
+    fullname = resolve_name(name, package) if name.startswith(".") else name
     if fullname not in sys.modules:
-        parent_name = fullname.rpartition('.')[0]
+        parent_name = fullname.rpartition(".")[0]
         if parent_name:
-            parent = __import__(parent_name, fromlist=['__path__'])
+            parent = __import__(parent_name, fromlist=["__path__"])
             try:
                 parent_path = parent.__path__
             except AttributeError as e:
                 raise ModuleNotFoundError(
                     f"__path__ attribute not found on {parent_name!r} "
-                    f"while trying to find {fullname!r}", name=fullname) from e
+                    f"while trying to find {fullname!r}",
+                    name=fullname,
+                ) from e
         else:
             parent_path = None
         return _find_spec(fullname, parent_path)
@@ -105,16 +110,17 @@ def find_spec(name, package=None):
         try:
             spec = module.__spec__
         except AttributeError:
-            raise ValueError(f'{name}.__spec__ is not set') from None
+            raise ValueError(f"{name}.__spec__ is not set") from None
         else:
             if spec is None:
-                raise ValueError(f'{name}.__spec__ is None')
+                raise ValueError(f"{name}.__spec__ is None")
             return spec
 
 
 # Normally we would use contextlib.contextmanager.  However, this module
 # is imported by runpy, which means we want to avoid any unnecessary
 # dependencies.  Thus we use a class.
+
 
 class _incompatible_extension_module_restrictions:
     """A context manager that can temporarily skip the compatibility check.
@@ -166,26 +172,25 @@ class _incompatible_extension_module_restrictions:
 
 
 class _LazyModule(types.ModuleType):
-
     """A subclass of the module type which triggers loading upon attribute access."""
 
     def __getattribute__(self, attr):
         """Trigger the load of the module and return the attribute."""
-        __spec__ = object.__getattribute__(self, '__spec__')
+        __spec__ = object.__getattribute__(self, "__spec__")
         loader_state = __spec__.loader_state
-        with loader_state['lock']:
+        with loader_state["lock"]:
             # Only the first thread to get the lock should trigger the load
             # and reset the module's class. The rest can now getattr().
-            if object.__getattribute__(self, '__class__') is _LazyModule:
+            if object.__getattribute__(self, "__class__") is _LazyModule:
                 # Reentrant calls from the same thread must be allowed to proceed without
                 # triggering the load again.
                 # exec_module() and self-referential imports are the primary ways this can
                 # happen, but in any case we must return something to avoid deadlock.
-                if loader_state['is_loading']:
+                if loader_state["is_loading"]:
                     return object.__getattribute__(self, attr)
-                loader_state['is_loading'] = True
+                loader_state["is_loading"] = True
 
-                __dict__ = object.__getattribute__(self, '__dict__')
+                __dict__ = object.__getattribute__(self, "__dict__")
 
                 # All module metadata must be gathered from __spec__ in order to avoid
                 # using mutated values.
@@ -194,7 +199,7 @@ class _LazyModule(types.ModuleType):
                 original_name = __spec__.name
                 # Figure out exactly what attributes were mutated between the creation
                 # of the module and now.
-                attrs_then = loader_state['__dict__']
+                attrs_then = loader_state["__dict__"]
                 attrs_now = __dict__
                 attrs_updated = {}
                 for key, value in attrs_now.items():
@@ -209,9 +214,11 @@ class _LazyModule(types.ModuleType):
                 # object was put into sys.modules.
                 if original_name in sys.modules:
                     if id(self) != id(sys.modules[original_name]):
-                        raise ValueError(f"module object for {original_name!r} "
-                                          "substituted in sys.modules during a lazy "
-                                          "load")
+                        raise ValueError(
+                            f"module object for {original_name!r} "
+                            "substituted in sys.modules during a lazy "
+                            "load"
+                        )
                 # Update after loading since that's what would happen in an eager
                 # loading situation.
                 __dict__.update(attrs_updated)
@@ -229,13 +236,12 @@ class _LazyModule(types.ModuleType):
 
 
 class LazyLoader(Loader):
-
     """A loader that creates a module which defers loading until attribute access."""
 
     @staticmethod
     def __check_eager_loader(loader):
-        if not hasattr(loader, 'exec_module'):
-            raise TypeError('loader must define exec_module()')
+        if not hasattr(loader, "exec_module"):
+            raise TypeError("loader must define exec_module()")
 
     @classmethod
     def factory(cls, loader):
@@ -255,6 +261,7 @@ class LazyLoader(Loader):
         # Threading is only needed for lazy loading, and importlib.util can
         # be pulled in at interpreter startup, so defer until needed.
         import threading
+
         module.__spec__.loader = self.loader
         module.__loader__ = self.loader
         # Don't need to worry about deep-copying as trying to set an attribute
@@ -262,9 +269,9 @@ class LazyLoader(Loader):
         # e.g. ``module.__spec__.loader = None`` would trigger a load from
         # trying to access module.__spec__.
         loader_state = {}
-        loader_state['__dict__'] = module.__dict__.copy()
-        loader_state['__class__'] = module.__class__
-        loader_state['lock'] = threading.RLock()
-        loader_state['is_loading'] = False
+        loader_state["__dict__"] = module.__dict__.copy()
+        loader_state["__class__"] = module.__class__
+        loader_state["lock"] = threading.RLock()
+        loader_state["is_loading"] = False
         module.__spec__.loader_state = loader_state
         module.__class__ = _LazyModule

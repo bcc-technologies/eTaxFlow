@@ -1,10 +1,10 @@
 """Subset of importlib.abc used to reduce importlib.util imports."""
+
 from . import _bootstrap
 import abc
 
 
 class Loader(metaclass=abc.ABCMeta):
-
     """Abstract base class for import loaders."""
 
     def create_module(self, spec):
@@ -33,7 +33,7 @@ class Loader(metaclass=abc.ABCMeta):
         functionality for this method.
 
         """
-        if not hasattr(self, 'exec_module'):
+        if not hasattr(self, "exec_module"):
             raise ImportError
         # Warning implemented in _load_module_shim().
         return _bootstrap._load_module_shim(self, fullname)

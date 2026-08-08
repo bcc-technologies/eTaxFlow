@@ -1,9 +1,11 @@
 """Fixer for __nonzero__ -> __bool__ methods."""
+
 # Author: Collin Winter
 
 # Local imports
 from .. import fixer_base
 from ..fixer_util import Name
+
 
 class FixNonzero(fixer_base.BaseFix):
     BM_compatible = True

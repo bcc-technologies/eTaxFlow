@@ -26,6 +26,7 @@ See the Idle run.main() docstring for further information on how this was
 accomplished in Idle.
 
 """
+
 import builtins
 import copyreg
 import io
@@ -42,17 +43,20 @@ import threading
 import traceback
 import types
 
+
 def unpickle_code(ms):
     "Return code object from marshal string ms."
     co = marshal.loads(ms)
     assert isinstance(co, types.CodeType)
     return co
 
+
 def pickle_code(co):
     "Return unpickle function and tuple with marshalled co code object."
     assert isinstance(co, types.CodeType)
     ms = marshal.dumps(co)
     return unpickle_code, (ms,)
+
 
 def dumps(obj, protocol=None):
     "Return pickled (or marshalled) string for obj."
@@ -67,8 +71,9 @@ class CodePickler(pickle.Pickler):
     dispatch_table = {types.CodeType: pickle_code, **copyreg.dispatch_table}
 
 
-BUFSIZE = 8*1024
-LOCALHOST = '127.0.0.1'
+BUFSIZE = 8 * 1024
+LOCALHOST = "127.0.0.1"
+
 
 class RPCServer(socketserver.TCPServer):
 
@@ -108,17 +113,18 @@ class RPCServer(socketserver.TCPServer):
             raise
         except:
             erf = sys.__stderr__
-            print('\n' + '-'*40, file=erf)
-            print('Unhandled server exception!', file=erf)
-            print('Thread: %s' % threading.current_thread().name, file=erf)
-            print('Client Address: ', client_address, file=erf)
-            print('Request: ', repr(request), file=erf)
+            print("\n" + "-" * 40, file=erf)
+            print("Unhandled server exception!", file=erf)
+            print("Thread: %s" % threading.current_thread().name, file=erf)
+            print("Client Address: ", client_address, file=erf)
+            print("Request: ", repr(request), file=erf)
             traceback.print_exc(file=erf)
-            print('\n*** Unrecoverable, server exiting!', file=erf)
-            print('-'*40, file=erf)
+            print("\n*** Unrecoverable, server exiting!", file=erf)
+            print("-" * 40, file=erf)
             os._exit(0)
 
-#----------------- end class RPCServer --------------------
+
+# ----------------- end class RPCServer --------------------
 
 objecttable = {}
 request_queue = queue.Queue(0)
@@ -188,14 +194,14 @@ class SocketIO:
             return ("ERROR", f"Unsupported method name: {methodname!r}")
         method = getattr(obj, methodname)
         try:
-            if how == 'CALL':
+            if how == "CALL":
                 ret = method(*args, **kwargs)
                 if isinstance(ret, RemoteObject):
                     ret = remoteref(ret)
                 return ("OK", ret)
-            elif how == 'QUEUE':
+            elif how == "QUEUE":
                 request_queue.put((seq, (method, args, kwargs)))
-                return("QUEUED", None)
+                return ("QUEUED", None)
             else:
                 return ("ERROR", "Unsupported message type: %s" % how)
         except SystemExit:
@@ -207,8 +213,10 @@ class SocketIO:
         except Exception as ex:
             return ("CALLEXC", ex)
         except:
-            msg = "*** Internal Error: rpc.py:SocketIO.localcall()\n\n"\
-                  " Object: %s \n Method: %s \n Args: %s\n"
+            msg = (
+                "*** Internal Error: rpc.py:SocketIO.localcall()\n\n"
+                " Object: %s \n Method: %s \n Args: %s\n"
+            )
             print(msg % (oid, method, args), file=sys.__stderr__)
             traceback.print_exc(file=sys.__stderr__)
             return ("EXCEPTION", None)
@@ -271,7 +279,7 @@ class SocketIO:
         raise SystemError(how, what)
 
     def decode_interrupthook(self):
-        ""
+        """"""
         raise EOFError
 
     def mainloop(self):
@@ -318,8 +326,9 @@ class SocketIO:
             while myseq not in self.responses:
                 cvar.wait()
             response = self.responses[myseq]
-            self.debug("_getresponse:%s: thread woke up: response: %s" %
-                       (myseq, response))
+            self.debug(
+                "_getresponse:%s: thread woke up: response: %s" % (myseq, response)
+            )
             del self.responses[myseq]
             del self.cvars[myseq]
             cvar.release()
@@ -345,9 +354,9 @@ class SocketIO:
                 raise OSError("socket no longer exists")
             s = s[n:]
 
-    buff = b''
+    buff = b""
     bufneed = 4
-    bufstate = 0 # meaning: 0 => reading count; 1 => reading data
+    bufstate = 0  # meaning: 0 => reading count; 1 => reading data
 
     def pollpacket(self, wait):
         self._stage0()
@@ -374,8 +383,8 @@ class SocketIO:
 
     def _stage1(self):
         if self.bufstate == 1 and len(self.buff) >= self.bufneed:
-            packet = self.buff[:self.bufneed]
-            self.buff = self.buff[self.bufneed:]
+            packet = self.buff[: self.bufneed]
+            self.buff = self.buff[self.bufneed :]
             self.bufneed = 4
             self.bufstate = 0
             return packet
@@ -425,7 +434,7 @@ class SocketIO:
                 pass
             else:
                 seq, response = qmsg
-                message = (seq, ('OK', response))
+                message = (seq, ("OK", response))
                 self.putmessage(message)
             # poll for message on link
             try:
@@ -444,8 +453,7 @@ class SocketIO:
             if how in ("CALL", "QUEUE"):
                 self.debug("pollresponse:%d:localcall:call:" % seq)
                 response = self.localcall(seq, resq)
-                self.debug("pollresponse:%d:localcall:response:%s"
-                           % (seq, response))
+                self.debug("pollresponse:%d:localcall:response:%s" % (seq, response))
                 if how == "CALL":
                     self.putmessage((seq, response))
                 elif how == "QUEUE":
@@ -474,7 +482,7 @@ class SocketIO:
         for key in self.cvars:
             cv = self.cvars[key]
             cv.acquire()
-            self.responses[key] = ('EOF', None)
+            self.responses[key] = ("EOF", None)
             cv.notify()
             cv.release()
         # call our (possibly overridden) exit function
@@ -484,7 +492,9 @@ class SocketIO:
         "Classes using rpc client/server can override to augment EOF action"
         pass
 
-#----------------- end class SocketIO --------------------
+
+# ----------------- end class SocketIO --------------------
+
 
 class RemoteObject:
     # Token mix-in class
@@ -509,7 +519,7 @@ class RPCHandler(socketserver.BaseRequestHandler, SocketIO):
     location = "#S"  # Server
 
     def __init__(self, sock, addr, svr):
-        svr.current_handler = self ## cgt xxx
+        svr.current_handler = self  ## cgt xxx
         SocketIO.__init__(self, sock)
         socketserver.BaseRequestHandler.__init__(self, sock, addr, svr)
 
@@ -526,7 +536,7 @@ class RPCClient(SocketIO):
     debugging = False
     location = "#C"  # Client
 
-    nextseq = 1 # Requests coming from the client are odd numbered
+    nextseq = 1  # Requests coming from the client are odd numbered
 
     def __init__(self, address, family=socket.AF_INET, type=socket.SOCK_STREAM):
         self.listening_sock = socket.socket(family, type)
@@ -564,19 +574,17 @@ class RPCProxy:
         if self.__attributes is None:
             self.__getattributes()
         if name in self.__attributes:
-            value = self.sockio.remotecall(self.oid, '__getattribute__',
-                                           (name,), {})
+            value = self.sockio.remotecall(self.oid, "__getattribute__", (name,), {})
             return value
         else:
             raise AttributeError(name)
 
     def __getattributes(self):
-        self.__attributes = self.sockio.remotecall(self.oid,
-                                                "__attributes__", (), {})
+        self.__attributes = self.sockio.remotecall(self.oid, "__attributes__", (), {})
 
     def __getmethods(self):
-        self.__methods = self.sockio.remotecall(self.oid,
-                                                "__methods__", (), {})
+        self.__methods = self.sockio.remotecall(self.oid, "__methods__", (), {})
+
 
 def _getmethods(obj, methods):
     # Helper to get a list of methods from an object
@@ -588,6 +596,7 @@ def _getmethods(obj, methods):
     if isinstance(obj, type):
         for super in obj.__bases__:
             _getmethods(super, methods)
+
 
 def _getattributes(obj, attributes):
     for name in dir(obj):
@@ -611,6 +620,7 @@ class MethodProxy:
 # XXX KBK 09Sep03  We need a proper unit test for this module.  Previously
 #                  existing test code was removed at Rev 1.27 (r34098).
 
+
 def displayhook(value):
     """Override standard display hook to use non-locale encoding"""
     if value is None:
@@ -622,14 +632,18 @@ def displayhook(value):
         sys.stdout.write(text)
     except UnicodeEncodeError:
         # let's use ascii while utf8-bmp codec doesn't present
-        encoding = 'ascii'
-        bytes = text.encode(encoding, 'backslashreplace')
-        text = bytes.decode(encoding, 'strict')
+        encoding = "ascii"
+        bytes = text.encode(encoding, "backslashreplace")
+        text = bytes.decode(encoding, "strict")
         sys.stdout.write(text)
     sys.stdout.write("\n")
     builtins._ = value
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_rpc', verbosity=2,)
+
+    main(
+        "idlelib.idle_test.test_rpc",
+        verbosity=2,
+    )

@@ -1,5 +1,6 @@
 from tkinter import TclError
 
+
 class WidgetRedirector:
     """Support for redirecting arbitrary widget subcommands.
 
@@ -24,8 +25,9 @@ class WidgetRedirector:
     of a Percolator chain.  At the bottom of the chain is a call to the
     original Tk widget operation.
     """
+
     def __init__(self, widget):
-        '''Initialize attributes and setup redirection.
+        """Initialize attributes and setup redirection.
 
         _operations: dict mapping operation name to new function.
         widget: the widget whose tcl command is to be intercepted.
@@ -34,11 +36,11 @@ class WidgetRedirector:
 
         Since renaming to orig fails with TclError when orig already
         exists, only one WidgetDirector can exist for a given widget.
-        '''
+        """
         self._operations = {}
-        self.widget = widget            # widget instance
-        self.tk = tk = widget.tk        # widget's root
-        w = widget._w                   # widget's (full) Tk pathname
+        self.widget = widget  # widget instance
+        self.tk = tk = widget.tk  # widget's root
+        w = widget._w  # widget's (full) Tk pathname
         self.orig = w + "_orig"
         # Rename the Tcl command within Tcl:
         tk.call("rename", w, self.orig)
@@ -64,7 +66,7 @@ class WidgetRedirector:
         # if instance is deleted after close, as in Percolator.
 
     def register(self, operation, function):
-        '''Return OriginalCommand(operation) after registering function.
+        """Return OriginalCommand(operation) after registering function.
 
         Registration adds an operation: function pair to ._operations.
         It also adds a widget function attribute that masks the tkinter
@@ -73,16 +75,16 @@ class WidgetRedirector:
 
         If a second function is registered for the same operation, the
         first function is replaced in both places.
-        '''
+        """
         self._operations[operation] = function
         setattr(self.widget, operation, function)
         return OriginalCommand(self, operation)
 
     def unregister(self, operation):
-        '''Return the function for the operation, or None.
+        """Return the function for the operation, or None.
 
         Deleting the instance attribute unmasks the class attribute.
-        '''
+        """
         if operation in self._operations:
             function = self._operations[operation]
             del self._operations[operation]
@@ -95,7 +97,7 @@ class WidgetRedirector:
             return None
 
     def dispatch(self, operation, *args):
-        '''Callback from Tcl which runs when the widget is referenced.
+        """Callback from Tcl which runs when the widget is referenced.
 
         If an operation has been registered in self._operations, apply the
         associated function to the args passed into Tcl. Otherwise, pass the
@@ -105,7 +107,7 @@ class WidgetRedirector:
         passed through to Tk.  Apply the function returned by self.register()
         to *args to accomplish that.  For an example, see colorizer.py.
 
-        '''
+        """
         m = self._operations.get(operation)
         try:
             if m:
@@ -117,7 +119,7 @@ class WidgetRedirector:
 
 
 class OriginalCommand:
-    '''Callable for original tk command that has been redirected.
+    """Callable for original tk command that has been redirected.
 
     Returned by .register; can be used in the function registered.
     redir = WidgetRedirector(text)
@@ -125,14 +127,14 @@ class OriginalCommand:
         print("insert", args)
         original_insert(*args)
     original_insert = redir.register("insert", my_insert)
-    '''
+    """
 
     def __init__(self, redir, operation):
-        '''Create .tk_call and .orig_and_operation for .__call__ method.
+        """Create .tk_call and .orig_and_operation for .__call__ method.
 
         .redir and .operation store the input args for __repr__.
         .tk and .orig copy attributes of .redir (probably not needed).
-        '''
+        """
         self.redir = redir
         self.operation = operation
         self.tk = redir.tk  # redundant with self.redir
@@ -153,21 +155,25 @@ def _widget_redirector(parent):  # htest #
 
     top = Toplevel(parent)
     top.title("Test WidgetRedirector")
-    x, y = map(int, parent.geometry().split('+')[1:])
+    x, y = map(int, parent.geometry().split("+")[1:])
     top.geometry("+%d+%d" % (x, y + 175))
     text = Text(top)
     text.pack()
     text.focus_set()
     redir = WidgetRedirector(text)
+
     def my_insert(*args):
         print("insert", args)
         original_insert(*args)
+
     original_insert = redir.register("insert", my_insert)
 
 
 if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_redirector', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_redirector", verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
+
     run(_widget_redirector)

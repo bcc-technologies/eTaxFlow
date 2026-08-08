@@ -108,33 +108,36 @@ Some of the things this checks:
     sys.stderr, because we only know it isn't called when the object
     is garbage collected).
 """
-__all__ = ['validator']
+
+__all__ = ["validator"]
 
 
 import re
 import sys
 import warnings
 
-header_re = re.compile(r'^[a-zA-Z][a-zA-Z0-9\-_]*$')
-bad_header_value_re = re.compile(r'[\000-\037]')
+header_re = re.compile(r"^[a-zA-Z][a-zA-Z0-9\-_]*$")
+bad_header_value_re = re.compile(r"[\000-\037]")
+
 
 class WSGIWarning(Warning):
     """
     Raised in response to WSGI-spec-related warnings
     """
 
+
 def assert_(cond, *args):
     if not cond:
         raise AssertionError(*args)
 
+
 def check_string_type(value, title):
-    if type (value) is str:
+    if type(value) is str:
         return value
-    raise AssertionError(
-        "{0} must be of type str (got {1})".format(title, repr(value)))
+    raise AssertionError("{0} must be of type str (got {1})".format(title, repr(value)))
+
 
 def validator(application):
-
     """
     When applied between a WSGI server and a WSGI application, this
     middleware will check for WSGI compliance on a number of levels.
@@ -157,8 +160,10 @@ def validator(application):
         start_response_started = []
 
         def start_response_wrapper(*args, **kw):
-            assert_(len(args) == 2 or len(args) == 3, (
-                "Invalid number of arguments: %s" % (args,)))
+            assert_(
+                len(args) == 2 or len(args) == 3,
+                ("Invalid number of arguments: %s" % (args,)),
+            )
             assert_(not kw, "No keyword arguments allowed")
             status = args[0]
             headers = args[1]
@@ -175,18 +180,21 @@ def validator(application):
             start_response_started.append(None)
             return WriteWrapper(start_response(*args))
 
-        environ['wsgi.input'] = InputWrapper(environ['wsgi.input'])
-        environ['wsgi.errors'] = ErrorWrapper(environ['wsgi.errors'])
+        environ["wsgi.input"] = InputWrapper(environ["wsgi.input"])
+        environ["wsgi.errors"] = ErrorWrapper(environ["wsgi.errors"])
 
         iterator = application(environ, start_response_wrapper)
-        assert_(iterator is not None and iterator != False,
-            "The application must return an iterator, if only an empty list")
+        assert_(
+            iterator is not None and iterator != False,
+            "The application must return an iterator, if only an empty list",
+        )
 
         check_iterator(iterator)
 
         return IteratorWrapper(iterator, start_response_started)
 
     return lint_app
+
 
 class InputWrapper:
 
@@ -220,6 +228,7 @@ class InputWrapper:
     def close(self):
         assert_(0, "input.close() must not be called")
 
+
 class ErrorWrapper:
 
     def __init__(self, wsgi_errors):
@@ -239,6 +248,7 @@ class ErrorWrapper:
     def close(self):
         assert_(0, "errors.close() must not be called")
 
+
 class WriteWrapper:
 
     def __init__(self, wsgi_writer):
@@ -248,6 +258,7 @@ class WriteWrapper:
         assert_(type(s) is bytes)
         self.writer(s)
 
+
 class PartialIteratorWrapper:
 
     def __init__(self, wsgi_iterator):
@@ -256,6 +267,7 @@ class PartialIteratorWrapper:
     def __iter__(self):
         # We want to make sure __iter__ is called
         return IteratorWrapper(self.iterator, None)
+
 
 class IteratorWrapper:
 
@@ -269,144 +281,197 @@ class IteratorWrapper:
         return self
 
     def __next__(self):
-        assert_(not self.closed,
-            "Iterator read after closed")
+        assert_(not self.closed, "Iterator read after closed")
         v = next(self.iterator)
         if type(v) is not bytes:
             assert_(False, "Iterator yielded non-bytestring (%r)" % (v,))
         if self.check_start_response is not None:
-            assert_(self.check_start_response,
-                "The application returns and we started iterating over its body, but start_response has not yet been called")
+            assert_(
+                self.check_start_response,
+                "The application returns and we started iterating over its body, but start_response has not yet been called",
+            )
             self.check_start_response = None
         return v
 
     def close(self):
         self.closed = True
-        if hasattr(self.original_iterator, 'close'):
+        if hasattr(self.original_iterator, "close"):
             self.original_iterator.close()
 
     def __del__(self):
         if not self.closed:
-            sys.stderr.write(
-                "Iterator garbage collected without being closed")
-        assert_(self.closed,
-            "Iterator garbage collected without being closed")
+            sys.stderr.write("Iterator garbage collected without being closed")
+        assert_(self.closed, "Iterator garbage collected without being closed")
+
 
 def check_environ(environ):
-    assert_(type(environ) is dict,
+    assert_(
+        type(environ) is dict,
         "Environment is not of the right type: %r (environment: %r)"
-        % (type(environ), environ))
+        % (type(environ), environ),
+    )
 
-    for key in ['REQUEST_METHOD', 'SERVER_NAME', 'SERVER_PORT',
-                'wsgi.version', 'wsgi.input', 'wsgi.errors',
-                'wsgi.multithread', 'wsgi.multiprocess',
-                'wsgi.run_once']:
-        assert_(key in environ,
-            "Environment missing required key: %r" % (key,))
+    for key in [
+        "REQUEST_METHOD",
+        "SERVER_NAME",
+        "SERVER_PORT",
+        "wsgi.version",
+        "wsgi.input",
+        "wsgi.errors",
+        "wsgi.multithread",
+        "wsgi.multiprocess",
+        "wsgi.run_once",
+    ]:
+        assert_(key in environ, "Environment missing required key: %r" % (key,))
 
-    for key in ['HTTP_CONTENT_TYPE', 'HTTP_CONTENT_LENGTH']:
-        assert_(key not in environ,
+    for key in ["HTTP_CONTENT_TYPE", "HTTP_CONTENT_LENGTH"]:
+        assert_(
+            key not in environ,
             "Environment should not have the key: %s "
-            "(use %s instead)" % (key, key[5:]))
+            "(use %s instead)" % (key, key[5:]),
+        )
 
-    if 'QUERY_STRING' not in environ:
+    if "QUERY_STRING" not in environ:
         warnings.warn(
-            'QUERY_STRING is not in the WSGI environment; the cgi '
-            'module will use sys.argv when this variable is missing, '
-            'so application errors are more likely',
-            WSGIWarning)
+            "QUERY_STRING is not in the WSGI environment; the cgi "
+            "module will use sys.argv when this variable is missing, "
+            "so application errors are more likely",
+            WSGIWarning,
+        )
 
     for key in environ.keys():
-        if '.' in key:
+        if "." in key:
             # Extension, we don't care about its type
             continue
-        assert_(type(environ[key]) is str,
+        assert_(
+            type(environ[key]) is str,
             "Environmental variable %s is not a string: %r (value: %r)"
-            % (key, type(environ[key]), environ[key]))
+            % (key, type(environ[key]), environ[key]),
+        )
 
-    assert_(type(environ['wsgi.version']) is tuple,
-        "wsgi.version should be a tuple (%r)" % (environ['wsgi.version'],))
-    assert_(environ['wsgi.url_scheme'] in ('http', 'https'),
-        "wsgi.url_scheme unknown: %r" % environ['wsgi.url_scheme'])
+    assert_(
+        type(environ["wsgi.version"]) is tuple,
+        "wsgi.version should be a tuple (%r)" % (environ["wsgi.version"],),
+    )
+    assert_(
+        environ["wsgi.url_scheme"] in ("http", "https"),
+        "wsgi.url_scheme unknown: %r" % environ["wsgi.url_scheme"],
+    )
 
-    check_input(environ['wsgi.input'])
-    check_errors(environ['wsgi.errors'])
+    check_input(environ["wsgi.input"])
+    check_errors(environ["wsgi.errors"])
 
     # @@: these need filling out:
-    if environ['REQUEST_METHOD'] not in (
-        'GET', 'HEAD', 'POST', 'OPTIONS', 'PATCH', 'PUT', 'DELETE', 'TRACE'):
+    if environ["REQUEST_METHOD"] not in (
+        "GET",
+        "HEAD",
+        "POST",
+        "OPTIONS",
+        "PATCH",
+        "PUT",
+        "DELETE",
+        "TRACE",
+    ):
         warnings.warn(
-            "Unknown REQUEST_METHOD: %r" % environ['REQUEST_METHOD'],
-            WSGIWarning)
+            "Unknown REQUEST_METHOD: %r" % environ["REQUEST_METHOD"], WSGIWarning
+        )
 
-    assert_(not environ.get('SCRIPT_NAME')
-            or environ['SCRIPT_NAME'].startswith('/'),
-        "SCRIPT_NAME doesn't start with /: %r" % environ['SCRIPT_NAME'])
-    assert_(not environ.get('PATH_INFO')
-            or environ['PATH_INFO'].startswith('/'),
-        "PATH_INFO doesn't start with /: %r" % environ['PATH_INFO'])
-    if environ.get('CONTENT_LENGTH'):
-        assert_(int(environ['CONTENT_LENGTH']) >= 0,
-            "Invalid CONTENT_LENGTH: %r" % environ['CONTENT_LENGTH'])
+    assert_(
+        not environ.get("SCRIPT_NAME") or environ["SCRIPT_NAME"].startswith("/"),
+        "SCRIPT_NAME doesn't start with /: %r" % environ["SCRIPT_NAME"],
+    )
+    assert_(
+        not environ.get("PATH_INFO") or environ["PATH_INFO"].startswith("/"),
+        "PATH_INFO doesn't start with /: %r" % environ["PATH_INFO"],
+    )
+    if environ.get("CONTENT_LENGTH"):
+        assert_(
+            int(environ["CONTENT_LENGTH"]) >= 0,
+            "Invalid CONTENT_LENGTH: %r" % environ["CONTENT_LENGTH"],
+        )
 
-    if not environ.get('SCRIPT_NAME'):
-        assert_('PATH_INFO' in environ,
+    if not environ.get("SCRIPT_NAME"):
+        assert_(
+            "PATH_INFO" in environ,
             "One of SCRIPT_NAME or PATH_INFO are required (PATH_INFO "
-            "should at least be '/' if SCRIPT_NAME is empty)")
-    assert_(environ.get('SCRIPT_NAME') != '/',
+            "should at least be '/' if SCRIPT_NAME is empty)",
+        )
+    assert_(
+        environ.get("SCRIPT_NAME") != "/",
         "SCRIPT_NAME cannot be '/'; it should instead be '', and "
-        "PATH_INFO should be '/'")
+        "PATH_INFO should be '/'",
+    )
+
 
 def check_input(wsgi_input):
-    for attr in ['read', 'readline', 'readlines', '__iter__']:
-        assert_(hasattr(wsgi_input, attr),
-            "wsgi.input (%r) doesn't have the attribute %s"
-            % (wsgi_input, attr))
+    for attr in ["read", "readline", "readlines", "__iter__"]:
+        assert_(
+            hasattr(wsgi_input, attr),
+            "wsgi.input (%r) doesn't have the attribute %s" % (wsgi_input, attr),
+        )
+
 
 def check_errors(wsgi_errors):
-    for attr in ['flush', 'write', 'writelines']:
-        assert_(hasattr(wsgi_errors, attr),
-            "wsgi.errors (%r) doesn't have the attribute %s"
-            % (wsgi_errors, attr))
+    for attr in ["flush", "write", "writelines"]:
+        assert_(
+            hasattr(wsgi_errors, attr),
+            "wsgi.errors (%r) doesn't have the attribute %s" % (wsgi_errors, attr),
+        )
+
 
 def check_status(status):
     status = check_string_type(status, "Status")
     # Implicitly check that we can turn it into an integer:
     status_code = status.split(None, 1)[0]
-    assert_(len(status_code) == 3,
-        "Status codes must be three characters: %r" % status_code)
+    assert_(
+        len(status_code) == 3, "Status codes must be three characters: %r" % status_code
+    )
     status_int = int(status_code)
     assert_(status_int >= 100, "Status code is invalid: %r" % status_int)
-    if len(status) < 4 or status[3] != ' ':
+    if len(status) < 4 or status[3] != " ":
         warnings.warn(
             "The status string (%r) should be a three-digit integer "
-            "followed by a single space and a status explanation"
-            % status, WSGIWarning)
+            "followed by a single space and a status explanation" % status,
+            WSGIWarning,
+        )
+
 
 def check_headers(headers):
-    assert_(type(headers) is list,
-        "Headers (%r) must be of type list: %r"
-        % (headers, type(headers)))
+    assert_(
+        type(headers) is list,
+        "Headers (%r) must be of type list: %r" % (headers, type(headers)),
+    )
     for item in headers:
-        assert_(type(item) is tuple,
-            "Individual headers (%r) must be of type tuple: %r"
-            % (item, type(item)))
+        assert_(
+            type(item) is tuple,
+            "Individual headers (%r) must be of type tuple: %r" % (item, type(item)),
+        )
         assert_(len(item) == 2)
         name, value = item
         name = check_string_type(name, "Header name")
         value = check_string_type(value, "Header value")
-        assert_(name.lower() != 'status',
+        assert_(
+            name.lower() != "status",
             "The Status header cannot be used; it conflicts with CGI "
             "script, and HTTP status is not given through headers "
-            "(value: %r)." % value)
-        assert_('\n' not in name and ':' not in name,
-            "Header names may not contain ':' or '\\n': %r" % name)
+            "(value: %r)." % value,
+        )
+        assert_(
+            "\n" not in name and ":" not in name,
+            "Header names may not contain ':' or '\\n': %r" % name,
+        )
         assert_(header_re.search(name), "Bad header name: %r" % name)
-        assert_(not name.endswith('-') and not name.endswith('_'),
-            "Names may not end in '-' or '_': %r" % name)
+        assert_(
+            not name.endswith("-") and not name.endswith("_"),
+            "Names may not end in '-' or '_': %r" % name,
+        )
         if bad_header_value_re.search(value):
-            assert_(0, "Bad header value: %r (bad char: %r)"
-            % (value, bad_header_value_re.search(value).group(0)))
+            assert_(
+                0,
+                "Bad header value: %r (bad char: %r)"
+                % (value, bad_header_value_re.search(value).group(0)),
+            )
+
 
 def check_content_type(status, headers):
     status = check_string_type(status, "Status")
@@ -416,23 +481,35 @@ def check_content_type(status, headers):
     NO_MESSAGE_BODY = (204, 304)
     for name, value in headers:
         name = check_string_type(name, "Header name")
-        if name.lower() == 'content-type':
+        if name.lower() == "content-type":
             if code not in NO_MESSAGE_BODY:
                 return
-            assert_(0, ("Content-Type header found in a %s response, "
-                        "which must not return content.") % code)
+            assert_(
+                0,
+                (
+                    "Content-Type header found in a %s response, "
+                    "which must not return content."
+                )
+                % code,
+            )
     if code not in NO_MESSAGE_BODY:
         assert_(0, "No Content-Type header found in headers (%s)" % headers)
 
+
 def check_exc_info(exc_info):
-    assert_(exc_info is None or type(exc_info) is tuple,
-        "exc_info (%r) is not a tuple: %r" % (exc_info, type(exc_info)))
+    assert_(
+        exc_info is None or type(exc_info) is tuple,
+        "exc_info (%r) is not a tuple: %r" % (exc_info, type(exc_info)),
+    )
     # More exc_info checks?
+
 
 def check_iterator(iterator):
     # Technically a bytestring is legal, which is why it's a really bad
     # idea, because it may cause the response to be returned
     # character-by-character
-    assert_(not isinstance(iterator, (str, bytes)),
+    assert_(
+        not isinstance(iterator, (str, bytes)),
         "You should not return a string as your application iterator, "
-        "instead return a single-item list containing a bytestring.")
+        "instead return a single-item list containing a bytestring.",
+    )

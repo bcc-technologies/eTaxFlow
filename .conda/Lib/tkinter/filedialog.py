@@ -11,27 +11,51 @@ to the native file dialogues available in Tk 4.2 and newer, and the
 directory dialogue available in Tk 8.3 and newer.
 These interfaces were written by Fredrik Lundh, May 1997.
 """
-__all__ = ["FileDialog", "LoadFileDialog", "SaveFileDialog",
-           "Open", "SaveAs", "Directory",
-           "askopenfilename", "asksaveasfilename", "askopenfilenames",
-           "askopenfile", "askopenfiles", "asksaveasfile", "askdirectory"]
+
+__all__ = [
+    "FileDialog",
+    "LoadFileDialog",
+    "SaveFileDialog",
+    "Open",
+    "SaveAs",
+    "Directory",
+    "askopenfilename",
+    "asksaveasfilename",
+    "askopenfilenames",
+    "askopenfile",
+    "askopenfiles",
+    "asksaveasfile",
+    "askdirectory",
+]
 
 import fnmatch
 import os
 from tkinter import (
-    Frame, LEFT, YES, BOTTOM, Entry, TOP, Button, Tk, X,
-    Toplevel, RIGHT, Y, END, Listbox, BOTH, Scrollbar,
+    Frame,
+    LEFT,
+    YES,
+    BOTTOM,
+    Entry,
+    TOP,
+    Button,
+    Tk,
+    X,
+    Toplevel,
+    RIGHT,
+    Y,
+    END,
+    Listbox,
+    BOTH,
+    Scrollbar,
 )
 from tkinter.dialog import Dialog
 from tkinter import commondialog
 from tkinter.simpledialog import _setup_dialog
 
-
 dialogstates = {}
 
 
 class FileDialog:
-
     """Standard file selection dialog -- no checks on selected file.
 
     Usage:
@@ -56,7 +80,8 @@ class FileDialog:
     title = "File Selection Dialog"
 
     def __init__(self, master, title=None):
-        if title is None: title = self.title
+        if title is None:
+            title = self.title
         self.master = master
         self.directory = None
 
@@ -70,54 +95,54 @@ class FileDialog:
 
         self.selection = Entry(self.top)
         self.selection.pack(side=BOTTOM, fill=X)
-        self.selection.bind('<Return>', self.ok_event)
+        self.selection.bind("<Return>", self.ok_event)
 
         self.filter = Entry(self.top)
         self.filter.pack(side=TOP, fill=X)
-        self.filter.bind('<Return>', self.filter_command)
+        self.filter.bind("<Return>", self.filter_command)
 
         self.midframe = Frame(self.top)
         self.midframe.pack(expand=YES, fill=BOTH)
 
         self.filesbar = Scrollbar(self.midframe)
         self.filesbar.pack(side=RIGHT, fill=Y)
-        self.files = Listbox(self.midframe, exportselection=0,
-                             yscrollcommand=(self.filesbar, 'set'))
+        self.files = Listbox(
+            self.midframe, exportselection=0, yscrollcommand=(self.filesbar, "set")
+        )
         self.files.pack(side=RIGHT, expand=YES, fill=BOTH)
         btags = self.files.bindtags()
         self.files.bindtags(btags[1:] + btags[:1])
-        self.files.bind('<ButtonRelease-1>', self.files_select_event)
-        self.files.bind('<Double-ButtonRelease-1>', self.files_double_event)
-        self.filesbar.config(command=(self.files, 'yview'))
+        self.files.bind("<ButtonRelease-1>", self.files_select_event)
+        self.files.bind("<Double-ButtonRelease-1>", self.files_double_event)
+        self.filesbar.config(command=(self.files, "yview"))
 
         self.dirsbar = Scrollbar(self.midframe)
         self.dirsbar.pack(side=LEFT, fill=Y)
-        self.dirs = Listbox(self.midframe, exportselection=0,
-                            yscrollcommand=(self.dirsbar, 'set'))
+        self.dirs = Listbox(
+            self.midframe, exportselection=0, yscrollcommand=(self.dirsbar, "set")
+        )
         self.dirs.pack(side=LEFT, expand=YES, fill=BOTH)
-        self.dirsbar.config(command=(self.dirs, 'yview'))
+        self.dirsbar.config(command=(self.dirs, "yview"))
         btags = self.dirs.bindtags()
         self.dirs.bindtags(btags[1:] + btags[:1])
-        self.dirs.bind('<ButtonRelease-1>', self.dirs_select_event)
-        self.dirs.bind('<Double-ButtonRelease-1>', self.dirs_double_event)
+        self.dirs.bind("<ButtonRelease-1>", self.dirs_select_event)
+        self.dirs.bind("<Double-ButtonRelease-1>", self.dirs_double_event)
 
-        self.ok_button = Button(self.botframe,
-                                 text="OK",
-                                 command=self.ok_command)
+        self.ok_button = Button(self.botframe, text="OK", command=self.ok_command)
         self.ok_button.pack(side=LEFT)
-        self.filter_button = Button(self.botframe,
-                                    text="Filter",
-                                    command=self.filter_command)
+        self.filter_button = Button(
+            self.botframe, text="Filter", command=self.filter_command
+        )
         self.filter_button.pack(side=LEFT, expand=YES)
-        self.cancel_button = Button(self.botframe,
-                                    text="Cancel",
-                                    command=self.cancel_command)
+        self.cancel_button = Button(
+            self.botframe, text="Cancel", command=self.cancel_command
+        )
         self.cancel_button.pack(side=RIGHT)
 
-        self.top.protocol('WM_DELETE_WINDOW', self.cancel_command)
+        self.top.protocol("WM_DELETE_WINDOW", self.cancel_command)
         # XXX Are the following okay for a general audience?
-        self.top.bind('<Alt-w>', self.cancel_command)
-        self.top.bind('<Alt-W>', self.cancel_command)
+        self.top.bind("<Alt-w>", self.cancel_command)
+        self.top.bind("<Alt-W>", self.cancel_command)
 
     def go(self, dir_or_file=os.curdir, pattern="*", default="", key=None):
         if key and key in dialogstates:
@@ -132,10 +157,10 @@ class FileDialog:
         self.set_selection(default)
         self.filter_command()
         self.selection.focus_set()
-        self.top.wait_visibility() # window needs to be visible for the grab
+        self.top.wait_visibility()  # window needs to be visible for the grab
         self.top.grab_set()
         self.how = None
-        self.master.mainloop()          # Exited by self.quit(how)
+        self.master.mainloop()  # Exited by self.quit(how)
         if key:
             directory, pattern = self.get_filter()
             if self.how:
@@ -146,14 +171,14 @@ class FileDialog:
 
     def quit(self, how=None):
         self.how = how
-        self.master.quit()              # Exit mainloop()
+        self.master.quit()  # Exit mainloop()
 
     def dirs_double_event(self, event):
         self.filter_command()
 
     def dirs_select_event(self, event):
         dir, pat = self.get_filter()
-        subdir = self.dirs.get('active')
+        subdir = self.dirs.get("active")
         dir = os.path.normpath(os.path.join(self.directory, subdir))
         self.set_filter(dir, pat)
 
@@ -161,7 +186,7 @@ class FileDialog:
         self.ok_command()
 
     def files_select_event(self, event):
-        file = self.files.get('active')
+        file = self.files.get("active")
         self.set_selection(file)
 
     def ok_event(self, event):
@@ -195,7 +220,8 @@ class FileDialog:
         for name in matchingfiles:
             self.files.insert(END, name)
         head, tail = os.path.split(self.get_selection())
-        if tail == os.curdir: tail = ''
+        if tail == os.curdir:
+            tail = ""
         self.set_selection(tail)
 
     def get_filter(self):
@@ -231,7 +257,6 @@ class FileDialog:
 
 
 class LoadFileDialog(FileDialog):
-
     """File selection dialog which checks that the file exists."""
 
     title = "Load File Selection Dialog"
@@ -245,7 +270,6 @@ class LoadFileDialog(FileDialog):
 
 
 class SaveFileDialog(FileDialog):
-
     """File selection dialog which checks that the file may be created."""
 
     title = "Save File Selection Dialog"
@@ -256,12 +280,14 @@ class SaveFileDialog(FileDialog):
             if os.path.isdir(file):
                 self.master.bell()
                 return
-            d = Dialog(self.top,
-                       title="Overwrite Existing File Question",
-                       text="Overwrite existing file %r?" % (file,),
-                       bitmap='questhead',
-                       default=1,
-                       strings=("Yes", "Cancel"))
+            d = Dialog(
+                self.top,
+                title="Overwrite Existing File Question",
+                text="Overwrite existing file %r?" % (file,),
+                bitmap="questhead",
+                default=1,
+                strings=("Yes", "Cancel"),
+            )
             if d.num != 0:
                 return
         else:
@@ -322,12 +348,13 @@ class _Dialog(commondialog.Dialog):
             path, file = os.path.split(result)
             self.options["initialdir"] = path
             self.options["initialfile"] = file
-        self.filename = result # compatibility
+        self.filename = result  # compatibility
         return result
 
 
 #
 # file dialogs
+
 
 class Open(_Dialog):
     "Ask for a filename to open"
@@ -371,8 +398,9 @@ class Directory(commondialog.Dialog):
                 pass
             # keep directory until next time
             self.options["initialdir"] = result
-        self.directory = result # compatibility
+        self.directory = result  # compatibility
         return result
+
 
 #
 # convenience stuff
@@ -396,13 +424,14 @@ def askopenfilenames(**options):
     Returns a list of filenames or empty list if
     cancel button selected
     """
-    options["multiple"]=1
+    options["multiple"] = 1
     return Open(**options).show()
+
 
 # FIXME: are the following  perhaps a bit too convenient?
 
 
-def askopenfile(mode = "r", **options):
+def askopenfile(mode="r", **options):
     "Ask for a filename to open, and returned the opened file"
 
     filename = Open(**options).show()
@@ -411,7 +440,7 @@ def askopenfile(mode = "r", **options):
     return None
 
 
-def askopenfiles(mode = "r", **options):
+def askopenfiles(mode="r", **options):
     """Ask for multiple filenames and return the open file
     objects
 
@@ -421,14 +450,14 @@ def askopenfiles(mode = "r", **options):
 
     files = askopenfilenames(**options)
     if files:
-        ofiles=[]
+        ofiles = []
         for filename in files:
             ofiles.append(open(filename, mode))
-        files=ofiles
+        files = ofiles
     return files
 
 
-def asksaveasfile(mode = "w", **options):
+def asksaveasfile(mode="w", **options):
     "Ask for a filename to save as, and returned the opened file"
 
     filename = SaveAs(**options).show()
@@ -437,13 +466,14 @@ def asksaveasfile(mode = "w", **options):
     return None
 
 
-def askdirectory (**options):
+def askdirectory(**options):
     "Ask for a directory, and return the file name"
     return Directory(**options).show()
 
 
 # --------------------------------------------------------------------
 # test stuff
+
 
 def test():
     """Simple test program."""
@@ -465,16 +495,17 @@ def test():
     # See whether CODESET is defined
     try:
         import locale
-        locale.setlocale(locale.LC_ALL,'')
+
+        locale.setlocale(locale.LC_ALL, "")
         enc = locale.nl_langinfo(locale.CODESET)
     except (ImportError, AttributeError):
         pass
 
     # dialog for opening files
 
-    openfilename=askopenfilename(filetypes=[("all files", "*")])
+    openfilename = askopenfilename(filetypes=[("all files", "*")])
     try:
-        fp=open(openfilename,"r")
+        fp = open(openfilename, "r")
         fp.close()
     except BaseException as exc:
         print("Could not open File: ")
@@ -484,9 +515,9 @@ def test():
 
     # dialog for saving files
 
-    saveasfilename=asksaveasfilename()
+    saveasfilename = asksaveasfilename()
     print("saveas", saveasfilename.encode(enc))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

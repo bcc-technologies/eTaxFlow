@@ -4,7 +4,7 @@
 
 """Base class for MIME specializations."""
 
-__all__ = ['MIMEBase']
+__all__ = ["MIMEBase"]
 
 import email.policy
 
@@ -24,6 +24,6 @@ class MIMEBase(message.Message):
         if policy is None:
             policy = email.policy.compat32
         message.Message.__init__(self, policy=policy)
-        ctype = '%s/%s' % (_maintype, _subtype)
-        self.add_header('Content-Type', ctype, **_params)
-        self['MIME-Version'] = '1.0'
+        ctype = "%s/%s" % (_maintype, _subtype)
+        self.add_header("Content-Type", ctype, **_params)
+        self["MIME-Version"] = "1.0"

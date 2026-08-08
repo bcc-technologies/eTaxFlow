@@ -218,7 +218,7 @@ class editable_wheel(Command):
         # For portability, ensure scripts are built with #!python shebang
         # pypa/setuptools#4863
         build_scripts = dist.get_command_obj("build_scripts")
-        build_scripts.executable = 'python'
+        build_scripts.executable = "python"
 
         install_scripts = cast(
             install_scripts_cls, dist.get_command_obj("install_scripts")
@@ -459,7 +459,7 @@ class _LinkTree(_StaticPth):
         # Files relative to build_lib will be normalized to None
         with suppress(ValueError):
             path = Path(file).resolve().relative_to(self.build_lib)
-            return str(path).replace(os.sep, '/')
+            return str(path).replace(os.sep, "/")
         return None
 
     def _create_file(self, relative_output: str, src_file: str, link=None):
@@ -644,7 +644,7 @@ def _simple_layout(
         return set(package_dir) in ({}, {""})
     parent = os.path.commonpath(starmap(_parent_path, layout.items()))
     return all(
-        _path.same_path(Path(parent, *key.split('.')), value)
+        _path.same_path(Path(parent, *key.split(".")), value)
         for key, value in layout.items()
     )
 

@@ -1,13 +1,13 @@
-""" robotparser.py
+"""robotparser.py
 
-    Copyright (C) 2000  Bastian Kleineidam
+Copyright (C) 2000  Bastian Kleineidam
 
-    You can choose between two licenses when using this package:
-    1) GNU GPLv2
-    2) PSF license for Python 2.2
+You can choose between two licenses when using this package:
+1) GNU GPLv2
+2) PSF license for Python 2.2
 
-    The robots.txt Exclusion Protocol is implemented as specified in
-    http://www.robotstxt.org/norobots-rfc.txt
+The robots.txt Exclusion Protocol is implemented as specified in
+http://www.robotstxt.org/norobots-rfc.txt
 """
 
 import collections
@@ -21,12 +21,12 @@ RequestRate = collections.namedtuple("RequestRate", "requests seconds")
 
 
 class RobotFileParser:
-    """ This class provides a set of methods to read, parse and answer
+    """This class provides a set of methods to read, parse and answer
     questions about a single robots.txt file.
 
     """
 
-    def __init__(self, url=''):
+    def __init__(self, url=""):
         self.entries = []
         self.sitemaps = []
         self.default_entry = None
@@ -50,6 +50,7 @@ class RobotFileParser:
 
         """
         import time
+
         self.last_checked = time.time()
 
     def set_url(self, url):
@@ -104,13 +105,13 @@ class RobotFileParser:
                     entry = Entry()
                     state = 0
             # remove optional comment and strip line
-            i = line.find('#')
+            i = line.find("#")
             if i >= 0:
                 line = line[:i]
             line = line.strip()
             if not line:
                 continue
-            line = line.split(':', 1)
+            line = line.split(":", 1)
             if len(line) == 2:
                 line[0] = line[0].strip().lower()
                 line[1] = urllib.parse.unquote(line[1].strip())
@@ -138,11 +139,16 @@ class RobotFileParser:
                         state = 2
                 elif line[0] == "request-rate":
                     if state != 0:
-                        numbers = line[1].split('/')
+                        numbers = line[1].split("/")
                         # check if all values are sane
-                        if (len(numbers) == 2 and numbers[0].strip().isdigit()
-                            and numbers[1].strip().isdigit()):
-                            entry.req_rate = RequestRate(int(numbers[0]), int(numbers[1]))
+                        if (
+                            len(numbers) == 2
+                            and numbers[0].strip().isdigit()
+                            and numbers[1].strip().isdigit()
+                        ):
+                            entry.req_rate = RequestRate(
+                                int(numbers[0]), int(numbers[1])
+                            )
                         state = 2
                 elif line[0] == "sitemap":
                     # According to http://www.sitemaps.org/protocol.html
@@ -168,8 +174,16 @@ class RobotFileParser:
         # search for given user agent matches
         # the first match counts
         parsed_url = urllib.parse.urlparse(urllib.parse.unquote(url))
-        url = urllib.parse.urlunparse(('','',parsed_url.path,
-            parsed_url.params,parsed_url.query, parsed_url.fragment))
+        url = urllib.parse.urlunparse(
+            (
+                "",
+                "",
+                parsed_url.path,
+                parsed_url.params,
+                parsed_url.query,
+                parsed_url.fragment,
+            )
+        )
         url = urllib.parse.quote(url)
         if not url:
             url = "/"
@@ -211,14 +225,15 @@ class RobotFileParser:
         entries = self.entries
         if self.default_entry is not None:
             entries = entries + [self.default_entry]
-        return '\n\n'.join(map(str, entries))
+        return "\n\n".join(map(str, entries))
 
 
 class RuleLine:
     """A rule line is a single "Allow:" (allowance==True) or "Disallow:"
-       (allowance==False) followed by a path."""
+    (allowance==False) followed by a path."""
+
     def __init__(self, path, allowance):
-        if path == '' and not allowance:
+        if path == "" and not allowance:
             # an empty value means allow all
             allowance = True
         path = urllib.parse.urlunparse(urllib.parse.urlparse(path))
@@ -234,6 +249,7 @@ class RuleLine:
 
 class Entry:
     """An entry has one or more user-agents and zero or more rulelines"""
+
     def __init__(self):
         self.useragents = []
         self.rulelines = []
@@ -250,14 +266,14 @@ class Entry:
             rate = self.req_rate
             ret.append(f"Request-rate: {rate.requests}/{rate.seconds}")
         ret.extend(map(str, self.rulelines))
-        return '\n'.join(ret)
+        return "\n".join(ret)
 
     def applies_to(self, useragent):
         """check if this entry applies to the specified agent"""
         # split the name token and make it lower case
         useragent = useragent.split("/")[0].lower()
         for agent in self.useragents:
-            if agent == '*':
+            if agent == "*":
                 # we have the catch-all agent
                 return True
             agent = agent.lower()

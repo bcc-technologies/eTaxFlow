@@ -20,7 +20,7 @@ class WindowList:
             pass
         self.call_callbacks()
 
-    def add_windows_to_menu(self,  menu):
+    def add_windows_to_menu(self, menu):
         list = []
         for key in self.dict:
             window = self.dict[key]
@@ -95,4 +95,5 @@ class ListedToplevel(Toplevel):
 
 if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_window', verbosity=2)
+
+    main("idlelib.idle_test.test_window", verbosity=2)

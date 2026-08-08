@@ -7,10 +7,9 @@
 # Licensed to PSF under a Contributor Agreement.
 #
 
-__all__ = [ 'Client', 'Listener', 'Pipe' ]
+__all__ = ["Client", "Listener", "Pipe"]
 
 from queue import Queue
-
 
 families = [None]
 

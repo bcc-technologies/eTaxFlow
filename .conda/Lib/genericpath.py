@@ -3,12 +3,25 @@ Path operations common to more than one OS
 Do not use directly.  The OS specific modules import the appropriate
 functions from this module themselves.
 """
+
 import os
 import stat
 
-__all__ = ['commonprefix', 'exists', 'getatime', 'getctime', 'getmtime',
-           'getsize', 'isdir', 'isfile', 'islink', 'samefile', 'sameopenfile',
-           'samestat', 'ALLOW_MISSING']
+__all__ = [
+    "commonprefix",
+    "exists",
+    "getatime",
+    "getctime",
+    "getmtime",
+    "getsize",
+    "isdir",
+    "isfile",
+    "islink",
+    "samefile",
+    "sameopenfile",
+    "samestat",
+    "ALLOW_MISSING",
+]
 
 
 # Does a path exist?
@@ -48,6 +61,7 @@ def isdir(s):
 # Is a path a symbolic link?
 # This will always return false on systems where os.lstat doesn't exist.
 
+
 def islink(path):
     """Test whether a path is a symbolic link"""
     try:
@@ -80,7 +94,8 @@ def getctime(filename):
 # Return the longest prefix of all list elements.
 def commonprefix(m):
     "Given a list of pathnames, returns the longest common leading component"
-    if not m: return ''
+    if not m:
+        return ""
     # Some people pass in a list of pathname parts to operate in an OS-agnostic
     # fashion; don't try to translate in that case as that's an abuse of the
     # API and they are already doing what they need to be OS-agnostic and so
@@ -94,12 +109,12 @@ def commonprefix(m):
             return s1[:i]
     return s1
 
+
 # Are two stat buffers (obtained from stat, fstat or lstat)
 # describing the same file?
 def samestat(s1, s2):
     """Test whether two stat buffers reference the same file"""
-    return (s1.st_ino == s2.st_ino and
-            s1.st_dev == s2.st_dev)
+    return s1.st_ino == s2.st_ino and s1.st_dev == s2.st_dev
 
 
 # Are two filenames really pointing to the same file?
@@ -128,6 +143,7 @@ def sameopenfile(fp1, fp2):
 # pathname component; the root is everything before that.
 # It is always true that root + ext == p.
 
+
 # Generic implementation of splitext, to be parametrized with
 # the separators
 def _splitext(p, sep, altsep, extsep):
@@ -147,11 +163,12 @@ def _splitext(p, sep, altsep, extsep):
         # skip all leading dots
         filenameIndex = sepIndex + 1
         while filenameIndex < dotIndex:
-            if p[filenameIndex:filenameIndex+1] != extsep:
+            if p[filenameIndex : filenameIndex + 1] != extsep:
                 return p[:dotIndex], p[dotIndex:]
             filenameIndex += 1
 
     return p, p[:0]
+
 
 def _check_arg_types(funcname, *args):
     hasstr = hasbytes = False
@@ -161,16 +178,21 @@ def _check_arg_types(funcname, *args):
         elif isinstance(s, bytes):
             hasbytes = True
         else:
-            raise TypeError(f'{funcname}() argument must be str, bytes, or '
-                            f'os.PathLike object, not {s.__class__.__name__!r}') from None
+            raise TypeError(
+                f"{funcname}() argument must be str, bytes, or "
+                f"os.PathLike object, not {s.__class__.__name__!r}"
+            ) from None
     if hasstr and hasbytes:
         raise TypeError("Can't mix strings and bytes in path components") from None
+
 
 # A singleton with a true boolean value.
 @object.__new__
 class ALLOW_MISSING:
     """Special value for use in realpath()."""
+
     def __repr__(self):
-        return 'os.path.ALLOW_MISSING'
+        return "os.path.ALLOW_MISSING"
+
     def __reduce__(self):
         return self.__class__.__name__

@@ -20,19 +20,18 @@ from ._legacy import (
 
 from .abc import ResourceReader
 
-
 __all__ = [
-    'Package',
-    'Anchor',
-    'Resource',
-    'ResourceReader',
-    'as_file',
-    'contents',
-    'files',
-    'is_resource',
-    'open_binary',
-    'open_text',
-    'path',
-    'read_binary',
-    'read_text',
+    "Package",
+    "Anchor",
+    "Resource",
+    "ResourceReader",
+    "as_file",
+    "contents",
+    "files",
+    "is_resource",
+    "open_binary",
+    "open_text",
+    "path",
+    "read_binary",
+    "read_text",
 ]

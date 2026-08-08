@@ -16,7 +16,7 @@ __unittest = True
 # what about .pyc (etc)
 # we would need to avoid loading the same tests multiple times
 # from '.py', *and* '.pyc'
-VALID_MODULE_NAME = re.compile(r'[_a-z]\w*\.py$', re.IGNORECASE)
+VALID_MODULE_NAME = re.compile(r"[_a-z]\w*\.py$", re.IGNORECASE)
 
 
 class _FailedTest(case.TestCase):
@@ -29,32 +29,37 @@ class _FailedTest(case.TestCase):
     def __getattr__(self, name):
         if name != self._testMethodName:
             return super(_FailedTest, self).__getattr__(name)
+
         def testFailure():
             raise self._exception
+
         return testFailure
 
 
 def _make_failed_import_test(name, suiteClass):
-    message = 'Failed to import test module: %s\n%s' % (
-        name, traceback.format_exc())
+    message = "Failed to import test module: %s\n%s" % (name, traceback.format_exc())
     return _make_failed_test(name, ImportError(message), suiteClass, message)
 
+
 def _make_failed_load_tests(name, exception, suiteClass):
-    message = 'Failed to call load_tests:\n%s' % (traceback.format_exc(),)
-    return _make_failed_test(
-        name, exception, suiteClass, message)
+    message = "Failed to call load_tests:\n%s" % (traceback.format_exc(),)
+    return _make_failed_test(name, exception, suiteClass, message)
+
 
 def _make_failed_test(methodname, exception, suiteClass, message):
     test = _FailedTest(methodname, exception)
     return suiteClass((test,)), message
 
+
 def _make_skipped_test(methodname, exception, suiteClass):
     @case.skip(str(exception))
     def testSkipped(self):
         pass
+
     attrs = {methodname: testSkipped}
     TestClass = type("ModuleSkipped", (case.TestCase,), attrs)
     return suiteClass((TestClass(methodname),))
+
 
 def _splitext(path):
     return os.path.splitext(path)[0]
@@ -65,7 +70,8 @@ class TestLoader(object):
     This class is responsible for loading tests according to various criteria
     and returning them wrapped in a TestSuite
     """
-    testMethodPrefix = 'test'
+
+    testMethodPrefix = "test"
     sortTestMethodsUsing = staticmethod(util.three_way_cmp)
     testNamePatterns = None
     suiteClass = suite.TestSuite
@@ -81,16 +87,18 @@ class TestLoader(object):
     def loadTestsFromTestCase(self, testCaseClass):
         """Return a suite of all test cases contained in testCaseClass"""
         if issubclass(testCaseClass, suite.TestSuite):
-            raise TypeError("Test cases should not be derived from "
-                            "TestSuite. Maybe you meant to derive from "
-                            "TestCase?")
+            raise TypeError(
+                "Test cases should not be derived from "
+                "TestSuite. Maybe you meant to derive from "
+                "TestCase?"
+            )
         if testCaseClass in (case.TestCase, case.FunctionTestCase):
             # We don't load any tests from base types that should not be loaded.
             testCaseNames = []
         else:
             testCaseNames = self.getTestCaseNames(testCaseClass)
-            if not testCaseNames and hasattr(testCaseClass, 'runTest'):
-                testCaseNames = ['runTest']
+            if not testCaseNames and hasattr(testCaseClass, "runTest"):
+                testCaseNames = ["runTest"]
         loaded_suite = self.suiteClass(map(testCaseClass, testCaseNames))
         return loaded_suite
 
@@ -106,14 +114,15 @@ class TestLoader(object):
             ):
                 tests.append(self.loadTestsFromTestCase(obj))
 
-        load_tests = getattr(module, 'load_tests', None)
+        load_tests = getattr(module, "load_tests", None)
         tests = self.suiteClass(tests)
         if load_tests is not None:
             try:
                 return load_tests(self, tests, pattern)
             except Exception as e:
                 error_case, error_message = _make_failed_load_tests(
-                    module.__name__, e, self.suiteClass)
+                    module.__name__, e, self.suiteClass
+                )
                 self.errors.append(error_message)
                 return error_case
         return tests
@@ -127,20 +136,21 @@ class TestLoader(object):
 
         The method optionally resolves the names relative to a given module.
         """
-        parts = name.split('.')
+        parts = name.split(".")
         error_case, error_message = None, None
         if module is None:
             parts_copy = parts[:]
             while parts_copy:
                 try:
-                    module_name = '.'.join(parts_copy)
+                    module_name = ".".join(parts_copy)
                     module = __import__(module_name)
                     break
                 except ImportError:
                     next_attribute = parts_copy.pop()
                     # Last error so we can give it to the user if needed.
                     error_case, error_message = _make_failed_import_test(
-                        next_attribute, self.suiteClass)
+                        next_attribute, self.suiteClass
+                    )
                     if not parts_copy:
                         # Even the top level import failed: report that error.
                         self.errors.append(error_message)
@@ -152,8 +162,10 @@ class TestLoader(object):
                 parent, obj = obj, getattr(obj, part)
             except AttributeError as e:
                 # We can't traverse some part of the name.
-                if (getattr(obj, '__path__', None) is not None
-                    and error_case is not None):
+                if (
+                    getattr(obj, "__path__", None) is not None
+                    and error_case is not None
+                ):
                     # This is a package (no __path__ per importlib docs), and we
                     # encountered an error importing something. We cannot tell
                     # the difference between package.WrongNameTestClass and
@@ -164,9 +176,11 @@ class TestLoader(object):
                 else:
                     # Otherwise, we signal that an AttributeError has occurred.
                     error_case, error_message = _make_failed_test(
-                        part, e, self.suiteClass,
-                        'Failed to access attribute:\n%s' % (
-                            traceback.format_exc(),))
+                        part,
+                        e,
+                        self.suiteClass,
+                        "Failed to access attribute:\n%s" % (traceback.format_exc(),),
+                    )
                     self.errors.append(error_message)
                     return error_case
 
@@ -178,9 +192,11 @@ class TestLoader(object):
             and obj not in (case.TestCase, case.FunctionTestCase)
         ):
             return self.loadTestsFromTestCase(obj)
-        elif (isinstance(obj, types.FunctionType) and
-              isinstance(parent, type) and
-              issubclass(parent, case.TestCase)):
+        elif (
+            isinstance(obj, types.FunctionType)
+            and isinstance(parent, type)
+            and issubclass(parent, case.TestCase)
+        ):
             name = parts[-1]
             inst = parent(name)
             # static methods follow a different path
@@ -195,8 +211,7 @@ class TestLoader(object):
             elif isinstance(test, case.TestCase):
                 return self.suiteClass([test])
             else:
-                raise TypeError("calling %s returned %s, not a test" %
-                                (obj, test))
+                raise TypeError("calling %s returned %s, not a test" % (obj, test))
         else:
             raise TypeError("don't know how to make test from: %s" % obj)
 
@@ -208,25 +223,29 @@ class TestLoader(object):
         return self.suiteClass(suites)
 
     def getTestCaseNames(self, testCaseClass):
-        """Return a sorted sequence of method names found within testCaseClass
-        """
+        """Return a sorted sequence of method names found within testCaseClass"""
+
         def shouldIncludeMethod(attrname):
             if not attrname.startswith(self.testMethodPrefix):
                 return False
             testFunc = getattr(testCaseClass, attrname)
             if not callable(testFunc):
                 return False
-            fullName = f'%s.%s.%s' % (
-                testCaseClass.__module__, testCaseClass.__qualname__, attrname
+            fullName = f"%s.%s.%s" % (
+                testCaseClass.__module__,
+                testCaseClass.__qualname__,
+                attrname,
             )
-            return self.testNamePatterns is None or \
-                any(fnmatchcase(fullName, pattern) for pattern in self.testNamePatterns)
+            return self.testNamePatterns is None or any(
+                fnmatchcase(fullName, pattern) for pattern in self.testNamePatterns
+            )
+
         testFnNames = list(filter(shouldIncludeMethod, dir(testCaseClass)))
         if self.sortTestMethodsUsing:
             testFnNames.sort(key=functools.cmp_to_key(self.sortTestMethodsUsing))
         return testFnNames
 
-    def discover(self, start_dir, pattern='test*.py', top_level_dir=None):
+    def discover(self, start_dir, pattern="test*.py", top_level_dir=None):
         """Find and return all test modules from the specified start
         directory, recursing into subdirectories to find them and return all
         tests found within them. Only test files that match the pattern will
@@ -277,7 +296,9 @@ class TestLoader(object):
         if os.path.isdir(os.path.abspath(start_dir)):
             start_dir = os.path.abspath(start_dir)
             if start_dir != top_level_dir:
-                is_not_importable = not os.path.isfile(os.path.join(start_dir, '__init__.py'))
+                is_not_importable = not os.path.isfile(
+                    os.path.join(start_dir, "__init__.py")
+                )
         else:
             # support for discovery from dotted module names
             try:
@@ -286,26 +307,28 @@ class TestLoader(object):
                 is_not_importable = True
             else:
                 the_module = sys.modules[start_dir]
-                top_part = start_dir.split('.')[0]
+                top_part = start_dir.split(".")[0]
                 try:
-                    start_dir = os.path.abspath(
-                        os.path.dirname((the_module.__file__)))
+                    start_dir = os.path.abspath(os.path.dirname((the_module.__file__)))
                 except AttributeError:
                     if the_module.__name__ in sys.builtin_module_names:
                         # builtin module
-                        raise TypeError('Can not use builtin modules '
-                                        'as dotted module names') from None
+                        raise TypeError(
+                            "Can not use builtin modules " "as dotted module names"
+                        ) from None
                     else:
                         raise TypeError(
                             f"don't know how to discover from {the_module!r}"
-                            ) from None
+                        ) from None
 
                 if set_implicit_top:
-                    self._top_level_dir = self._get_directory_containing_module(top_part)
+                    self._top_level_dir = self._get_directory_containing_module(
+                        top_part
+                    )
                     sys.path.remove(top_level_dir)
 
         if is_not_importable:
-            raise ImportError('Start directory is not importable: %r' % start_dir)
+            raise ImportError("Start directory is not importable: %r" % start_dir)
 
         tests = list(self._find_tests(start_dir, pattern))
         self._top_level_dir = original_top_level_dir
@@ -315,7 +338,7 @@ class TestLoader(object):
         module = sys.modules[module_name]
         full_path = os.path.abspath(module.__file__)
 
-        if os.path.basename(full_path).lower().startswith('__init__.py'):
+        if os.path.basename(full_path).lower().startswith("__init__.py"):
             return os.path.dirname(os.path.dirname(full_path))
         else:
             # here we have been given a module rather than a package - so
@@ -325,14 +348,14 @@ class TestLoader(object):
 
     def _get_name_from_path(self, path):
         if path == self._top_level_dir:
-            return '.'
+            return "."
         path = _splitext(os.path.normpath(path))
 
         _relpath = os.path.relpath(path, self._top_level_dir)
         assert not os.path.isabs(_relpath), "Path must be within the project"
-        assert not _relpath.startswith('..'), "Path must be within the project"
+        assert not _relpath.startswith(".."), "Path must be within the project"
 
-        name = _relpath.replace(os.path.sep, '.')
+        name = _relpath.replace(os.path.sep, ".")
         return name
 
     def _get_module_from_name(self, name):
@@ -349,7 +372,7 @@ class TestLoader(object):
         name = self._get_name_from_path(start_dir)
         # name is '.' when start_dir == top_level_dir (and top_level_dir is by
         # definition not a package).
-        if name != '.' and name not in self._loading_packages:
+        if name != "." and name not in self._loading_packages:
             # name is in self._loading_packages while we have called into
             # loadTestsFromModule with name.
             tests, should_recurse = self._find_test_path(start_dir, pattern)
@@ -397,29 +420,27 @@ class TestLoader(object):
             except case.SkipTest as e:
                 return _make_skipped_test(name, e, self.suiteClass), False
             except:
-                error_case, error_message = \
-                    _make_failed_import_test(name, self.suiteClass)
+                error_case, error_message = _make_failed_import_test(
+                    name, self.suiteClass
+                )
                 self.errors.append(error_message)
                 return error_case, False
             else:
-                mod_file = os.path.abspath(
-                    getattr(module, '__file__', full_path))
-                realpath = _splitext(
-                    os.path.realpath(mod_file))
-                fullpath_noext = _splitext(
-                    os.path.realpath(full_path))
+                mod_file = os.path.abspath(getattr(module, "__file__", full_path))
+                realpath = _splitext(os.path.realpath(mod_file))
+                fullpath_noext = _splitext(os.path.realpath(full_path))
                 if realpath.lower() != fullpath_noext.lower():
                     module_dir = os.path.dirname(realpath)
-                    mod_name = _splitext(
-                        os.path.basename(full_path))
+                    mod_name = _splitext(os.path.basename(full_path))
                     expected_dir = os.path.dirname(full_path)
-                    msg = ("%r module incorrectly imported from %r. Expected "
-                           "%r. Is this module globally installed?")
-                    raise ImportError(
-                        msg % (mod_name, module_dir, expected_dir))
+                    msg = (
+                        "%r module incorrectly imported from %r. Expected "
+                        "%r. Is this module globally installed?"
+                    )
+                    raise ImportError(msg % (mod_name, module_dir, expected_dir))
                 return self.loadTestsFromModule(module, pattern=pattern), False
         elif os.path.isdir(full_path):
-            if not os.path.isfile(os.path.join(full_path, '__init__.py')):
+            if not os.path.isfile(os.path.join(full_path, "__init__.py")):
                 return None, False
 
             load_tests = None
@@ -430,12 +451,13 @@ class TestLoader(object):
             except case.SkipTest as e:
                 return _make_skipped_test(name, e, self.suiteClass), False
             except:
-                error_case, error_message = \
-                    _make_failed_import_test(name, self.suiteClass)
+                error_case, error_message = _make_failed_import_test(
+                    name, self.suiteClass
+                )
                 self.errors.append(error_message)
                 return error_case, False
             else:
-                load_tests = getattr(package, 'load_tests', None)
+                load_tests = getattr(package, "load_tests", None)
                 # Mark this package as being in load_tests (possibly ;))
                 self._loading_packages.add(name)
                 try:
@@ -456,6 +478,7 @@ defaultTestLoader = TestLoader()
 # These functions are considered obsolete for long time.
 # They will be removed in Python 3.13.
 
+
 def _makeLoader(prefix, sortUsing, suiteClass=None, testNamePatterns=None):
     loader = TestLoader()
     loader.sortTestMethodsUsing = sortUsing
@@ -465,33 +488,51 @@ def _makeLoader(prefix, sortUsing, suiteClass=None, testNamePatterns=None):
         loader.suiteClass = suiteClass
     return loader
 
-def getTestCaseNames(testCaseClass, prefix, sortUsing=util.three_way_cmp, testNamePatterns=None):
+
+def getTestCaseNames(
+    testCaseClass, prefix, sortUsing=util.three_way_cmp, testNamePatterns=None
+):
     import warnings
+
     warnings.warn(
         "unittest.getTestCaseNames() is deprecated and will be removed in Python 3.13. "
         "Please use unittest.TestLoader.getTestCaseNames() instead.",
-        DeprecationWarning, stacklevel=2
+        DeprecationWarning,
+        stacklevel=2,
     )
-    return _makeLoader(prefix, sortUsing, testNamePatterns=testNamePatterns).getTestCaseNames(testCaseClass)
+    return _makeLoader(
+        prefix, sortUsing, testNamePatterns=testNamePatterns
+    ).getTestCaseNames(testCaseClass)
 
-def makeSuite(testCaseClass, prefix='test', sortUsing=util.three_way_cmp,
-              suiteClass=suite.TestSuite):
+
+def makeSuite(
+    testCaseClass,
+    prefix="test",
+    sortUsing=util.three_way_cmp,
+    suiteClass=suite.TestSuite,
+):
     import warnings
+
     warnings.warn(
         "unittest.makeSuite() is deprecated and will be removed in Python 3.13. "
         "Please use unittest.TestLoader.loadTestsFromTestCase() instead.",
-        DeprecationWarning, stacklevel=2
+        DeprecationWarning,
+        stacklevel=2,
     )
     return _makeLoader(prefix, sortUsing, suiteClass).loadTestsFromTestCase(
-        testCaseClass)
+        testCaseClass
+    )
 
-def findTestCases(module, prefix='test', sortUsing=util.three_way_cmp,
-                  suiteClass=suite.TestSuite):
+
+def findTestCases(
+    module, prefix="test", sortUsing=util.three_way_cmp, suiteClass=suite.TestSuite
+):
     import warnings
+
     warnings.warn(
         "unittest.findTestCases() is deprecated and will be removed in Python 3.13. "
         "Please use unittest.TestLoader.loadTestsFromModule() instead.",
-        DeprecationWarning, stacklevel=2
+        DeprecationWarning,
+        stacklevel=2,
     )
-    return _makeLoader(prefix, sortUsing, suiteClass).loadTestsFromModule(\
-        module)
+    return _makeLoader(prefix, sortUsing, suiteClass).loadTestsFromModule(module)

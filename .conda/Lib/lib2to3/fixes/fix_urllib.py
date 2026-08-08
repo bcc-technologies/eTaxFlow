@@ -1,44 +1,92 @@
 """Fix changes imports of urllib which are now incompatible.
-   This is rather similar to fix_imports, but because of the more
-   complex nature of the fixing for urllib, it has its own fixer.
+This is rather similar to fix_imports, but because of the more
+complex nature of the fixing for urllib, it has its own fixer.
 """
+
 # Author: Nick Edds
 
 # Local imports
 from lib2to3.fixes.fix_imports import alternates, FixImports
-from lib2to3.fixer_util import (Name, Comma, FromImport, Newline,
-                                find_indentation, Node, syms)
+from lib2to3.fixer_util import (
+    Name,
+    Comma,
+    FromImport,
+    Newline,
+    find_indentation,
+    Node,
+    syms,
+)
 
-MAPPING = {"urllib":  [
-                ("urllib.request",
-                    ["URLopener", "FancyURLopener", "urlretrieve",
-                     "_urlopener", "urlopen", "urlcleanup",
-                     "pathname2url", "url2pathname", "getproxies"]),
-                ("urllib.parse",
-                    ["quote", "quote_plus", "unquote", "unquote_plus",
-                     "urlencode", "splitattr", "splithost", "splitnport",
-                     "splitpasswd", "splitport", "splitquery", "splittag",
-                     "splittype", "splituser", "splitvalue", ]),
-                ("urllib.error",
-                    ["ContentTooShortError"])],
-           "urllib2" : [
-                ("urllib.request",
-                    ["urlopen", "install_opener", "build_opener",
-                     "Request", "OpenerDirector", "BaseHandler",
-                     "HTTPDefaultErrorHandler", "HTTPRedirectHandler",
-                     "HTTPCookieProcessor", "ProxyHandler",
-                     "HTTPPasswordMgr",
-                     "HTTPPasswordMgrWithDefaultRealm",
-                     "AbstractBasicAuthHandler",
-                     "HTTPBasicAuthHandler", "ProxyBasicAuthHandler",
-                     "AbstractDigestAuthHandler",
-                     "HTTPDigestAuthHandler", "ProxyDigestAuthHandler",
-                     "HTTPHandler", "HTTPSHandler", "FileHandler",
-                     "FTPHandler", "CacheFTPHandler",
-                     "UnknownHandler"]),
-                ("urllib.error",
-                    ["URLError", "HTTPError"]),
-           ]
+MAPPING = {
+    "urllib": [
+        (
+            "urllib.request",
+            [
+                "URLopener",
+                "FancyURLopener",
+                "urlretrieve",
+                "_urlopener",
+                "urlopen",
+                "urlcleanup",
+                "pathname2url",
+                "url2pathname",
+                "getproxies",
+            ],
+        ),
+        (
+            "urllib.parse",
+            [
+                "quote",
+                "quote_plus",
+                "unquote",
+                "unquote_plus",
+                "urlencode",
+                "splitattr",
+                "splithost",
+                "splitnport",
+                "splitpasswd",
+                "splitport",
+                "splitquery",
+                "splittag",
+                "splittype",
+                "splituser",
+                "splitvalue",
+            ],
+        ),
+        ("urllib.error", ["ContentTooShortError"]),
+    ],
+    "urllib2": [
+        (
+            "urllib.request",
+            [
+                "urlopen",
+                "install_opener",
+                "build_opener",
+                "Request",
+                "OpenerDirector",
+                "BaseHandler",
+                "HTTPDefaultErrorHandler",
+                "HTTPRedirectHandler",
+                "HTTPCookieProcessor",
+                "ProxyHandler",
+                "HTTPPasswordMgr",
+                "HTTPPasswordMgrWithDefaultRealm",
+                "AbstractBasicAuthHandler",
+                "HTTPBasicAuthHandler",
+                "ProxyBasicAuthHandler",
+                "AbstractDigestAuthHandler",
+                "HTTPDigestAuthHandler",
+                "ProxyDigestAuthHandler",
+                "HTTPHandler",
+                "HTTPSHandler",
+                "FileHandler",
+                "FTPHandler",
+                "CacheFTPHandler",
+                "UnknownHandler",
+            ],
+        ),
+        ("urllib.error", ["URLError", "HTTPError"]),
+    ],
 }
 
 # Duplicate the url parsing functions for urllib2.
@@ -75,8 +123,8 @@ class FixUrllib(FixImports):
 
     def transform_import(self, node, results):
         """Transform for the basic import case. Replaces the old
-           import name with a comma separated list of its
-           replacements.
+        import name with a comma separated list of its
+        replacements.
         """
         import_mod = results.get("module")
         pref = import_mod.prefix
@@ -91,8 +139,8 @@ class FixUrllib(FixImports):
 
     def transform_member(self, node, results):
         """Transform for imports of specific module elements. Replaces
-           the module to be imported from with the appropriate new
-           module.
+        the module to be imported from with the appropriate new
+        module.
         """
         mod_member = results.get("mod_member")
         pref = mod_member.prefix
@@ -137,13 +185,17 @@ class FixUrllib(FixImports):
             new_nodes = []
             indentation = find_indentation(node)
             first = True
+
             def handle_name(name, prefix):
                 if name.type == syms.import_as_name:
-                    kids = [Name(name.children[0].value, prefix=prefix),
-                            name.children[1].clone(),
-                            name.children[2].clone()]
+                    kids = [
+                        Name(name.children[0].value, prefix=prefix),
+                        name.children[1].clone(),
+                        name.children[2].clone(),
+                    ]
                     return [Node(syms.import_as_name, kids)]
                 return [Name(name.value, prefix=prefix)]
+
             for module in modules:
                 elts = mod_dict[module]
                 names = []
@@ -177,8 +229,7 @@ class FixUrllib(FixImports):
                 new_name = change[0]
                 break
         if new_name:
-            module_dot.replace(Name(new_name,
-                                    prefix=module_dot.prefix))
+            module_dot.replace(Name(new_name, prefix=module_dot.prefix))
         else:
             self.cannot_convert(node, "This is an invalid module element")
 

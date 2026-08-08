@@ -1,6 +1,29 @@
 {
-    "Factura": "F001-00000001",
+    "Factura (DGII code)": "F001-00000001", 
+    "Codigo Interno BCC (similar al del Drive)": "FI-0001",
     "Cliente": "Juan Pérez",
-    "RNC": "123456789",
-    "Total": 54988.0
+    "Compania (si aplica)": "Tech Solutions S.A.",
+    "RNC o cedula": "123456789", 
+    "Area/Departamento": "Finanzas",
+    "Fecha de creacion de la factura": "2024-06-01",
+    "Estado": "Pagada",
+    "fecha de pago": "2024-06-05",
+    "Detalles": [
+        {
+            "Producto": "Laptop",
+            "Cantidad": 1,
+            "PrecioUnitario": 50000.0,
+            "Subtotal": 50000.0
+        },
+        {
+            "Producto": "Mouse",
+            "Cantidad": 2,
+            "PrecioUnitario": 2494.0,
+            "Subtotal": 4988.0
+        }
+    ],
+    "Total Neto": 54988.0,
+    "ITBIS (18%)": 8497.0,
+    "Total con ITBIS": 63485.0
+ 
 }

@@ -11,6 +11,7 @@ from . import _common, _tzpath
 EPOCH = datetime(1970, 1, 1)
 EPOCHORDINAL = datetime(1970, 1, 1).toordinal()
 
+
 # It is relatively expensive to construct new timedelta objects, and in most
 # cases we're looking at the same deltas, like integer numbers of hours, etc.
 # To improve speed and memory use, we'll keep a dictionary with references
@@ -125,12 +126,10 @@ class ZoneInfo(tzinfo):
         if num_trans >= 1 and timestamp < self._trans_utc[0]:
             tti = self._tti_before
             fold = 0
-        elif (
-            num_trans == 0 or timestamp > self._trans_utc[-1]
-        ) and not isinstance(self._tz_after, _ttinfo):
-            tti, fold = self._tz_after.get_trans_info_fromutc(
-                timestamp, dt.year
-            )
+        elif (num_trans == 0 or timestamp > self._trans_utc[-1]) and not isinstance(
+            self._tz_after, _ttinfo
+        ):
+            tti, fold = self._tz_after.get_trans_info_fromutc(timestamp, dt.year)
         elif num_trans == 0:
             tti = self._tz_after
             fold = 0
@@ -224,9 +223,7 @@ class ZoneInfo(tzinfo):
 
     def _load_file(self, fobj):
         # Retrieve all the data as it exists in the zoneinfo file
-        trans_idx, trans_utc, utcoff, isdst, abbr, tz_str = _common.load_data(
-            fobj
-        )
+        trans_idx, trans_utc, utcoff, isdst, abbr, tz_str = _common.load_data(fobj)
 
         # Infer the DST offsets (needed for .dst()) from the data
         dstoff = self._utcoff_to_dstoff(trans_idx, utcoff, isdst)
@@ -236,9 +233,7 @@ class ZoneInfo(tzinfo):
 
         # Construct `_ttinfo` objects for each transition in the file
         _ttinfo_list = [
-            _ttinfo(
-                _load_timedelta(utcoffset), _load_timedelta(dstoffset), tzname
-            )
+            _ttinfo(_load_timedelta(utcoffset), _load_timedelta(dstoffset), tzname)
             for utcoffset, dstoffset, tzname in zip(utcoff, dstoff, abbr)
         ]
 
@@ -645,7 +640,7 @@ def _parse_tz_str(tz_str):
             )? # dst
         )? # stdoff
         """,
-        re.ASCII|re.VERBOSE
+        re.ASCII | re.VERBOSE,
     )
 
     m = parser_re.fullmatch(offset_str)
@@ -693,9 +688,7 @@ def _parse_tz_str(tz_str):
         raise ValueError(f"Transition rule present without DST: {tz_str}")
     else:
         # This is a static ttinfo, don't return _TZStr
-        return _ttinfo(
-            _load_timedelta(std_offset), _load_timedelta(0), std_abbr
-        )
+        return _ttinfo(_load_timedelta(std_offset), _load_timedelta(0), std_abbr)
 
 
 def _parse_dst_start_end(dststr):
@@ -728,7 +721,7 @@ def _parse_transition_time(time_str):
     match = re.fullmatch(
         r"(?P<sign>[+-])?(?P<h>\d{1,3})(:(?P<m>\d{2})(:(?P<s>\d{2}))?)?",
         time_str,
-        re.ASCII
+        re.ASCII,
     )
     if match is None:
         raise ValueError(f"Invalid time: {time_str}")
@@ -736,9 +729,7 @@ def _parse_transition_time(time_str):
     h, m, s = (int(v or 0) for v in match.group("h", "m", "s"))
 
     if h > 167:
-        raise ValueError(
-            f"Hour must be in [0, 167]: {time_str}"
-        )
+        raise ValueError(f"Hour must be in [0, 167]: {time_str}")
 
     if match.group("sign") == "-":
         h, m, s = -h, -m, -s
@@ -750,7 +741,7 @@ def _parse_tz_delta(tz_delta):
     match = re.fullmatch(
         r"(?P<sign>[+-])?(?P<h>\d{1,3})(:(?P<m>\d{2})(:(?P<s>\d{2}))?)?",
         tz_delta,
-        re.ASCII
+        re.ASCII,
     )
     # Anything passed to this function should already have hit an equivalent
     # regular expression to find the section to parse.
@@ -761,9 +752,7 @@ def _parse_tz_delta(tz_delta):
     total = h * 3600 + m * 60 + s
 
     if h > 24:
-        raise ValueError(
-            f"Offset hours must be in [0, 24]: {tz_delta}"
-        )
+        raise ValueError(f"Offset hours must be in [0, 24]: {tz_delta}")
 
     # Yes, +5 maps to an offset of -5h
     if match.group("sign") != "-":

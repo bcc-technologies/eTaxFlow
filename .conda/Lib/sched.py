@@ -32,21 +32,22 @@ from time import monotonic as _time
 
 __all__ = ["scheduler"]
 
-Event = namedtuple('Event', 'time, priority, sequence, action, argument, kwargs')
-Event.time.__doc__ = ('''Numeric type compatible with the return value of the
-timefunc function passed to the constructor.''')
-Event.priority.__doc__ = ('''Events scheduled for the same time will be executed
-in the order of their priority.''')
-Event.sequence.__doc__ = ('''A continually increasing sequence number that
-    separates events if time and priority are equal.''')
-Event.action.__doc__ = ('''Executing the event means executing
-action(*argument, **kwargs)''')
-Event.argument.__doc__ = ('''argument is a sequence holding the positional
-arguments for the action.''')
-Event.kwargs.__doc__ = ('''kwargs is a dictionary holding the keyword
-arguments for the action.''')
+Event = namedtuple("Event", "time, priority, sequence, action, argument, kwargs")
+Event.time.__doc__ = """Numeric type compatible with the return value of the
+timefunc function passed to the constructor."""
+Event.priority.__doc__ = """Events scheduled for the same time will be executed
+in the order of their priority."""
+Event.sequence.__doc__ = """A continually increasing sequence number that
+    separates events if time and priority are equal."""
+Event.action.__doc__ = """Executing the event means executing
+action(*argument, **kwargs)"""
+Event.argument.__doc__ = """argument is a sequence holding the positional
+arguments for the action."""
+Event.kwargs.__doc__ = """kwargs is a dictionary holding the keyword
+arguments for the action."""
 
 _sentinel = object()
+
 
 class scheduler:
 
@@ -70,10 +71,11 @@ class scheduler:
             kwargs = {}
 
         with self._lock:
-            event = Event(time, priority, next(self._sequence_generator),
-                          action, argument, kwargs)
+            event = Event(
+                time, priority, next(self._sequence_generator), action, argument, kwargs
+            )
             heapq.heappush(self._queue, event)
-        return event # The ID
+        return event  # The ID
 
     def enter(self, delay, priority, action, argument=(), kwargs=_sentinel):
         """A variant that specifies the time as a relative time.
@@ -135,8 +137,7 @@ class scheduler:
             with lock:
                 if not q:
                     break
-                (time, priority, sequence, action,
-                 argument, kwargs) = q[0]
+                time, priority, sequence, action, argument, kwargs = q[0]
                 now = timefunc()
                 if time > now:
                     delay = True
@@ -149,7 +150,7 @@ class scheduler:
                 delayfunc(time - now)
             else:
                 action(*argument, **kwargs)
-                delayfunc(0)   # Let other threads run
+                delayfunc(0)  # Let other threads run
 
     @property
     def queue(self):
@@ -164,4 +165,4 @@ class scheduler:
         # the actual order they would be retrieved.
         with self._lock:
             events = self._queue[:]
-        return list(map(heapq.heappop, [events]*len(events)))
+        return list(map(heapq.heappop, [events] * len(events)))

@@ -23,13 +23,13 @@ def test_directories_in_package_data_glob(tmpdir_cwd):
     """
     dist = Distribution(
         dict(
-            script_name='setup.py',
-            script_args=['build_py'],
-            packages=[''],
-            package_data={'': ['path/*']},
+            script_name="setup.py",
+            script_args=["build_py"],
+            packages=[""],
+            package_data={"": ["path/*"]},
         )
     )
-    os.makedirs('path/subpath')
+    os.makedirs("path/subpath")
     dist.parse_command_line()
     dist.run_commands()
 
@@ -43,21 +43,21 @@ def test_recursive_in_package_data_glob(tmpdir_cwd):
     """
     dist = Distribution(
         dict(
-            script_name='setup.py',
-            script_args=['build_py'],
-            packages=[''],
-            package_data={'': ['path/**/data']},
+            script_name="setup.py",
+            script_args=["build_py"],
+            packages=[""],
+            package_data={"": ["path/**/data"]},
         )
     )
-    os.makedirs('path/subpath/subsubpath')
-    open('path/subpath/subsubpath/data', 'wb').close()
+    os.makedirs("path/subpath/subsubpath")
+    open("path/subpath/subsubpath/data", "wb").close()
 
     dist.parse_command_line()
     dist.run_commands()
 
-    assert stat.S_ISREG(os.stat('build/lib/path/subpath/subsubpath/data').st_mode), (
-        "File is not included"
-    )
+    assert stat.S_ISREG(
+        os.stat("build/lib/path/subpath/subsubpath/data").st_mode
+    ), "File is not included"
 
 
 def test_read_only(tmpdir_cwd):
@@ -71,20 +71,20 @@ def test_read_only(tmpdir_cwd):
     """
     dist = Distribution(
         dict(
-            script_name='setup.py',
-            script_args=['build_py'],
-            packages=['pkg'],
-            package_data={'pkg': ['data.dat']},
+            script_name="setup.py",
+            script_args=["build_py"],
+            packages=["pkg"],
+            package_data={"pkg": ["data.dat"]},
         )
     )
-    os.makedirs('pkg')
-    open('pkg/__init__.py', 'wb').close()
-    open('pkg/data.dat', 'wb').close()
-    os.chmod('pkg/__init__.py', stat.S_IREAD)
-    os.chmod('pkg/data.dat', stat.S_IREAD)
+    os.makedirs("pkg")
+    open("pkg/__init__.py", "wb").close()
+    open("pkg/data.dat", "wb").close()
+    os.chmod("pkg/__init__.py", stat.S_IREAD)
+    os.chmod("pkg/data.dat", stat.S_IREAD)
     dist.parse_command_line()
     dist.run_commands()
-    shutil.rmtree('build')
+    shutil.rmtree("build")
 
 
 @pytest.mark.xfail(
@@ -102,28 +102,27 @@ def test_executable_data(tmpdir_cwd):
     """
     dist = Distribution(
         dict(
-            script_name='setup.py',
-            script_args=['build_py'],
-            packages=['pkg'],
-            package_data={'pkg': ['run-me']},
+            script_name="setup.py",
+            script_args=["build_py"],
+            packages=["pkg"],
+            package_data={"pkg": ["run-me"]},
         )
     )
-    os.makedirs('pkg')
-    open('pkg/__init__.py', 'wb').close()
-    open('pkg/run-me', 'wb').close()
-    os.chmod('pkg/run-me', 0o700)
+    os.makedirs("pkg")
+    open("pkg/__init__.py", "wb").close()
+    open("pkg/run-me", "wb").close()
+    os.chmod("pkg/run-me", 0o700)
 
     dist.parse_command_line()
     dist.run_commands()
 
-    assert os.stat('build/lib/pkg/run-me').st_mode & stat.S_IEXEC, (
-        "Script is not executable"
-    )
+    assert (
+        os.stat("build/lib/pkg/run-me").st_mode & stat.S_IEXEC
+    ), "Script is not executable"
 
 
 EXAMPLE_WITH_MANIFEST = {
-    "setup.cfg": DALS(
-        """
+    "setup.cfg": DALS("""
         [metadata]
         name = mypkg
         version = 42
@@ -134,8 +133,7 @@ EXAMPLE_WITH_MANIFEST = {
 
         [options.packages.find]
         exclude = *.tests*
-        """
-    ),
+        """),
     "mypkg": {
         "__init__.py": "",
         "resource_file.txt": "",
@@ -145,15 +143,13 @@ EXAMPLE_WITH_MANIFEST = {
             "test_file.txt": "",
         },
     },
-    "MANIFEST.in": DALS(
-        """
+    "MANIFEST.in": DALS("""
         global-include *.py *.txt
         global-exclude *.py[cod]
         prune dist
         prune build
         prune *.egg-info
-        """
-    ),
+        """),
 }
 
 
@@ -230,7 +226,7 @@ def test_existing_egg_info(tmpdir_cwd, monkeypatch):
     # == Remove caches ==
     # egg_info is called when build_py looks for data_files, which gets cached.
     # We need to ensure it is not cached yet, otherwise it may impact on the tests
-    build_py.__dict__.pop('data_files', None)
+    build_py.__dict__.pop("data_files", None)
     dist.reinitialize_command(egg_info)
 
     # == Sanity check ==
@@ -241,7 +237,7 @@ def test_existing_egg_info(tmpdir_cwd, monkeypatch):
 
     # == Remove caches ==
     egg_info_run.reset_mock()
-    build_py.__dict__.pop('data_files', None)
+    build_py.__dict__.pop("data_files", None)
     dist.reinitialize_command(egg_info)
 
     # == Actual test ==
@@ -259,8 +255,7 @@ def test_existing_egg_info(tmpdir_cwd, monkeypatch):
 
 
 EXAMPLE_ARBITRARY_MAPPING = {
-    "pyproject.toml": DALS(
-        """
+    "pyproject.toml": DALS("""
         [project]
         name = "mypkg"
         version = "42"
@@ -272,8 +267,7 @@ EXAMPLE_ARBITRARY_MAPPING = {
         "" = "src"
         "mypkg.sub2" = "src/mypkg/_sub2"
         "mypkg.sub2.nested" = "other"
-        """
-    ),
+        """),
     "src": {
         "mypkg": {
             "__init__.py": "",
@@ -291,12 +285,10 @@ EXAMPLE_ARBITRARY_MAPPING = {
         "__init__.py": "",
         "mod3.py": "",
     },
-    "MANIFEST.in": DALS(
-        """
+    "MANIFEST.in": DALS("""
         global-include *.py *.txt
         global-exclude *.py[cod]
-        """
-    ),
+        """),
 }
 
 
@@ -336,25 +328,20 @@ def test_get_outputs(tmpdir_cwd):
 
 class TestTypeInfoFiles:
     PYPROJECTS = {
-        "default_pyproject": DALS(
-            """
+        "default_pyproject": DALS("""
             [project]
             name = "foo"
             version = "1"
-            """
-        ),
-        "dont_include_package_data": DALS(
-            """
+            """),
+        "dont_include_package_data": DALS("""
             [project]
             name = "foo"
             version = "1"
 
             [tool.setuptools]
             include-package-data = false
-            """
-        ),
-        "exclude_type_info": DALS(
-            """
+            """),
+        "exclude_type_info": DALS("""
             [project]
             name = "foo"
             version = "1"
@@ -364,8 +351,7 @@ class TestTypeInfoFiles:
 
             [tool.setuptools.exclude-package-data]
             "*" = ["py.typed", "*.pyi"]
-            """
-        ),
+            """),
     }
 
     EXAMPLES = {
@@ -447,13 +433,11 @@ class TestTypeInfoFiles:
 
     def test_stub_only_package(self, tmpdir_cwd):
         structure = {
-            "pyproject.toml": DALS(
-                """
+            "pyproject.toml": DALS("""
                 [project]
                 name = "foo-stubs"
                 version = "1"
-                """
-            ),
+                """),
             "foo-stubs": {"__init__.pyi": "", "bar.pyi": ""},
         }
         expected_type_files = {"foo-stubs/__init__.pyi", "foo-stubs/bar.pyi"}

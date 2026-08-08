@@ -8,17 +8,18 @@ from collections import namedtuple
 class ParseMapTest(unittest.TestCase):
 
     def test_parsemap(self):
-        keepwhite = {ord(c): ord(c) for c in ' \t\n\r'}
+        keepwhite = {ord(c): ord(c) for c in " \t\n\r"}
         mapping = pyparse.ParseMap(keepwhite)
-        self.assertEqual(mapping[ord('\t')], ord('\t'))
-        self.assertEqual(mapping[ord('a')], ord('x'))
-        self.assertEqual(mapping[1000], ord('x'))
+        self.assertEqual(mapping[ord("\t")], ord("\t"))
+        self.assertEqual(mapping[ord("a")], ord("x"))
+        self.assertEqual(mapping[1000], ord("x"))
 
     def test_trans(self):
         # trans is the production instance of ParseMap, used in _study1
         parser = pyparse.Parser(4, 4)
-        self.assertEqual('\t a([{b}])b"c\'d\n'.translate(pyparse.trans),
-                         'xxx(((x)))x"x\'x\n')
+        self.assertEqual(
+            "\t a([{b}])b\"c'd\n".translate(pyparse.trans), "xxx(((x)))x\"x'x\n"
+        )
 
 
 class PyParseTest(unittest.TestCase):
@@ -42,10 +43,9 @@ class PyParseTest(unittest.TestCase):
 
         # Not empty and doesn't end with newline.
         with self.assertRaises(AssertionError):
-            setcode('a')
+            setcode("a")
 
-        tests = ('',
-                 'a\n')
+        tests = ("", "a\n")
 
         for string in tests:
             with self.subTest(string=string):
@@ -58,26 +58,29 @@ class PyParseTest(unittest.TestCase):
         p = self.parser
         setcode = p.set_code
         start = p.find_good_parse_start
-        def char_in_string_false(index): return False
+
+        def char_in_string_false(index):
+            return False
 
         # First line starts with 'def' and ends with ':', then 0 is the pos.
-        setcode('def spam():\n')
+        setcode("def spam():\n")
         eq(start(char_in_string_false), 0)
 
         # First line begins with a keyword in the list and ends
         # with an open brace, then 0 is the pos.  This is how
         # hyperparser calls this function as the newline is not added
         # in the editor, but rather on the call to setcode.
-        setcode('class spam( ' + ' \n')
+        setcode("class spam( " + " \n")
         eq(start(char_in_string_false), 0)
 
         # Split def across lines.
-        setcode('"""This is a module docstring"""\n'
-                'class C:\n'
-                '    def __init__(self, a,\n'
-                '                 b=True):\n'
-                '        pass\n'
-                )
+        setcode(
+            '"""This is a module docstring"""\n'
+            "class C:\n"
+            "    def __init__(self, a,\n"
+            "                 b=True):\n"
+            "        pass\n"
+        )
         pos0, pos = 33, 42  # Start of 'class...', '    def' lines.
 
         # Passing no value or non-callable should fail (issue 32989).
@@ -106,11 +109,12 @@ class PyParseTest(unittest.TestCase):
 
         # Code without extra line break in def line - mostly returns the same
         # values.
-        setcode('"""This is a module docstring"""\n'
-                'class C:\n'
-                '    def __init__(self, a, b=True):\n'
-                '        pass\n'
-                )  # Does not affect class, def positions.
+        setcode(
+            '"""This is a module docstring"""\n'
+            "class C:\n"
+            "    def __init__(self, a, b=True):\n"
+            "        pass\n"
+        )  # Does not affect class, def positions.
         eq(start(char_in_string_false), pos)
         eq(start(is_char_in_string=lambda index: index > pos), pos)
         eq(start(is_char_in_string=lambda index: index >= pos), pos0)
@@ -120,12 +124,12 @@ class PyParseTest(unittest.TestCase):
 
     def test_set_lo(self):
         code = (
-                '"""This is a module docstring"""\n'
-                'class C:\n'
-                '    def __init__(self, a,\n'
-                '                 b=True):\n'
-                '        pass\n'
-                )
+            '"""This is a module docstring"""\n'
+            "class C:\n"
+            "    def __init__(self, a,\n"
+            "                 b=True):\n"
+            "        pass\n"
+        )
         pos = 42
         p = self.parser
         p.set_code(code)
@@ -148,11 +152,10 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         study = p._study1
 
-        (NONE, BACKSLASH, FIRST, NEXT, BRACKET) = range(5)
-        TestInfo = namedtuple('TestInfo', ['string', 'goodlines',
-                                           'continuation'])
+        NONE, BACKSLASH, FIRST, NEXT, BRACKET = range(5)
+        TestInfo = namedtuple("TestInfo", ["string", "goodlines", "continuation"])
         tests = (
-            TestInfo('', [0], NONE),
+            TestInfo("", [0], NONE),
             # Docstrings.
             TestInfo('"""This is a complete docstring."""\n', [0, 1], NONE),
             TestInfo("'''This is a complete docstring.'''\n", [0, 1], NONE),
@@ -166,20 +169,21 @@ class PyParseTest(unittest.TestCase):
             TestInfo('"This is an incomplete string.\n', [0, 1], NONE),
             TestInfo("'This is more incomplete.\n\n", [0, 1, 2], NONE),
             # Comment (backslash does not continue comments).
-            TestInfo('# Comment\\\n', [0, 1], NONE),
+            TestInfo("# Comment\\\n", [0, 1], NONE),
             # Brackets.
             TestInfo('("""Complete string in bracket"""\n', [0, 1], BRACKET),
             TestInfo('("""Open string in bracket\n', [0, 1], FIRST),
-            TestInfo('a = (1 + 2) - 5 *\\\n', [0, 1], BACKSLASH),  # No bracket.
-            TestInfo('\n   def function1(self, a,\n                 b):\n',
-                     [0, 1, 3], NONE),
-            TestInfo('\n   def function1(self, a,\\\n', [0, 1, 2], BRACKET),
-            TestInfo('\n   def function1(self, a,\n', [0, 1, 2], BRACKET),
-            TestInfo('())\n', [0, 1], NONE),                    # Extra closer.
-            TestInfo(')(\n', [0, 1], BRACKET),                  # Extra closer.
+            TestInfo("a = (1 + 2) - 5 *\\\n", [0, 1], BACKSLASH),  # No bracket.
+            TestInfo(
+                "\n   def function1(self, a,\n                 b):\n", [0, 1, 3], NONE
+            ),
+            TestInfo("\n   def function1(self, a,\\\n", [0, 1, 2], BRACKET),
+            TestInfo("\n   def function1(self, a,\n", [0, 1, 2], BRACKET),
+            TestInfo("())\n", [0, 1], NONE),  # Extra closer.
+            TestInfo(")(\n", [0, 1], BRACKET),  # Extra closer.
             # For the mismatched example, it doesn't look like continuation.
-            TestInfo('{)(]\n', [0, 1], NONE),                   # Mismatched.
-            )
+            TestInfo("{)(]\n", [0, 1], NONE),  # Mismatched.
+        )
 
         for test in tests:
             with self.subTest(string=test.string):
@@ -198,15 +202,15 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         gettype = p.get_continuation_type
 
-        (NONE, BACKSLASH, FIRST, NEXT, BRACKET) = range(5)
-        TestInfo = namedtuple('TestInfo', ['string', 'continuation'])
+        NONE, BACKSLASH, FIRST, NEXT, BRACKET = range(5)
+        TestInfo = namedtuple("TestInfo", ["string", "continuation"])
         tests = (
-            TestInfo('', NONE),
+            TestInfo("", NONE),
             TestInfo('"""This is a continuation docstring.\n', FIRST),
             TestInfo("'''This is a multiline-continued docstring.\n\n", NEXT),
-            TestInfo('a = (1 + 2) - 5 *\\\n', BACKSLASH),
-            TestInfo('\n   def function1(self, a,\\\n', BRACKET)
-            )
+            TestInfo("a = (1 + 2) - 5 *\\\n", BACKSLASH),
+            TestInfo("\n   def function1(self, a,\\\n", BRACKET),
+        )
 
         for test in tests:
             with self.subTest(string=test.string):
@@ -219,46 +223,72 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         study = p._study2
 
-        TestInfo = namedtuple('TestInfo', ['string', 'start', 'end', 'lastch',
-                                           'openbracket', 'bracketing'])
+        TestInfo = namedtuple(
+            "TestInfo",
+            ["string", "start", "end", "lastch", "openbracket", "bracketing"],
+        )
         tests = (
-            TestInfo('', 0, 0, '', None, ((0, 0),)),
-            TestInfo("'''This is a multiline continuation docstring.\n\n",
-                     0, 48, "'", None, ((0, 0), (0, 1), (48, 0))),
-            TestInfo(' # Comment\\\n',
-                     0, 12, '', None, ((0, 0), (1, 1), (12, 0))),
+            TestInfo("", 0, 0, "", None, ((0, 0),)),
+            TestInfo(
+                "'''This is a multiline continuation docstring.\n\n",
+                0,
+                48,
+                "'",
+                None,
+                ((0, 0), (0, 1), (48, 0)),
+            ),
+            TestInfo(" # Comment\\\n", 0, 12, "", None, ((0, 0), (1, 1), (12, 0))),
             # A comment without a space is a special case
-            TestInfo(' #Comment\\\n',
-                     0, 0, '', None, ((0, 0),)),
+            TestInfo(" #Comment\\\n", 0, 0, "", None, ((0, 0),)),
             # Backslash continuation.
-            TestInfo('a = (1 + 2) - 5 *\\\n',
-                     0, 19, '*', None, ((0, 0), (4, 1), (11, 0))),
+            TestInfo(
+                "a = (1 + 2) - 5 *\\\n", 0, 19, "*", None, ((0, 0), (4, 1), (11, 0))
+            ),
             # Bracket continuation with close.
-            TestInfo('\n   def function1(self, a,\n                 b):\n',
-                     1, 48, ':', None, ((1, 0), (17, 1), (46, 0))),
+            TestInfo(
+                "\n   def function1(self, a,\n                 b):\n",
+                1,
+                48,
+                ":",
+                None,
+                ((1, 0), (17, 1), (46, 0)),
+            ),
             # Bracket continuation with unneeded backslash.
-            TestInfo('\n   def function1(self, a,\\\n',
-                     1, 28, ',', 17, ((1, 0), (17, 1))),
+            TestInfo(
+                "\n   def function1(self, a,\\\n", 1, 28, ",", 17, ((1, 0), (17, 1))
+            ),
             # Bracket continuation.
-            TestInfo('\n   def function1(self, a,\n',
-                     1, 27, ',', 17, ((1, 0), (17, 1))),
+            TestInfo(
+                "\n   def function1(self, a,\n", 1, 27, ",", 17, ((1, 0), (17, 1))
+            ),
             # Bracket continuation with comment at end of line with text.
-            TestInfo('\n   def function1(self, a,  # End of line comment.\n',
-                     1, 51, ',', 17, ((1, 0), (17, 1), (28, 2), (51, 1))),
+            TestInfo(
+                "\n   def function1(self, a,  # End of line comment.\n",
+                1,
+                51,
+                ",",
+                17,
+                ((1, 0), (17, 1), (28, 2), (51, 1)),
+            ),
             # Multi-line statement with comment line in between code lines.
-            TestInfo('  a = ["first item",\n  # Comment line\n    "next item",\n',
-                     0, 55, ',', 6, ((0, 0), (6, 1), (7, 2), (19, 1),
-                                     (23, 2), (38, 1), (42, 2), (53, 1))),
-            TestInfo('())\n',
-                     0, 4, ')', None, ((0, 0), (0, 1), (2, 0), (3, 0))),
-            TestInfo(')(\n', 0, 3, '(', 1, ((0, 0), (1, 0), (1, 1))),
+            TestInfo(
+                '  a = ["first item",\n  # Comment line\n    "next item",\n',
+                0,
+                55,
+                ",",
+                6,
+                ((0, 0), (6, 1), (7, 2), (19, 1), (23, 2), (38, 1), (42, 2), (53, 1)),
+            ),
+            TestInfo("())\n", 0, 4, ")", None, ((0, 0), (0, 1), (2, 0), (3, 0))),
+            TestInfo(")(\n", 0, 3, "(", 1, ((0, 0), (1, 0), (1, 1))),
             # Wrong closers still decrement stack level.
-            TestInfo('{)(]\n',
-                     0, 5, ']', None, ((0, 0), (0, 1), (2, 0), (2, 1), (4, 0))),
+            TestInfo(
+                "{)(]\n", 0, 5, "]", None, ((0, 0), (0, 1), (2, 0), (2, 1), (4, 0))
+            ),
             # Character after backslash.
-            TestInfo(':\\a\n', 0, 4, '\\a', None, ((0, 0),)),
-            TestInfo('\n', 0, 0, '', None, ((0, 0),)),
-            )
+            TestInfo(":\\a\n", 0, 4, "\\a", None, ((0, 0),)),
+            TestInfo("\n", 0, 0, "", None, ((0, 0),)),
+        )
 
         for test in tests:
             with self.subTest(string=test.string):
@@ -280,20 +310,20 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         getlines = p.get_num_lines_in_stmt
 
-        TestInfo = namedtuple('TestInfo', ['string', 'lines'])
+        TestInfo = namedtuple("TestInfo", ["string", "lines"])
         tests = (
-            TestInfo('[x for x in a]\n', 1),      # Closed on one line.
-            TestInfo('[x\nfor x in a\n', 2),      # Not closed.
-            TestInfo('[x\\\nfor x in a\\\n', 2),  # "", unneeded backslashes.
-            TestInfo('[x\nfor x in a\n]\n', 3),   # Closed on multi-line.
+            TestInfo("[x for x in a]\n", 1),  # Closed on one line.
+            TestInfo("[x\nfor x in a\n", 2),  # Not closed.
+            TestInfo("[x\\\nfor x in a\\\n", 2),  # "", unneeded backslashes.
+            TestInfo("[x\nfor x in a\n]\n", 3),  # Closed on multi-line.
             TestInfo('\n"""Docstring comment L1"""\nL2\nL3\nL4\n', 1),
             TestInfo('\n"""Docstring comment L1\nL2"""\nL3\nL4\n', 1),
             TestInfo('\n"""Docstring comment L1\\\nL2\\\nL3\\\nL4\\\n', 4),
-            TestInfo('\n\n"""Docstring comment L1\\\nL2\\\nL3\\\nL4\\\n"""\n', 5)
-            )
+            TestInfo('\n\n"""Docstring comment L1\\\nL2\\\nL3\\\nL4\\\n"""\n', 5),
+        )
 
         # Blank string doesn't have enough elements in goodlines.
-        setcode('')
+        setcode("")
         with self.assertRaises(IndexError):
             getlines()
 
@@ -308,25 +338,25 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         indent = p.compute_bracket_indent
 
-        TestInfo = namedtuple('TestInfo', ['string', 'spaces'])
+        TestInfo = namedtuple("TestInfo", ["string", "spaces"])
         tests = (
-            TestInfo('def function1(self, a,\n', 14),
+            TestInfo("def function1(self, a,\n", 14),
             # Characters after bracket.
-            TestInfo('\n    def function1(self, a,\n', 18),
-            TestInfo('\n\tdef function1(self, a,\n', 18),
+            TestInfo("\n    def function1(self, a,\n", 18),
+            TestInfo("\n\tdef function1(self, a,\n", 18),
             # No characters after bracket.
-            TestInfo('\n    def function1(\n', 8),
-            TestInfo('\n\tdef function1(\n', 8),
-            TestInfo('\n    def function1(  \n', 8),  # Ignore extra spaces.
+            TestInfo("\n    def function1(\n", 8),
+            TestInfo("\n\tdef function1(\n", 8),
+            TestInfo("\n    def function1(  \n", 8),  # Ignore extra spaces.
             TestInfo('[\n"first item",\n  # Comment line\n    "next item",\n', 0),
             TestInfo('[\n  "first item",\n  # Comment line\n    "next item",\n', 2),
             TestInfo('["first item",\n  # Comment line\n    "next item",\n', 1),
-            TestInfo('(\n', 4),
-            TestInfo('(a\n', 1),
-             )
+            TestInfo("(\n", 4),
+            TestInfo("(a\n", 1),
+        )
 
         # Must be C_BRACKET continuation type.
-        setcode('def function1(self, a, b):\n')
+        setcode("def function1(self, a, b):\n")
         with self.assertRaises(AssertionError):
             indent()
 
@@ -341,33 +371,35 @@ class PyParseTest(unittest.TestCase):
         indent = p.compute_backslash_indent
 
         # Must be C_BACKSLASH continuation type.
-        errors = (('def function1(self, a, b\\\n'),  # Bracket.
-                  ('    """ (\\\n'),                 # Docstring.
-                  ('a = #\\\n'),                     # Inline comment.
-                  )
+        errors = (
+            ("def function1(self, a, b\\\n"),  # Bracket.
+            ('    """ (\\\n'),  # Docstring.
+            ("a = #\\\n"),  # Inline comment.
+        )
         for string in errors:
             with self.subTest(string=string):
                 setcode(string)
                 with self.assertRaises(AssertionError):
                     indent()
 
-        TestInfo = namedtuple('TestInfo', ('string', 'spaces'))
-        tests = (TestInfo('a = (1 + 2) - 5 *\\\n', 4),
-                 TestInfo('a = 1 + 2 - 5 *\\\n', 4),
-                 TestInfo('    a = 1 + 2 - 5 *\\\n', 8),
-                 TestInfo('  a = "spam"\\\n', 6),
-                 TestInfo('  a = \\\n"a"\\\n', 4),
-                 TestInfo('  a = #\\\n"a"\\\n', 5),
-                 TestInfo('a == \\\n', 2),
-                 TestInfo('a != \\\n', 2),
-                 # Difference between containing = and those not.
-                 TestInfo('\\\n', 2),
-                 TestInfo('    \\\n', 6),
-                 TestInfo('\t\\\n', 6),
-                 TestInfo('a\\\n', 3),
-                 TestInfo('{}\\\n', 4),
-                 TestInfo('(1 + 2) - 5 *\\\n', 3),
-                 )
+        TestInfo = namedtuple("TestInfo", ("string", "spaces"))
+        tests = (
+            TestInfo("a = (1 + 2) - 5 *\\\n", 4),
+            TestInfo("a = 1 + 2 - 5 *\\\n", 4),
+            TestInfo("    a = 1 + 2 - 5 *\\\n", 8),
+            TestInfo('  a = "spam"\\\n', 6),
+            TestInfo('  a = \\\n"a"\\\n', 4),
+            TestInfo('  a = #\\\n"a"\\\n', 5),
+            TestInfo("a == \\\n", 2),
+            TestInfo("a != \\\n", 2),
+            # Difference between containing = and those not.
+            TestInfo("\\\n", 2),
+            TestInfo("    \\\n", 6),
+            TestInfo("\t\\\n", 6),
+            TestInfo("a\\\n", 3),
+            TestInfo("{}\\\n", 4),
+            TestInfo("(1 + 2) - 5 *\\\n", 3),
+        )
         for test in tests:
             with self.subTest(string=test.string):
                 setcode(test.string)
@@ -379,15 +411,16 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         baseindent = p.get_base_indent_string
 
-        TestInfo = namedtuple('TestInfo', ['string', 'indent'])
-        tests = (TestInfo('', ''),
-                 TestInfo('def a():\n', ''),
-                 TestInfo('\tdef a():\n', '\t'),
-                 TestInfo('    def a():\n', '    '),
-                 TestInfo('    def a(\n', '    '),
-                 TestInfo('\t\n    def a(\n', '    '),
-                 TestInfo('\t\n    # Comment.\n', '    '),
-                 )
+        TestInfo = namedtuple("TestInfo", ["string", "indent"])
+        tests = (
+            TestInfo("", ""),
+            TestInfo("def a():\n", ""),
+            TestInfo("\tdef a():\n", "\t"),
+            TestInfo("    def a():\n", "    "),
+            TestInfo("    def a(\n", "    "),
+            TestInfo("\t\n    def a(\n", "    "),
+            TestInfo("\t\n    # Comment.\n", "    "),
+        )
 
         for test in tests:
             with self.subTest(string=test.string):
@@ -401,21 +434,21 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         opener = p.is_block_opener
 
-        TestInfo = namedtuple('TestInfo', ['string', 'assert_'])
+        TestInfo = namedtuple("TestInfo", ["string", "assert_"])
         tests = (
-            TestInfo('def a():\n', yes),
-            TestInfo('\n   def function1(self, a,\n                 b):\n', yes),
-            TestInfo(':\n', yes),
-            TestInfo('a:\n', yes),
-            TestInfo('):\n', yes),
-            TestInfo('(:\n', yes),
+            TestInfo("def a():\n", yes),
+            TestInfo("\n   def function1(self, a,\n                 b):\n", yes),
+            TestInfo(":\n", yes),
+            TestInfo("a:\n", yes),
+            TestInfo("):\n", yes),
+            TestInfo("(:\n", yes),
             TestInfo('":\n', no),
-            TestInfo('\n   def function1(self, a,\n', no),
-            TestInfo('def function1(self, a):\n    pass\n', no),
-            TestInfo('# A comment:\n', no),
+            TestInfo("\n   def function1(self, a,\n", no),
+            TestInfo("def function1(self, a):\n    pass\n", no),
+            TestInfo("# A comment:\n", no),
             TestInfo('"""A docstring:\n', no),
             TestInfo('"""A docstring:\n', no),
-            )
+        )
 
         for test in tests:
             with self.subTest(string=test.string):
@@ -429,22 +462,22 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         closer = p.is_block_closer
 
-        TestInfo = namedtuple('TestInfo', ['string', 'assert_'])
+        TestInfo = namedtuple("TestInfo", ["string", "assert_"])
         tests = (
-            TestInfo('return\n', yes),
-            TestInfo('\tbreak\n', yes),
-            TestInfo('  continue\n', yes),
-            TestInfo('     raise\n', yes),
-            TestInfo('pass    \n', yes),
-            TestInfo('pass\t\n', yes),
-            TestInfo('return #\n', yes),
-            TestInfo('raised\n', no),
-            TestInfo('returning\n', no),
-            TestInfo('# return\n', no),
+            TestInfo("return\n", yes),
+            TestInfo("\tbreak\n", yes),
+            TestInfo("  continue\n", yes),
+            TestInfo("     raise\n", yes),
+            TestInfo("pass    \n", yes),
+            TestInfo("pass\t\n", yes),
+            TestInfo("return #\n", yes),
+            TestInfo("raised\n", no),
+            TestInfo("returning\n", no),
+            TestInfo("# return\n", no),
             TestInfo('"""break\n', no),
             TestInfo('"continue\n', no),
-            TestInfo('def function1(self, a):\n    pass\n', yes),
-            )
+            TestInfo("def function1(self, a):\n    pass\n", yes),
+        )
 
         for test in tests:
             with self.subTest(string=test.string):
@@ -457,21 +490,22 @@ class PyParseTest(unittest.TestCase):
         setcode = p.set_code
         bracketing = p.get_last_stmt_bracketing
 
-        TestInfo = namedtuple('TestInfo', ['string', 'bracket'])
+        TestInfo = namedtuple("TestInfo", ["string", "bracket"])
         tests = (
-            TestInfo('', ((0, 0),)),
-            TestInfo('a\n', ((0, 0),)),
-            TestInfo('()()\n', ((0, 0), (0, 1), (2, 0), (2, 1), (4, 0))),
-            TestInfo('(\n)()\n', ((0, 0), (0, 1), (3, 0), (3, 1), (5, 0))),
-            TestInfo('()\n()\n', ((3, 0), (3, 1), (5, 0))),
-            TestInfo('()(\n)\n', ((0, 0), (0, 1), (2, 0), (2, 1), (5, 0))),
-            TestInfo('(())\n', ((0, 0), (0, 1), (1, 2), (3, 1), (4, 0))),
-            TestInfo('(\n())\n', ((0, 0), (0, 1), (2, 2), (4, 1), (5, 0))),
+            TestInfo("", ((0, 0),)),
+            TestInfo("a\n", ((0, 0),)),
+            TestInfo("()()\n", ((0, 0), (0, 1), (2, 0), (2, 1), (4, 0))),
+            TestInfo("(\n)()\n", ((0, 0), (0, 1), (3, 0), (3, 1), (5, 0))),
+            TestInfo("()\n()\n", ((3, 0), (3, 1), (5, 0))),
+            TestInfo("()(\n)\n", ((0, 0), (0, 1), (2, 0), (2, 1), (5, 0))),
+            TestInfo("(())\n", ((0, 0), (0, 1), (1, 2), (3, 1), (4, 0))),
+            TestInfo("(\n())\n", ((0, 0), (0, 1), (2, 2), (4, 1), (5, 0))),
             # Same as matched test.
-            TestInfo('{)(]\n', ((0, 0), (0, 1), (2, 0), (2, 1), (4, 0))),
-            TestInfo('(((())\n',
-                     ((0, 0), (0, 1), (1, 2), (2, 3), (3, 4), (5, 3), (6, 2))),
-            )
+            TestInfo("{)(]\n", ((0, 0), (0, 1), (2, 0), (2, 1), (4, 0))),
+            TestInfo(
+                "(((())\n", ((0, 0), (0, 1), (1, 2), (2, 3), (3, 4), (5, 3), (6, 2))
+            ),
+        )
 
         for test in tests:
             with self.subTest(string=test.string):
@@ -479,5 +513,5 @@ class PyParseTest(unittest.TestCase):
                 eq(bracketing(), test.bracket)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

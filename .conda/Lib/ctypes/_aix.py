@@ -44,6 +44,7 @@ member (e.g., libFOO.so, or shr.o) is located and loaded.
 The mode bit RTLD_MEMBER tells initAndLoad() that it needs to use the AIX (SVR3)
 naming style.
 """
+
 __author__ = "Michael Felt <aixtools@felt.demon.nl>"
 
 import re
@@ -58,6 +59,8 @@ AIX_ABI = sizeof(c_void_p) * 8
 
 
 from sys import maxsize
+
+
 def _last_version(libnames, sep):
     def _num_version(libname):
         # "libxyz.so.MAJOR.MINOR" => [MAJOR, MINOR]
@@ -69,17 +72,20 @@ def _last_version(libnames, sep):
         except ValueError:
             pass
         return nums or [maxsize]
+
     return max(reversed(libnames), key=_num_version)
+
 
 def get_ld_header(p):
     # "nested-function, but placed at module level
     ld_header = None
     for line in p.stdout:
-        if line.startswith(('/', './', '../')):
+        if line.startswith(("/", "./", "../")):
             ld_header = line
         elif "INDEX" in line:
-            return ld_header.rstrip('\n')
+            return ld_header.rstrip("\n")
     return None
+
 
 def get_ld_header_info(p):
     # "nested-function, but placed at module level
@@ -94,6 +100,7 @@ def get_ld_header_info(p):
             break
     return info
 
+
 def get_ld_headers(file):
     """
     Parse the header of the loader section of executable and archives
@@ -105,14 +112,19 @@ def get_ld_headers(file):
     # 2. If "INDEX" in occurs in a following line - return ld_header
     # 3. get info (lines starting with [0-9])
     ldr_headers = []
-    p = Popen(["/usr/bin/dump", f"-X{AIX_ABI}", "-H", file],
-        universal_newlines=True, stdout=PIPE, stderr=DEVNULL)
+    p = Popen(
+        ["/usr/bin/dump", f"-X{AIX_ABI}", "-H", file],
+        universal_newlines=True,
+        stdout=PIPE,
+        stderr=DEVNULL,
+    )
     # be sure to read to the end-of-file - getting all entries
     while ld_header := get_ld_header(p):
         ldr_headers.append((ld_header, get_ld_header_info(p)))
     p.stdout.close()
     p.wait()
     return ldr_headers
+
 
 def get_shared(ld_headers):
     """
@@ -122,13 +134,14 @@ def get_shared(ld_headers):
     are not removed here.
     """
     shared = []
-    for (line, _) in ld_headers:
+    for line, _ in ld_headers:
         # potential member lines contain "["
         # otherwise, no processing needed
         if "[" in line:
             # Strip off trailing colon (:)
-            shared.append(line[line.index("["):-1])
+            shared.append(line[line.index("[") : -1])
     return shared
+
 
 def get_one_match(expr, lines):
     """
@@ -136,12 +149,13 @@ def get_one_match(expr, lines):
     When there is a match, strip leading "[" and trailing "]"
     """
     # member names in the ld_headers output are between square brackets
-    expr = rf'\[({expr})\]'
+    expr = rf"\[({expr})\]"
     matches = list(filter(None, (re.search(expr, line) for line in lines)))
     if len(matches) == 1:
         return matches[0].group(1)
     else:
         return None
+
 
 # additional processing to deal with AIX legacy names for 64-bit members
 def get_legacy(members):
@@ -153,7 +167,7 @@ def get_legacy(members):
     """
     if AIX_ABI == 64:
         # AIX 64-bit member is one of shr64.o, shr_64.o, or shr4_64.o
-        expr = r'shr4?_?64\.o'
+        expr = r"shr4?_?64\.o"
         member = get_one_match(expr, members)
         if member:
             return member
@@ -161,11 +175,12 @@ def get_legacy(members):
         # 32-bit legacy names - both shr.o and shr4.o exist.
         # shr.o is the preferred name so we look for shr.o first
         #  i.e., shr4.o is returned only when shr.o does not exist
-        for name in ['shr.o', 'shr4.o']:
+        for name in ["shr.o", "shr4.o"]:
             member = get_one_match(re.escape(name), members)
             if member:
                 return member
     return None
+
 
 def get_version(name, members):
     """
@@ -193,8 +208,7 @@ def get_version(name, members):
     # any combination of additional 'dot' digits pairs are accepted
     # anything more than libFOO.so.digits.digits.digits
     # should be seen as a member name outside normal expectations
-    exprs = [rf'lib{name}\.so\.[0-9]+[0-9.]*',
-        rf'lib{name}_?64\.so\.[0-9]+[0-9.]*']
+    exprs = [rf"lib{name}\.so\.[0-9]+[0-9.]*", rf"lib{name}_?64\.so\.[0-9]+[0-9.]*"]
     for expr in exprs:
         versions = []
         for line in members:
@@ -202,8 +216,9 @@ def get_version(name, members):
             if m:
                 versions.append(m.group(0))
         if versions:
-            return _last_version(versions, '.')
+            return _last_version(versions, ".")
     return None
+
 
 def get_member(name, members):
     """
@@ -215,12 +230,12 @@ def get_member(name, members):
     and finally, legacy AIX naming scheme.
     """
     # look first for a generic match - prepend lib and append .so
-    expr = rf'lib{name}\.so'
+    expr = rf"lib{name}\.so"
     member = get_one_match(expr, members)
     if member:
         return member
     elif AIX_ABI == 64:
-        expr = rf'lib{name}64\.so'
+        expr = rf"lib{name}64\.so"
         member = get_one_match(expr, members)
     if member:
         return member
@@ -232,6 +247,7 @@ def get_member(name, members):
         return member
     else:
         return get_legacy(members)
+
 
 def get_libpaths():
     """
@@ -251,13 +267,14 @@ def get_libpaths():
     else:
         libpaths = libpaths.split(":")
     objects = get_ld_headers(executable)
-    for (_, lines) in objects:
+    for _, lines in objects:
         for line in lines:
             # the second (optional) argument is PATH if it includes a /
             path = line.split()[1]
             if "/" in path:
                 libpaths.extend(path.split(":"))
     return libpaths
+
 
 def find_shared(paths, name):
     """
@@ -273,7 +290,7 @@ def find_shared(paths, name):
             continue
         # "lib" is prefixed to emulate compiler name resolution,
         # e.g., -lc to libc
-        base = f'lib{name}.a'
+        base = f"lib{name}.a"
         archive = path.join(dir, base)
         if path.exists(archive):
             members = get_shared(get_ld_headers(archive))
@@ -283,6 +300,7 @@ def find_shared(paths, name):
             else:
                 return (None, None)
     return (None, None)
+
 
 def find_library(name):
     """AIX implementation of ctypes.util.find_library()
@@ -302,7 +320,7 @@ def find_library(name):
     """
 
     libpaths = get_libpaths()
-    (base, member) = find_shared(libpaths, name)
+    base, member = find_shared(libpaths, name)
     if base is not None:
         return f"{base}({member})"
 

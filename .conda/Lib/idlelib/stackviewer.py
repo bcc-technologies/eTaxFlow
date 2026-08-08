@@ -8,6 +8,7 @@ import tkinter as tk
 from idlelib.debugobj import ObjectTreeItem, make_objecttreeitem
 from idlelib.tree import TreeNode, TreeItem, ScrolledCanvas
 
+
 def StackBrowser(root, exc, flist=None, top=None):
     global sc, item, node  # For testing.
     if top is None:
@@ -66,8 +67,7 @@ class FrameTreeItem(TreeItem):
         if funcname in ("?", "", None):
             item = "%s, line %d: %s" % (modname, lineno, sourceline)
         else:
-            item = "%s.%s(...), line %d: %s" % (modname, funcname,
-                                             lineno, sourceline)
+            item = "%s.%s(...), line %d: %s" % (modname, funcname, lineno, sourceline)
         return item
 
     def GetSubList(self):
@@ -106,8 +106,10 @@ class VariablesTreeItem(ObjectTreeItem):
                 value = self.object[key]
             except KeyError:
                 continue
+
             def setfunction(value, key=key, object_=self.object):
                 object_[key] = value
+
             item = make_objecttreeitem(key + " =", value, setfunction)
             sublist.append(item)
         return sublist
@@ -115,20 +117,23 @@ class VariablesTreeItem(ObjectTreeItem):
 
 def _stackbrowser(parent):  # htest #
     from idlelib.pyshell import PyShellFileList
+
     top = tk.Toplevel(parent)
     top.title("Test StackViewer")
-    x, y = map(int, parent.geometry().split('+')[1:])
+    x, y = map(int, parent.geometry().split("+")[1:])
     top.geometry("+%d+%d" % (x + 50, y + 175))
     flist = PyShellFileList(top)
-    try: # to obtain a traceback object
+    try:  # to obtain a traceback object
         intentional_name_error
     except NameError as e:
         StackBrowser(top, e, flist=flist, top=top)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from unittest import main
-    main('idlelib.idle_test.test_stackviewer', verbosity=2, exit=False)
+
+    main("idlelib.idle_test.test_stackviewer", verbosity=2, exit=False)
 
     from idlelib.idle_test.htest import run
+
     run(_stackbrowser)

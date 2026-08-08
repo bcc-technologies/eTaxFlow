@@ -103,12 +103,12 @@ class TestDiscoverPackagesAndPyModules:
 
         sdist_files = get_sdist_members(next(tmp_path.glob("dist/*.tar.gz")))
         print("~~~~~ sdist_members ~~~~~")
-        print('\n'.join(sdist_files))
+        print("\n".join(sdist_files))
         assert sdist_files >= set(files)
 
         wheel_files = get_wheel_members(next(tmp_path.glob("dist/*.whl")))
         print("~~~~~ wheel_members ~~~~~")
-        print('\n'.join(wheel_files))
+        print("\n".join(wheel_files))
         orig_files = {f.replace("src/", "").replace("lib/", "") for f in files}
         assert wheel_files >= orig_files
 
@@ -118,27 +118,22 @@ class TestDiscoverPackagesAndPyModules:
             assert "dist" not in files
 
     PURPOSEFULLY_EMPY = {
-        "setup.cfg": DALS(
-            """
+        "setup.cfg": DALS("""
             [metadata]
             name = myproj
             version = 0.0.0
 
             [options]
             {param} =
-            """
-        ),
-        "setup.py": DALS(
-            """
+            """),
+        "setup.py": DALS("""
             __import__('setuptools').setup(
                 name="myproj",
                 version="0.0.0",
                 {param}=[]
             )
-            """
-        ),
-        "pyproject.toml": DALS(
-            """
+            """),
+        "pyproject.toml": DALS("""
             [build-system]
             requires = []
             build-backend = 'setuptools.build_meta'
@@ -149,15 +144,12 @@ class TestDiscoverPackagesAndPyModules:
 
             [tool.setuptools]
             {param} = []
-            """
-        ),
-        "template-pyproject.toml": DALS(
-            """
+            """),
+        "template-pyproject.toml": DALS("""
             [build-system]
             requires = []
             build-backend = 'setuptools.build_meta'
-            """
-        ),
+            """),
     }
 
     @pytest.mark.parametrize(
@@ -454,31 +446,21 @@ class TestWithPackageData:
             ("src", {"pyproject.toml": DALS(EXAMPLE_PYPROJECT)}),
             (
                 "src",
-                {
-                    "setup.cfg": DALS(EXAMPLE_SETUPCFG)
-                    + DALS(
-                        """
+                {"setup.cfg": DALS(EXAMPLE_SETUPCFG) + DALS("""
                         packages = find:
                         package_dir =
                             =src
 
                         [options.packages.find]
                         where = src
-                        """
-                    )
-                },
+                        """)},
             ),
             (
                 "src",
-                {
-                    "pyproject.toml": DALS(EXAMPLE_PYPROJECT)
-                    + DALS(
-                        """
+                {"pyproject.toml": DALS(EXAMPLE_PYPROJECT) + DALS("""
                         [tool.setuptools]
                         package-dir = {"" = "src"}
-                        """
-                    )
-                },
+                        """)},
             ),
         ],
     )
@@ -499,12 +481,12 @@ class TestWithPackageData:
 
         sdist_files = get_sdist_members(next(tmp_path.glob("dist/*.tar.gz")))
         print("~~~~~ sdist_members ~~~~~")
-        print('\n'.join(sdist_files))
+        print("\n".join(sdist_files))
         assert sdist_files >= expected
 
         wheel_files = get_wheel_members(next(tmp_path.glob("dist/*.whl")))
         print("~~~~~ wheel_members ~~~~~")
-        print('\n'.join(wheel_files))
+        print("\n".join(wheel_files))
         orig_files = {f.replace("src/", "").replace("lib/", "") for f in expected}
         assert wheel_files >= orig_files
 
@@ -542,15 +524,13 @@ def test_preserve_explicit_name_with_dynamic_version(tmpdir_cwd, monkeypatch):
         "src": {
             "pkg": {"__init__.py": "__version__ = 42\n"},
         },
-        "pyproject.toml": DALS(
-            """
+        "pyproject.toml": DALS("""
             [project]
             name = "myproj"  # purposefully different from package name
             dynamic = ["version"]
             [tool.setuptools.dynamic]
             version = {"attr" = "pkg.__version__"}
-            """
-        ),
+            """),
     }
     jaraco.path.build(files)
     dist = Distribution({})
@@ -610,13 +590,13 @@ def _write_setupcfg(root, options):
 
 def _run_build(path, *flags):
     cmd = [sys.executable, "-m", "build", "--no-isolation", *flags, str(path)]
-    return run(cmd, env={'DISTUTILS_DEBUG': ''})
+    return run(cmd, env={"DISTUTILS_DEBUG": ""})
 
 
 def _get_dist(dist_path, attrs):
     root = "/".join(os.path.split(dist_path))  # POSIX-style
 
-    script = dist_path / 'setup.py'
+    script = dist_path / "setup.py"
     if script.exists():
         with Path(dist_path):
             dist = cast(
