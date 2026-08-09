@@ -13,3 +13,4 @@ This directory holds fixtures for DGII-related mapping and (future) XML tests.
 ## Current contents
 
 - `synthetic_invoice_mapping_case.json` — synthetic internal mapping case only.
+- `synthetic_certification_case.json` — synthetic local harness smoke case only.

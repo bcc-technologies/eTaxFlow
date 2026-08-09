@@ -1,0 +1,38 @@
+{
+  "fixture_kind": "synthetic",
+  "official": false,
+  "dgii_compliant": false,
+  "purpose": "local certification harness smoke test only",
+  "disclaimer": "SYNTHETIC — not an official DGII certification case and not DGII-compliant.",
+  "cases": [
+    {
+      "case_id": "SYN-T31-HARNESS-001",
+      "invoice": {
+        "internal_code": "BCC-HARNESS-SYN-000001",
+        "official_encf": "E319000000101",
+        "fiscal_document_type_code": "31",
+        "currency": "DOP",
+        "issue_date": "2026-01-15",
+        "issuer": {
+          "rnc": "131000001",
+          "legal_name": "Synthetic Harness Issuer S.R.L.",
+          "address": "Synthetic local address"
+        },
+        "customer": {
+          "rnc_or_id": "123456789",
+          "legal_name": "Synthetic Harness Customer S.R.L.",
+          "address": "Synthetic local address"
+        },
+        "lines": [
+          {
+            "line_order": 1,
+            "description": "Synthetic certification harness service",
+            "quantity": "1.00",
+            "unit_price": "100.00",
+            "tax_rate": "18.00"
+          }
+        ]
+      }
+    }
+  ]
+}
