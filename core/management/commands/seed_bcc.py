@@ -5,7 +5,18 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from contacts.models import Contact
+from contacts.natural_keys import (
+    find_contacts_by_natural_key,
+    resolve_contact_by_natural_key,
+)
+from core.seed_demo import (
+    DEMO_CLIENT_DEFAULTS,
+    DEMO_CLIENT_RNC,
+    DEMO_ISSUER_RNC,
+    DEMO_SUPPLIER_DEFAULTS,
+    DEMO_SUPPLIER_RNC,
+    SEED_INVOICE_MARKER,
+)
 from ecf.models import ECFDocument
 from fiscal.models import (
     FiscalDocumentType,
@@ -20,23 +31,48 @@ from organizations.models import Organization
 class Command(BaseCommand):
     help = "Seed the database with demo BCC data."
 
-    def _get_or_update_first(self, model, filters, defaults=None):
+    def get_first_or_create(self, model, filters, defaults=None):
+        """Return the first matching row by natural key, or create one.
+
+        Safe against MultipleObjectsReturned: never uses get()/get_or_create
+        on non-unique natural keys. If duplicates exist, updates the first
+        deterministic record (lowest pk) and prints a warning with counts.
+        """
         defaults = defaults or {}
         queryset = model.objects.filter(**filters).order_by("pk")
-        if queryset.exists():
+        duplicate_count = queryset.count()
+
+        if duplicate_count:
             instance = queryset.first()
             if defaults:
                 for key, value in defaults.items():
                     setattr(instance, key, value)
-                instance.save(update_fields=list(defaults.keys()))
-            if queryset.count() > 1:
-                self.stdout.write(self.style.WARNING(
-                    f"Multiple {model.__name__} records found for {filters}; using first pk={instance.pk}."
-                ))
+                # Full save so model.save() side effects (e.g. InvoiceLine
+                # snapshots/totals) persist even when update_fields would omit them.
+                instance.save()
+            if duplicate_count > 1:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"WARNING: Found {duplicate_count} duplicate {model.__name__} "
+                        f"records for {filters}; using first pk={instance.pk}."
+                    )
+                )
             return instance, False
 
         instance = model.objects.create(**filters, **defaults)
         return instance, True
+
+    # Alias used by callers / tests for clarity.
+    update_first_or_create = get_first_or_create
+
+    def _get_organization(self, rnc, defaults):
+        if rnc:
+            return self.get_first_or_create(Organization, {"rnc": rnc}, defaults=defaults)
+        return self.get_first_or_create(
+            Organization,
+            {"legal_name": defaults["legal_name"]},
+            defaults={**defaults, "rnc": rnc or ""},
+        )
 
     def handle(self, *args, **options):
         with transaction.atomic():
@@ -51,9 +87,8 @@ class Command(BaseCommand):
                 demo_user.set_unusable_password()
                 demo_user.save(update_fields=["password"])
 
-            issuer, _ = self._get_or_update_first(
-                Organization,
-                {"rnc": "1310000000"},
+            issuer, _ = self._get_organization(
+                DEMO_ISSUER_RNC,
                 defaults={
                     "legal_name": "BARREIRO CASANOVA CASTILLO TECHNOLOGIES, S.R.L.",
                     "commercial_name": "BCC Technologies",
@@ -65,35 +100,31 @@ class Command(BaseCommand):
                 },
             )
 
-            client, _ = self._get_or_update_first(
-                Contact,
-                {"contact_type": "CLIENT", "rnc_or_id": "123456789"},
-                defaults={
-                    "legal_name": "Demo Client S.R.L.",
-                    "commercial_name": "Demo Client",
-                    "id_type": "RNC",
-                    "address": "Santo Domingo",
-                    "phone": "809-111-1111",
-                    "email": "demo.client@example.com",
-                    "tax_category": "GENERAL",
-                    "is_active": True,
-                },
+            client, _, _ = resolve_contact_by_natural_key(
+                "CLIENT",
+                DEMO_CLIENT_RNC,
+                defaults=DEMO_CLIENT_DEFAULTS,
             )
-
-            supplier, _ = self._get_or_update_first(
-                Contact,
-                {"contact_type": "SUPPLIER", "rnc_or_id": "987654321"},
-                defaults={
-                    "legal_name": "Demo Supplier S.R.L.",
-                    "commercial_name": "Demo Supplier",
-                    "id_type": "RNC",
-                    "address": "Santo Domingo",
-                    "phone": "809-222-2222",
-                    "email": "demo.supplier@example.com",
-                    "tax_category": "GENERAL",
-                    "is_active": True,
-                },
+            supplier, _, _ = resolve_contact_by_natural_key(
+                "SUPPLIER",
+                DEMO_SUPPLIER_RNC,
+                defaults=DEMO_SUPPLIER_DEFAULTS,
             )
+            for contact_type, rnc, contact in (
+                ("CLIENT", DEMO_CLIENT_RNC, client),
+                ("SUPPLIER", DEMO_SUPPLIER_RNC, supplier),
+            ):
+                count = find_contacts_by_natural_key(
+                    contact_type, rnc, active_only=True
+                ).count()
+                if count > 1:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"WARNING: Found {count} duplicate Contact records for "
+                            f"{{'contact_type': '{contact_type}', 'rnc_or_id': '{rnc}'}}; "
+                            f"using first pk={contact.pk}."
+                        )
+                    )
 
             fiscal_types = [
                 ("31", "Factura de Crédito Fiscal Electrónica", "INVOICE", "OUTBOUND"),
@@ -109,7 +140,7 @@ class Command(BaseCommand):
             ]
             fiscal_catalog = {}
             for code, name, group, direction in fiscal_types:
-                item, _ = self._get_or_update_first(
+                item, _ = self.get_first_or_create(
                     FiscalDocumentType,
                     {"code": code},
                     defaults={
@@ -127,7 +158,7 @@ class Command(BaseCommand):
                 )
                 fiscal_catalog[code] = item
 
-            tax_itbis_18, _ = self._get_or_update_first(
+            tax_itbis_18, _ = self.get_first_or_create(
                 TaxRate,
                 {"code": "ITBIS_18"},
                 defaults={
@@ -138,7 +169,7 @@ class Command(BaseCommand):
                     "is_active": True,
                 },
             )
-            self._get_or_update_first(
+            self.get_first_or_create(
                 TaxRate,
                 {"code": "ITBIS_0"},
                 defaults={
@@ -149,7 +180,7 @@ class Command(BaseCommand):
                     "is_active": True,
                 },
             )
-            self._get_or_update_first(
+            self.get_first_or_create(
                 TaxRate,
                 {"code": "EXEMPT"},
                 defaults={
@@ -161,7 +192,7 @@ class Command(BaseCommand):
                 },
             )
 
-            unit_service, _ = self._get_or_update_first(
+            unit_service, _ = self.get_first_or_create(
                 UnitOfMeasure,
                 {"code": "SERVICE"},
                 defaults={
@@ -170,7 +201,7 @@ class Command(BaseCommand):
                     "is_active": True,
                 },
             )
-            self._get_or_update_first(
+            self.get_first_or_create(
                 UnitOfMeasure,
                 {"code": "UNIT"},
                 defaults={
@@ -179,7 +210,7 @@ class Command(BaseCommand):
                     "is_active": True,
                 },
             )
-            self._get_or_update_first(
+            self.get_first_or_create(
                 UnitOfMeasure,
                 {"code": "HOUR"},
                 defaults={
@@ -189,7 +220,7 @@ class Command(BaseCommand):
                 },
             )
 
-            self._get_or_update_first(
+            product_software, _ = self.get_first_or_create(
                 ProductService,
                 {"code": "SOFTWARE_DEV_SERVICE"},
                 defaults={
@@ -202,7 +233,7 @@ class Command(BaseCommand):
                     "is_active": True,
                 },
             )
-            self._get_or_update_first(
+            product_consulting, _ = self.get_first_or_create(
                 ProductService,
                 {"code": "TECH_CONSULTING_SERVICE"},
                 defaults={
@@ -216,14 +247,18 @@ class Command(BaseCommand):
                 },
             )
 
-            seed_marker = "SEEDED_BCC_DEMO_INVOICE"
-            invoice = Invoice.objects.filter(
-                issuer=issuer,
-                customer=client,
-                notes__icontains=seed_marker,
-            ).order_by("pk").first()
+            invoice = (
+                Invoice.objects.filter(
+                    issuer=issuer,
+                    customer=client,
+                    notes__icontains=SEED_INVOICE_MARKER,
+                )
+                .order_by("pk")
+                .first()
+            )
 
             if not invoice:
+                # Adopt a prior draft demo invoice that predates the marker.
                 candidates = Invoice.objects.filter(
                     issuer=issuer,
                     customer=client,
@@ -234,11 +269,22 @@ class Command(BaseCommand):
                 ).order_by("pk")
                 if candidates.exists():
                     invoice = candidates.first()
-                    invoice.notes = seed_marker
+                    invoice.notes = SEED_INVOICE_MARKER
                     invoice.save(update_fields=["notes"])
-                    self.stdout.write(self.style.WARNING(
-                        f"Found existing seeded invoice without marker; adopting invoice pk={invoice.pk}."
-                    ))
+                    if candidates.count() > 1:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"WARNING: Found {candidates.count()} candidate demo invoices; "
+                                f"adopting first pk={invoice.pk}."
+                            )
+                        )
+                    else:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"Found existing seeded invoice without marker; "
+                                f"adopting invoice pk={invoice.pk}."
+                            )
+                        )
 
             if invoice:
                 invoice.issuer = issuer
@@ -250,7 +296,7 @@ class Command(BaseCommand):
                 invoice.created_by = demo_user
                 invoice.fiscal_document_type = "31"
                 invoice.fiscal_document_type_ref = fiscal_catalog["31"]
-                invoice.notes = seed_marker
+                invoice.notes = SEED_INVOICE_MARKER
                 invoice.save()
             else:
                 invoice_internal_code = InternalDocumentCode.generate_code("AR", date.today().year)
@@ -268,13 +314,13 @@ class Command(BaseCommand):
                     created_by=demo_user,
                     fiscal_document_type="31",
                     fiscal_document_type_ref=fiscal_catalog["31"],
-                    notes=seed_marker,
+                    notes=SEED_INVOICE_MARKER,
                 )
 
             line_fields = {
                 1: {
                     "description": "Software development service",
-                    "product_service": ProductService.objects.get(code="SOFTWARE_DEV_SERVICE"),
+                    "product_service": product_software,
                     "unit": unit_service,
                     "tax_rate_ref": tax_itbis_18,
                     "quantity": Decimal("1.00"),
@@ -286,7 +332,7 @@ class Command(BaseCommand):
                 },
                 2: {
                     "description": "Technical consulting service",
-                    "product_service": ProductService.objects.get(code="TECH_CONSULTING_SERVICE"),
+                    "product_service": product_consulting,
                     "unit": unit_service,
                     "tax_rate_ref": tax_itbis_18,
                     "quantity": Decimal("1.00"),
@@ -300,7 +346,7 @@ class Command(BaseCommand):
             for line_order, defaults in line_fields.items():
                 line_defaults = {**defaults}
                 line_description = line_defaults.pop("description")
-                _, _ = self._get_or_update_first(
+                self.get_first_or_create(
                     InvoiceLine,
                     {"invoice": invoice, "line_order": line_order},
                     defaults={"description": line_description, **line_defaults},
@@ -309,9 +355,10 @@ class Command(BaseCommand):
             extra_lines = invoice.lines.exclude(line_order__in=[1, 2])
             if extra_lines.exists():
                 extra_lines.delete()
-                invoice._recalculate_totals()
 
-            self._get_or_update_first(
+            invoice._recalculate_totals()
+
+            self.get_first_or_create(
                 ECFDocument,
                 {"invoice": invoice},
                 defaults={
@@ -322,3 +369,10 @@ class Command(BaseCommand):
             )
 
             self.stdout.write(self.style.SUCCESS("Demo BCC data seeded."))
+            self.stdout.write(
+                f"Seeded invoice: {invoice.internal_code} "
+                f"(lines={invoice.lines.count()}, marker={SEED_INVOICE_MARKER})"
+            )
+            self.stdout.write(
+                f"Contacts used: client_pk={client.pk}, supplier_pk={supplier.pk}"
+            )

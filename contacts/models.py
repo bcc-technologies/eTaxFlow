@@ -2,6 +2,15 @@ from django.db import models
 
 
 class Contact(models.Model):
+    """Party master data (clients/suppliers).
+
+    Soft uniqueness: business logic treats (contact_type, rnc_or_id) as a
+    natural key, but this is not enforced with a database UniqueConstraint yet
+    because local/dev databases may already contain duplicates. Prefer
+    ``contacts.natural_keys.resolve_contact_by_natural_key`` for seed/demo
+    resolution.
+    """
+
     CONTACT_TYPES = [
         ("CLIENT", "Client"),
         ("SUPPLIER", "Supplier"),
@@ -23,3 +32,9 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.commercial_name or self.legal_name
+
+    def natural_key_warnings(self):
+        """Return soft-uniqueness warnings for this contact's natural key."""
+        from contacts.natural_keys import natural_key_duplicate_warnings
+
+        return natural_key_duplicate_warnings(self.contact_type, self.rnc_or_id)

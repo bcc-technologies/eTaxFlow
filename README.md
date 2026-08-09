@@ -20,6 +20,26 @@ python manage.py runserver
 python manage.py seed_bcc
 ```
 
+Diagnose and optionally clean duplicate demo/seed rows:
+
+```bash
+python manage.py diagnose_seed_duplicates
+python manage.py cleanup_seed_demo_data          # dry-run (default)
+python manage.py cleanup_seed_demo_data --apply  # mutate clearly-demo duplicates only
+```
+
+Explicit opt-in merge for ambiguous duplicate contacts (never automatic):
+
+```bash
+python manage.py merge_duplicate_contacts \
+  --contact-type CLIENT --rnc-or-id 123456789 --keep-pk 1 --dry-run
+python manage.py merge_duplicate_contacts \
+  --contact-type CLIENT --rnc-or-id 123456789 --keep-pk 1 --apply \
+  --reason "Resolve local demo duplicate contacts"
+```
+
+**Contact uniqueness warning:** `(contact_type, rnc_or_id)` is a soft/business-level natural key only. It is **not** enforced with a database `UniqueConstraint` yet, because local databases may already contain duplicates. Prefer `contacts.natural_keys.resolve_contact_by_natural_key` for deterministic resolution.
+
 ## Admin workflow
 
 - Use the Django admin to create and manage organizations, contacts, invoices, documents, and ECF placeholders.

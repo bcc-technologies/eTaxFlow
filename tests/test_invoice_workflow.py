@@ -142,6 +142,26 @@ class SeedBCCCommandTests(TestCase):
         self.assertEqual(UnitOfMeasure.objects.count(), first_units)
         self.assertEqual(ProductService.objects.count(), first_products)
 
+    def test_seed_bcc_runs_twice_without_duplicate_catalog_rows(self):
+        from django.core.management import call_command
+
+        call_command("seed_bcc")
+        call_command("seed_bcc")
+
+        self.assertEqual(FiscalDocumentType.objects.count(), 10)
+        self.assertEqual(TaxRate.objects.count(), 3)
+        self.assertEqual(UnitOfMeasure.objects.count(), 3)
+        self.assertEqual(ProductService.objects.count(), 2)
+        self.assertEqual(Organization.objects.filter(rnc="1310000000").count(), 1)
+        self.assertEqual(
+            Contact.objects.filter(contact_type="CLIENT", rnc_or_id="123456789").count(),
+            1,
+        )
+        self.assertEqual(
+            Contact.objects.filter(contact_type="SUPPLIER", rnc_or_id="987654321").count(),
+            1,
+        )
+
     def test_seed_bcc_runs_twice_without_duplicate_demo_invoice(self):
         from django.core.management import call_command
 
@@ -171,26 +191,71 @@ class SeedBCCCommandTests(TestCase):
 
         out = StringIO()
         call_command("seed_bcc", stdout=out)
+        output = out.getvalue()
 
-        self.assertIn("Multiple Contact records found for {'contact_type': 'CLIENT', 'rnc_or_id': '123456789'}", out.getvalue())
+        self.assertIn("WARNING: Found 3 duplicate Contact records", output)
+        self.assertIn("{'contact_type': 'CLIENT', 'rnc_or_id': '123456789'}", output)
         self.assertEqual(Contact.objects.filter(contact_type="CLIENT", rnc_or_id="123456789").count(), 3)
+
+    def test_seeded_invoice_has_exactly_two_lines_after_repeated_runs(self):
+        from django.core.management import call_command
+
+        call_command("seed_bcc")
+        seeded = Invoice.objects.get(notes__icontains="SEEDED_BCC_DEMO_INVOICE")
+        InvoiceLine.objects.create(
+            invoice=seeded,
+            line_order=3,
+            description="Extra leftover line",
+            quantity=Decimal("1.00"),
+            unit_price=Decimal("10.00"),
+            discount_amount=Decimal("0.00"),
+            tax_rate=Decimal("0.00"),
+            tax_amount=Decimal("0.00"),
+            line_total=Decimal("10.00"),
+        )
+        self.assertEqual(seeded.lines.count(), 3)
+
+        call_command("seed_bcc")
+        seeded.refresh_from_db()
+        self.assertEqual(
+            Invoice.objects.filter(notes__icontains="SEEDED_BCC_DEMO_INVOICE").count(),
+            1,
+        )
+        self.assertEqual(seeded.lines.count(), 2)
+        self.assertEqual(
+            list(seeded.lines.order_by("line_order").values_list("line_order", flat=True)),
+            [1, 2],
+        )
 
     def test_seeded_invoice_still_works_with_generate_internal_xml(self):
         from django.core.management import call_command
-        from django.core.management import call_command as run_command
+
+        from documents.models import Document
         from ecf.services.internal_invoice_xml import build_internal_invoice_xml
 
         call_command("seed_bcc")
         seeded_invoice = Invoice.objects.filter(notes__icontains="SEEDED_BCC_DEMO_INVOICE").first()
         self.assertIsNotNone(seeded_invoice)
+
         xml_string = build_internal_invoice_xml(seeded_invoice)
         self.assertIn("<InternalInvoiceDraft", xml_string)
+
+        # Do not pass stdout= to call_command: generate_internal_xml defines --stdout,
+        # and Django maps the stdout kwarg onto that flag.
+        call_command("generate_internal_xml", invoice_code=seeded_invoice.internal_code)
+        self.assertTrue(
+            Document.objects.filter(
+                document_kind="XML",
+                source="GENERATED",
+                related_invoice=seeded_invoice,
+            ).exists()
+        )
 
     def test_seed_creates_ecf_placeholder(self):
         from django.core.management import call_command
 
         call_command("seed_bcc")
-        invoice = Invoice.objects.filter(fiscal_document_type_ref__isnull=False).first()
+        invoice = Invoice.objects.filter(notes__icontains="SEEDED_BCC_DEMO_INVOICE").first()
         self.assertIsNotNone(invoice)
         self.assertTrue(ECFDocument.objects.filter(invoice=invoice).exists())
 
@@ -208,7 +273,7 @@ class SeedBCCCommandTests(TestCase):
         self.assertEqual(ProductService.objects.count(), 2)
         self.assertTrue(ProductService.objects.filter(code="SOFTWARE_DEV_SERVICE").exists())
 
-        invoice = Invoice.objects.filter(fiscal_document_type_ref__isnull=False).first()
+        invoice = Invoice.objects.filter(notes__icontains="SEEDED_BCC_DEMO_INVOICE").first()
         self.assertIsNotNone(invoice)
         self.assertEqual(invoice.fiscal_document_type_ref.code, "31")
         self.assertFalse(bool(invoice.official_ncf))
@@ -359,3 +424,32 @@ class SeedBCCCommandTests(TestCase):
         self.assertEqual(invoice.internal_code, "BCC-AR-2026-000001")
         self.assertEqual(invoice.official_ncf, "B01000000001")
         self.assertEqual(invoice.official_encf, "E01000000001")
+
+
+class SeedBCCCleanDatabaseTests(TestCase):
+    """seed_bcc behavior on an empty test database (no pre-seeded rows)."""
+
+    def test_seed_bcc_runs_successfully_on_clean_database(self):
+        from django.core.management import call_command
+        from io import StringIO
+
+        self.assertEqual(Organization.objects.count(), 0)
+        self.assertEqual(Contact.objects.count(), 0)
+        self.assertEqual(Invoice.objects.count(), 0)
+
+        out = StringIO()
+        call_command("seed_bcc", stdout=out)
+
+        self.assertIn("Demo BCC data seeded.", out.getvalue())
+        self.assertEqual(Organization.objects.filter(rnc="1310000000").count(), 1)
+        self.assertEqual(Contact.objects.filter(contact_type="CLIENT", rnc_or_id="123456789").count(), 1)
+        self.assertEqual(Contact.objects.filter(contact_type="SUPPLIER", rnc_or_id="987654321").count(), 1)
+        self.assertEqual(FiscalDocumentType.objects.count(), 10)
+        self.assertEqual(TaxRate.objects.count(), 3)
+        self.assertEqual(UnitOfMeasure.objects.count(), 3)
+        self.assertEqual(ProductService.objects.count(), 2)
+        seeded = Invoice.objects.filter(notes__icontains="SEEDED_BCC_DEMO_INVOICE")
+        self.assertEqual(seeded.count(), 1)
+        self.assertEqual(seeded.first().lines.count(), 2)
+        self.assertFalse(bool(seeded.first().official_ncf))
+        self.assertFalse(bool(seeded.first().official_encf))
