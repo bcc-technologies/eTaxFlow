@@ -30,6 +30,22 @@ class Invoice(models.Model):
     grand_total = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     official_ncf = models.CharField(max_length=50, null=True, blank=True)
     official_encf = models.CharField(max_length=50, null=True, blank=True)
+    # Future DGII FechaVencimientoSecuencia source (nullable; not auto-populated).
+    sequence_expiration_date = models.DateField(null=True, blank=True)
+    income_type = models.ForeignKey(
+        "fiscal.FiscalIncomeType",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="invoices",
+    )
+    payment_type = models.ForeignKey(
+        "fiscal.PaymentType",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="invoices",
+    )
     fiscal_document_type = models.CharField(max_length=50, null=True, blank=True)
     fiscal_document_type_ref = models.ForeignKey(
         "fiscal.FiscalDocumentType",
@@ -197,6 +213,13 @@ class InvoiceLine(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+        related_name="invoice_lines",
+    )
+    billing_indicator = models.ForeignKey(
+        "fiscal.BillingIndicator",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
         related_name="invoice_lines",
     )
     description = models.CharField(max_length=255)

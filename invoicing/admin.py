@@ -9,6 +9,25 @@ from .models import Invoice, InvoiceLine, ProductService
 class InvoiceLineInline(admin.TabularInline):
     model = InvoiceLine
     extra = 1
+    fields = (
+        "line_order",
+        "product_service",
+        "description",
+        "quantity",
+        "unit",
+        "unit_price",
+        "discount_amount",
+        "tax_rate_ref",
+        "billing_indicator",
+        "tax_rate",
+        "tax_amount",
+        "line_total",
+        "item_code_snapshot",
+        "item_name_snapshot",
+        "unit_snapshot",
+        "tax_rate_snapshot",
+        "currency_snapshot",
+    )
     readonly_fields = ("item_code_snapshot", "item_name_snapshot", "unit_snapshot", "tax_rate_snapshot", "currency_snapshot")
 
 
@@ -33,6 +52,9 @@ class InvoiceAdmin(admin.ModelAdmin):
         "grand_total",
         "official_ncf",
         "official_encf",
+        "income_type",
+        "payment_type",
+        "sequence_expiration_date",
         "created_at",
     )
     search_fields = (
@@ -43,8 +65,17 @@ class InvoiceAdmin(admin.ModelAdmin):
         "official_ncf",
         "official_encf",
     )
-    list_filter = ("invoice_direction", "lifecycle_status", "currency", "issue_date", "created_at")
+    list_filter = (
+        "invoice_direction",
+        "lifecycle_status",
+        "currency",
+        "issue_date",
+        "income_type",
+        "payment_type",
+        "created_at",
+    )
     readonly_fields = ("subtotal", "tax_total", "discount_total", "grand_total")
+    autocomplete_fields = ("income_type", "payment_type", "fiscal_document_type_ref", "customer", "issuer")
     actions = [
         "action_mark_reviewed",
         "action_approve_invoices",
@@ -102,4 +133,13 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(InvoiceLine)
 class InvoiceLineAdmin(admin.ModelAdmin):
-    list_display = ("invoice", "description", "quantity", "unit_price", "line_total")
+    list_display = (
+        "invoice",
+        "description",
+        "quantity",
+        "unit_price",
+        "billing_indicator",
+        "line_total",
+    )
+    list_filter = ("billing_indicator",)
+    autocomplete_fields = ("billing_indicator", "product_service", "unit", "tax_rate_ref")

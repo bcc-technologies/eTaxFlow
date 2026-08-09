@@ -29,6 +29,13 @@ class ECFDocument(models.Model):
     dgii_status_message = models.TextField(blank=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
     last_status_check_at = models.DateTimeField(null=True, blank=True)
+    # Placeholder for future FechaHoraFirma mapping only — not set by seed/issue/XML draft.
+    # Digital signing is intentionally not implemented in this phase.
+    signature_datetime = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Placeholder only for future FechaHoraFirma; not a real digital signature.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

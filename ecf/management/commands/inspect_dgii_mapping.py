@@ -47,13 +47,23 @@ class Command(BaseCommand):
 
         if invoice_id is not None:
             invoice = Invoice.objects.filter(pk=invoice_id).select_related(
-                "issuer", "customer", "fiscal_document_type_ref"
+                "issuer",
+                "customer",
+                "fiscal_document_type_ref",
+                "income_type",
+                "payment_type",
+                "ecf_document",
             ).first()
             if not invoice:
                 raise CommandError(f"Invoice not found with ID: {invoice_id}")
         else:
             invoice = Invoice.objects.filter(internal_code=internal_code).select_related(
-                "issuer", "customer", "fiscal_document_type_ref"
+                "issuer",
+                "customer",
+                "fiscal_document_type_ref",
+                "income_type",
+                "payment_type",
+                "ecf_document",
             ).first()
             if not invoice:
                 raise CommandError(f"Invoice not found: {internal_code}")

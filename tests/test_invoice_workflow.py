@@ -7,7 +7,15 @@ from django.test import TestCase
 from audit.models import AuditEvent
 from contacts.models import Contact
 from ecf.models import ECFDocument
-from fiscal.models import FiscalDocumentType, InternalDocumentCode, TaxRate, UnitOfMeasure
+from fiscal.models import (
+    BillingIndicator,
+    FiscalDocumentType,
+    FiscalIncomeType,
+    InternalDocumentCode,
+    PaymentType,
+    TaxRate,
+    UnitOfMeasure,
+)
 from invoicing.models import Invoice, InvoiceLine, ProductService
 from organizations.models import Organization
 
@@ -149,6 +157,9 @@ class SeedBCCCommandTests(TestCase):
         call_command("seed_bcc")
 
         self.assertEqual(FiscalDocumentType.objects.count(), 10)
+        self.assertEqual(FiscalIncomeType.objects.count(), 6)
+        self.assertEqual(PaymentType.objects.count(), 3)
+        self.assertEqual(BillingIndicator.objects.count(), 5)
         self.assertEqual(TaxRate.objects.count(), 3)
         self.assertEqual(UnitOfMeasure.objects.count(), 3)
         self.assertEqual(ProductService.objects.count(), 2)
@@ -266,6 +277,9 @@ class SeedBCCCommandTests(TestCase):
 
         self.assertEqual(FiscalDocumentType.objects.count(), 10)
         self.assertTrue(FiscalDocumentType.objects.filter(code="31").exists())
+        self.assertEqual(FiscalIncomeType.objects.count(), 6)
+        self.assertEqual(PaymentType.objects.count(), 3)
+        self.assertEqual(BillingIndicator.objects.count(), 5)
         self.assertEqual(TaxRate.objects.count(), 3)
         self.assertTrue(TaxRate.objects.filter(code="ITBIS_18").exists())
         self.assertEqual(UnitOfMeasure.objects.count(), 3)
@@ -277,6 +291,9 @@ class SeedBCCCommandTests(TestCase):
         self.assertIsNotNone(invoice)
         self.assertEqual(invoice.fiscal_document_type_ref.code, "31")
         self.assertFalse(bool(invoice.official_ncf))
+        self.assertIsNotNone(invoice.income_type)
+        self.assertIsNotNone(invoice.payment_type)
+        self.assertIsNotNone(invoice.sequence_expiration_date)
         self.assertFalse(bool(invoice.official_encf))
 
         self.assertEqual(invoice.lines.count(), 2)
@@ -445,6 +462,9 @@ class SeedBCCCleanDatabaseTests(TestCase):
         self.assertEqual(Contact.objects.filter(contact_type="CLIENT", rnc_or_id="123456789").count(), 1)
         self.assertEqual(Contact.objects.filter(contact_type="SUPPLIER", rnc_or_id="987654321").count(), 1)
         self.assertEqual(FiscalDocumentType.objects.count(), 10)
+        self.assertEqual(FiscalIncomeType.objects.count(), 6)
+        self.assertEqual(PaymentType.objects.count(), 3)
+        self.assertEqual(BillingIndicator.objects.count(), 5)
         self.assertEqual(TaxRate.objects.count(), 3)
         self.assertEqual(UnitOfMeasure.objects.count(), 3)
         self.assertEqual(ProductService.objects.count(), 2)
@@ -453,3 +473,5 @@ class SeedBCCCleanDatabaseTests(TestCase):
         self.assertEqual(seeded.first().lines.count(), 2)
         self.assertFalse(bool(seeded.first().official_ncf))
         self.assertFalse(bool(seeded.first().official_encf))
+        self.assertIsNotNone(seeded.first().income_type_id)
+        self.assertIsNotNone(seeded.first().payment_type_id)

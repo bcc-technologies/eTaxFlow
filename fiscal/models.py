@@ -115,3 +115,69 @@ class UnitOfMeasure(models.Model):
 
     def __str__(self):
         return self.code
+
+
+class FiscalIncomeType(models.Model):
+    """TipoIngresos catalog (Formato e-CF / XSD enums 01-06).
+
+    Internal master data only — not a DGII compliance claim.
+    """
+
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["code"]
+        verbose_name = "Fiscal income type"
+        verbose_name_plural = "Fiscal income types"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class PaymentType(models.Model):
+    """TipoPago catalog (Formato e-CF / XSD enums 1|2|3).
+
+    Internal master data only — not a payments module and not DGII-compliant.
+    """
+
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["code"]
+        verbose_name = "Payment type"
+        verbose_name_plural = "Payment types"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class BillingIndicator(models.Model):
+    """IndicadorFacturacion catalog (Formato e-CF / XSD enums 0|1|2|3|4).
+
+    Line-level ITBIS/exempt/no-facturable indicator. Internal only.
+    """
+
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["code"]
+        verbose_name = "Billing indicator"
+        verbose_name_plural = "Billing indicators"
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"

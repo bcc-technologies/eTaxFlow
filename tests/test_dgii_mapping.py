@@ -23,7 +23,12 @@ from ecf.dgii.field_catalogs.tipo_ecf_31 import (
 from ecf.dgii.mapping import build_invoice_dgii_mapping_report
 from ecf.dgii.types import DGIIMappingStatus
 from ecf.models import ECFDocument
-from fiscal.models import FiscalDocumentType
+from fiscal.models import (
+    BillingIndicator,
+    FiscalDocumentType,
+    FiscalIncomeType,
+    PaymentType,
+)
 from invoicing.models import Invoice, InvoiceLine
 from organizations.models import Organization
 
@@ -139,6 +144,21 @@ class DGIIMappingReportTests(TestCase):
         self.assertIn("TIPO_ECF_31_FIELD_MATRIX_REVIEWED_NOT_COMPLIANT", codes)
         self.assertNotIn("TIPO_ECF_31_CATALOG_PENDING_SOURCE_REVIEW", codes)
         self.assertEqual(report.status, DGIIMappingStatus.READY_FOR_FUTURE_DRAFT)
+        # Phase 007: seeded invoice gains model-backed required fields, but not eNCF/signing.
+        self.assertIsNotNone(seeded.income_type_id)
+        self.assertIsNotNone(seeded.payment_type_id)
+        self.assertIsNotNone(seeded.sequence_expiration_date)
+        self.assertTrue(seeded.lines.exclude(billing_indicator__isnull=True).exists())
+        self.assertTrue(all(line.billing_indicator_id for line in seeded.lines.all()))
+        self.assertIsNone(seeded.official_encf)
+        missing_names = {item["field"] for item in report.missing_required_fields}
+        self.assertIn("eNCF", missing_names)
+        self.assertIn("FechaHoraFirma", missing_names)
+        self.assertIn("Signature", missing_names)
+        self.assertNotIn("TipoIngresos", missing_names)
+        self.assertNotIn("TipoPago", missing_names)
+        self.assertNotIn("IndicadorFacturacion", missing_names)
+        self.assertNotIn("FechaVencimientoSecuencia", missing_names)
 
     def test_report_identifies_missing_issuer_or_customer_rnc(self):
         self.issuer.rnc = ""
@@ -407,5 +427,84 @@ class DGIISourceAndCatalogScaffoldTests(TestCase):
         self.assertIsInstance(report.missing_required_fields, list)
         self.assertGreaterEqual(report.missing_required_field_count, 0)
         self.assertIn("NOT_DGII_COMPLIANT", report.compliance_claim)
+        self.assertEqual(Document.objects.count(), before_docs)
+        self.assertEqual(ECFDocument.objects.count(), before_ecf)
+
+
+class Tipo31RequiredModelFieldsTests(TestCase):
+    def test_fiscal_catalog_models_can_be_created(self):
+        income = FiscalIncomeType.objects.create(code="01", name="Ops")
+        payment = PaymentType.objects.create(code="1", name="Contado")
+        billing = BillingIndicator.objects.create(code="1", name="ITBIS 1")
+        self.assertEqual(str(income), "01 - Ops")
+        self.assertEqual(str(payment), "1 - Contado")
+        self.assertEqual(str(billing), "1 - ITBIS 1")
+
+    def test_new_invoice_fields_nullable_for_legacy_invoices(self):
+        user = get_user_model().objects.create_user(username="legacy31", password="x")
+        issuer = Organization.objects.create(legal_name="BCC", rnc="1310000099")
+        customer = Contact.objects.create(
+            contact_type="CLIENT",
+            legal_name="Client",
+            rnc_or_id="123456780",
+        )
+        invoice = Invoice.objects.create(
+            issuer=issuer,
+            customer=customer,
+            invoice_direction="OUTBOUND",
+            lifecycle_status="DRAFT",
+            currency="DOP",
+            issue_date="2026-01-01",
+            created_by=user,
+            internal_code="BCC-AR-2026-000801",
+        )
+        self.assertIsNone(invoice.income_type_id)
+        self.assertIsNone(invoice.payment_type_id)
+        self.assertIsNone(invoice.sequence_expiration_date)
+        self.assertIsNone(invoice.official_encf)
+        line = InvoiceLine.objects.create(
+            invoice=invoice,
+            description="Legacy line",
+            quantity=Decimal("1.00"),
+            unit_price=Decimal("10.00"),
+            tax_amount=Decimal("1.80"),
+            line_total=Decimal("11.80"),
+        )
+        self.assertIsNone(line.billing_indicator_id)
+
+    def test_seed_bcc_sets_tipo31_required_model_fields_idempotently(self):
+        call_command("seed_bcc")
+        call_command("seed_bcc")
+
+        self.assertEqual(FiscalIncomeType.objects.count(), 6)
+        self.assertEqual(PaymentType.objects.count(), 3)
+        self.assertEqual(BillingIndicator.objects.count(), 5)
+
+        seeded = Invoice.objects.filter(notes__icontains="SEEDED_BCC_DEMO_INVOICE").first()
+        self.assertIsNotNone(seeded)
+        self.assertIsNotNone(seeded.income_type)
+        self.assertIsNotNone(seeded.payment_type)
+        self.assertIsNotNone(seeded.sequence_expiration_date)
+        self.assertIsNone(seeded.official_encf)
+        self.assertTrue(all(line.billing_indicator_id for line in seeded.lines.all()))
+
+        ecf = ECFDocument.objects.filter(invoice=seeded).first()
+        self.assertIsNotNone(ecf)
+        self.assertIsNone(ecf.signature_datetime)
+
+        before_docs = Document.objects.count()
+        before_ecf = ECFDocument.objects.count()
+        report = build_invoice_dgii_mapping_report(seeded)
+        missing = {item["field"] for item in report.missing_required_fields}
+        self.assertEqual(missing, {"eNCF", "FechaHoraFirma", "Signature"})
+        self.assertIn("NOT_DGII_COMPLIANT", report.compliance_claim)
+        identity = {f.internal_field: f for f in report.identity_fields}
+        self.assertTrue(identity["income_type"].present)
+        self.assertTrue(identity["payment_type"].present)
+        self.assertTrue(identity["sequence_expiration_date"].present)
+        self.assertFalse(identity["official_encf"].present)
+        self.assertFalse(identity["ecf_document.signature_datetime"].present)
+        line_map = {f.internal_field: f for f in report.line_fields}
+        self.assertTrue(line_map["lines[].billing_indicator"].present)
         self.assertEqual(Document.objects.count(), before_docs)
         self.assertEqual(ECFDocument.objects.count(), before_ecf)

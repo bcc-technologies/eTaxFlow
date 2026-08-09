@@ -12,6 +12,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from django.core.exceptions import ObjectDoesNotExist
+
 CATALOG_STATUS = "REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT"
 TIPO_ECF_31_CATALOG_STATUS = CATALOG_STATUS
 TIPO_ECF_31_DOCUMENT_TYPE = "31"
@@ -80,9 +82,9 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "etaxflow_source_model": "Invoice",
         "etaxflow_source_field": "official_encf",
         "availability": "missing",
-        "mapping_notes": "Field exists but typically empty; no sequence assignment workflow yet.",
-        "implementation_status": "pending",
-        "notes": "PDF Tipo31=1; XSD required. Distinct from internal_code."
+        "mapping_notes": "Model field Invoice.official_encf exists and is nullable; eNCF assignment workflow is not implemented and seed leaves it empty.",
+        "implementation_status": "mapped",
+        "notes": "PDF Tipo31=1; XSD required. Distinct from internal_code. Still missing until officially assigned."
     },
     {
         "section": "Encabezado",
@@ -94,12 +96,12 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "allowed_values": "",
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF ~p.6 field #4 / XSD IdDoc/FechaVencimientoSecuencia",
-        "etaxflow_source_model": "",
-        "etaxflow_source_field": "",
-        "availability": "missing",
-        "mapping_notes": "No eTaxFlow model field for authorized sequence expiry.",
-        "implementation_status": "blocked",
-        "notes": "PDF Tipo31=1; XSD required."
+        "etaxflow_source_model": "Invoice",
+        "etaxflow_source_field": "sequence_expiration_date",
+        "availability": "available",
+        "mapping_notes": "Phase 007: Invoice.sequence_expiration_date (DateField, nullable). Demo seed may populate a synthetic expiry; not an authorized DGII sequence range.",
+        "implementation_status": "mapped",
+        "notes": "PDF Tipo31=1; XSD required. Model support only — NOT_DGII_COMPLIANT."
     },
     {
         "section": "Encabezado",
@@ -145,12 +147,12 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "allowed_values": "01|02|03|04|05|06",
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF ~p.7 field #8 / XSD IdDoc/TipoIngresos",
-        "etaxflow_source_model": "",
-        "etaxflow_source_field": "",
-        "availability": "missing",
-        "mapping_notes": "No Invoice income-type field.",
-        "implementation_status": "blocked",
-        "notes": "PDF Tipo31=1; XSD required."
+        "etaxflow_source_model": "FiscalIncomeType",
+        "etaxflow_source_field": "code via Invoice.income_type",
+        "availability": "available",
+        "mapping_notes": "Phase 007: FiscalIncomeType catalog + Invoice.income_type FK. Codes 01-06 seeded from Formato/XSD review.",
+        "implementation_status": "mapped",
+        "notes": "PDF Tipo31=1; XSD required. Preliminary internal catalog — NOT_DGII_COMPLIANT."
     },
     {
         "section": "Encabezado",
@@ -162,11 +164,11 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "allowed_values": "1|2|3",
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF ~p.7 field #9 / XSD IdDoc/TipoPago",
-        "etaxflow_source_model": "",
-        "etaxflow_source_field": "",
-        "availability": "missing",
-        "mapping_notes": "No payment-type field on Invoice.",
-        "implementation_status": "blocked",
+        "etaxflow_source_model": "PaymentType",
+        "etaxflow_source_field": "code via Invoice.payment_type",
+        "availability": "available",
+        "mapping_notes": "Phase 007: PaymentType catalog + Invoice.payment_type FK. Codes 1|2|3 seeded from Formato/XSD review. Not a payments module.",
+        "implementation_status": "mapped",
         "notes": "PDF Tipo31=1; XSD required. Code 3 gratuito invalid for credito fiscal per PDF text."
     },
     {
@@ -774,12 +776,12 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "allowed_values": "0|1|2|3|4",
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF Detalle field #4 (Tipo31=1) / XSD Item/IndicadorFacturacion",
-        "etaxflow_source_model": "InvoiceLine",
-        "etaxflow_source_field": "tax_rate_snapshot",
-        "availability": "missing",
-        "mapping_notes": "tax_rate_snapshot/tax_rate_ref are candidates but no explicit 0-4 indicator mapping implemented.",
-        "implementation_status": "blocked",
-        "notes": "PDF Tipo31=1; XSD required."
+        "etaxflow_source_model": "BillingIndicator",
+        "etaxflow_source_field": "code via InvoiceLine.billing_indicator",
+        "availability": "available",
+        "mapping_notes": "Phase 007: BillingIndicator catalog + InvoiceLine.billing_indicator FK. Codes 0-4 seeded from Formato/XSD review.",
+        "implementation_status": "mapped",
+        "notes": "PDF Tipo31=1; XSD required. Preliminary internal catalog — NOT_DGII_COMPLIANT."
     },
     {
         "section": "DetallesItems",
@@ -978,12 +980,12 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "allowed_values": "",
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF section G / XSD ECF/FechaHoraFirma minOccurs=1",
-        "etaxflow_source_model": "",
-        "etaxflow_source_field": "",
+        "etaxflow_source_model": "ECFDocument",
+        "etaxflow_source_field": "signature_datetime",
         "availability": "missing",
-        "mapping_notes": "Requires signing workflow (explicitly out of scope).",
-        "implementation_status": "blocked",
-        "notes": "PDF section obligation Tipo31=1; XSD required."
+        "mapping_notes": "Phase 007: ECFDocument.signature_datetime placeholder exists but is never set by seed/issue/internal XML. Signing not implemented.",
+        "implementation_status": "pending",
+        "notes": "PDF section obligation Tipo31=1; XSD required. Remains missing until digital signing phase."
     },
     {
         "section": "FirmaDigital",
@@ -995,12 +997,12 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "allowed_values": "",
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF section H tag <Signature>; XSD ECF sequence xs:any after FechaHoraFirma",
-        "etaxflow_source_model": "",
-        "etaxflow_source_field": "",
+        "etaxflow_source_model": "ECFDocument",
+        "etaxflow_source_field": "xml_signed_file (future)",
         "availability": "missing",
-        "mapping_notes": "Digital signing explicitly out of scope; certificates not stored.",
+        "mapping_notes": "No signature blob/certificate storage. Future source may be ECFDocument.xml_signed_file or a signing service. Remains missing until signing phase.",
         "implementation_status": "blocked",
-        "notes": "PDF names <Signature>; local XSD encodes required wildcard xs:any (not a named Signature element). NOT implemented.",
+        "notes": "PDF names <Signature>; local XSD encodes required wildcard xs:any. NOT implemented.",
     }
 ]
 
@@ -1037,27 +1039,106 @@ def get_tipo_ecf_31_available_fields() -> list[dict[str, Any]]:
     return [r for r in FIELD_CATALOG if r.get("availability") == "available"]
 
 
-def get_tipo_ecf_31_required_missing_fields() -> list[dict[str, Any]]:
-    """Required (PDF/XSD) fields with availability == missing in eTaxFlow."""
-    return [
+def _is_blank(value) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str) and not value.strip():
+        return True
+    return False
+
+
+def _invoice_has_billing_indicator(invoice) -> bool:
+    lines = list(invoice.lines.all())
+    if not lines:
+        return False
+    return all(getattr(line, "billing_indicator_id", None) for line in lines)
+
+
+def resolve_tipo_ecf_31_runtime_availability(invoice, row: dict[str, Any]) -> str:
+    """Resolve runtime availability for one catalog row against an Invoice.
+
+    Returns one of: available / partially_available / derived / missing / not_applicable.
+    Does not mutate invoice. Does not create Document/ECFDocument.
+    """
+    field = row.get("field")
+    static = row.get("availability") or "missing"
+
+    if field == "eNCF":
+        return "available" if not _is_blank(getattr(invoice, "official_encf", None)) else "missing"
+    if field == "FechaVencimientoSecuencia":
+        return "available" if getattr(invoice, "sequence_expiration_date", None) else "missing"
+    if field == "TipoIngresos":
+        return "available" if getattr(invoice, "income_type_id", None) else "missing"
+    if field == "TipoPago":
+        return "available" if getattr(invoice, "payment_type_id", None) else "missing"
+    if field == "IndicadorFacturacion":
+        return "available" if _invoice_has_billing_indicator(invoice) else "missing"
+    if field == "FechaHoraFirma":
+        try:
+            ecf = invoice.ecf_document
+        except ObjectDoesNotExist:
+            ecf = None
+        if ecf is not None and getattr(ecf, "signature_datetime", None):
+            return "available"
+        return "missing"
+    if field == "Signature":
+        # Never available until a dedicated signing phase stores signed XML.
+        return "missing"
+    return static
+
+
+def get_tipo_ecf_31_required_missing_fields(invoice=None) -> list[dict[str, Any]]:
+    """Required fields with availability == missing.
+
+    When ``invoice`` is provided, evaluate runtime data for Phase 007 model fields.
+    """
+    out: list[dict[str, Any]] = []
+    for r in FIELD_CATALOG:
+        if r.get("required_status") != "required":
+            continue
+        availability = (
+            resolve_tipo_ecf_31_runtime_availability(invoice, r)
+            if invoice is not None
+            else r.get("availability")
+        )
+        if availability == "missing":
+            item = dict(r)
+            item["availability"] = availability
+            out.append(item)
+    return out
+
+
+def get_tipo_ecf_31_catalog_metrics(invoice=None) -> dict[str, Any]:
+    catalog = FIELD_CATALOG
+    resolved_rows = []
+    for r in catalog:
+        row = dict(r)
+        if invoice is not None and r.get("field") in {
+            "eNCF",
+            "FechaVencimientoSecuencia",
+            "TipoIngresos",
+            "TipoPago",
+            "IndicadorFacturacion",
+            "FechaHoraFirma",
+            "Signature",
+        }:
+            row["availability"] = resolve_tipo_ecf_31_runtime_availability(invoice, r)
+        resolved_rows.append(row)
+
+    hard_missing = [
         r
-        for r in FIELD_CATALOG
+        for r in resolved_rows
         if r.get("required_status") == "required" and r.get("availability") == "missing"
     ]
-
-
-def get_tipo_ecf_31_catalog_metrics() -> dict[str, Any]:
-    catalog = FIELD_CATALOG
-    hard_missing = get_tipo_ecf_31_required_missing_fields()
     return {
         "catalog_status": CATALOG_STATUS,
         "source_files_reviewed": list(SOURCE_FILES_REVIEWED),
-        "field_count": len(catalog),
-        "available_field_count": sum(1 for r in catalog if r.get("availability") == "available"),
+        "field_count": len(resolved_rows),
+        "available_field_count": sum(1 for r in resolved_rows if r.get("availability") == "available"),
         "partially_available_field_count": sum(
-            1 for r in catalog if r.get("availability") == "partially_available"
+            1 for r in resolved_rows if r.get("availability") == "partially_available"
         ),
-        "derived_field_count": sum(1 for r in catalog if r.get("availability") == "derived"),
+        "derived_field_count": sum(1 for r in resolved_rows if r.get("availability") == "derived"),
         "missing_required_field_count": len(hard_missing),
         "missing_required_fields": [
             {
@@ -1078,8 +1159,8 @@ def get_tipo_ecf_31_catalog_metrics() -> dict[str, Any]:
     }
 
 
-def tipo_ecf_31_catalog_summary() -> dict[str, Any]:
-    metrics = get_tipo_ecf_31_catalog_metrics()
+def tipo_ecf_31_catalog_summary(invoice=None) -> dict[str, Any]:
+    metrics = get_tipo_ecf_31_catalog_metrics(invoice=invoice)
     return {
         "future_catalog": TIPO_ECF_31_FUTURE_CATALOG,
         "catalog_status": metrics["catalog_status"],

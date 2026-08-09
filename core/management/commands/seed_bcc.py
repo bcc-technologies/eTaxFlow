@@ -19,8 +19,11 @@ from core.seed_demo import (
 )
 from ecf.models import ECFDocument
 from fiscal.models import (
+    BillingIndicator,
     FiscalDocumentType,
+    FiscalIncomeType,
     InternalDocumentCode,
+    PaymentType,
     TaxRate,
     UnitOfMeasure,
 )
@@ -158,6 +161,79 @@ class Command(BaseCommand):
                 )
                 fiscal_catalog[code] = item
 
+            # TipoIngresos codes from Formato e-CF v1.0 / XSD e-CF 31
+            # (01-06). Internal catalog only — NOT DGII compliance.
+            income_types = [
+                ("01", "Ingresos por operaciones (No financieros)"),
+                ("02", "Ingresos Financieros"),
+                ("03", "Ingresos Extraordinarios"),
+                ("04", "Ingresos por Arrendamientos"),
+                ("05", "Ingresos por Venta de Activo Depreciable"),
+                ("06", "Otros Ingresos"),
+            ]
+            income_catalog = {}
+            for code, name in income_types:
+                item, _ = self.get_first_or_create(
+                    FiscalIncomeType,
+                    {"code": code},
+                    defaults={
+                        "name": name,
+                        "description": (
+                            "Preliminary internal TipoIngresos catalog value from "
+                            "Formato e-CF v1.0 / XSD review. NOT_DGII_COMPLIANT."
+                        ),
+                        "is_active": True,
+                    },
+                )
+                income_catalog[code] = item
+
+            # TipoPago codes from Formato e-CF v1.0 / XSD (1 Contado, 2 Crédito, 3 Gratuito).
+            payment_types = [
+                ("1", "Contado"),
+                ("2", "Crédito"),
+                ("3", "Gratuito"),
+            ]
+            payment_catalog = {}
+            for code, name in payment_types:
+                item, _ = self.get_first_or_create(
+                    PaymentType,
+                    {"code": code},
+                    defaults={
+                        "name": name,
+                        "description": (
+                            "Preliminary internal TipoPago catalog value from "
+                            "Formato e-CF v1.0 / XSD review. NOT_DGII_COMPLIANT. "
+                            "Not a payments module."
+                        ),
+                        "is_active": True,
+                    },
+                )
+                payment_catalog[code] = item
+
+            # IndicadorFacturacion codes from Formato e-CF v1.0 / XSD (0-4).
+            billing_indicators = [
+                ("0", "No Facturable"),
+                ("1", "ITBIS 1 (18%)"),
+                ("2", "ITBIS 2 (16%)"),
+                ("3", "ITBIS 3 (0%)"),
+                ("4", "Exento (E)"),
+            ]
+            billing_catalog = {}
+            for code, name in billing_indicators:
+                item, _ = self.get_first_or_create(
+                    BillingIndicator,
+                    {"code": code},
+                    defaults={
+                        "name": name,
+                        "description": (
+                            "Preliminary internal IndicadorFacturacion catalog value "
+                            "from Formato e-CF v1.0 / XSD review. NOT_DGII_COMPLIANT."
+                        ),
+                        "is_active": True,
+                    },
+                )
+                billing_catalog[code] = item
+
             tax_itbis_18, _ = self.get_first_or_create(
                 TaxRate,
                 {"code": "ITBIS_18"},
@@ -286,6 +362,13 @@ class Command(BaseCommand):
                             )
                         )
 
+            # Demo Tipo 31 required-model placeholders (not official eNCF / not signing).
+            demo_income_type = income_catalog["01"]
+            demo_payment_type = payment_catalog["2"]  # Crédito demo
+            demo_billing_indicator = billing_catalog["1"]  # ITBIS 18%
+            # Synthetic sequence expiry for mapping demos only — not an authorized DGII range.
+            demo_sequence_expiration = date(date.today().year + 1, 12, 31)
+
             if invoice:
                 invoice.issuer = issuer
                 invoice.customer = client
@@ -296,6 +379,10 @@ class Command(BaseCommand):
                 invoice.created_by = demo_user
                 invoice.fiscal_document_type = "31"
                 invoice.fiscal_document_type_ref = fiscal_catalog["31"]
+                invoice.income_type = demo_income_type
+                invoice.payment_type = demo_payment_type
+                invoice.sequence_expiration_date = demo_sequence_expiration
+                # Intentionally leave official_encf empty (eNCF assignment not implemented).
                 invoice.notes = SEED_INVOICE_MARKER
                 invoice.save()
             else:
@@ -314,6 +401,9 @@ class Command(BaseCommand):
                     created_by=demo_user,
                     fiscal_document_type="31",
                     fiscal_document_type_ref=fiscal_catalog["31"],
+                    income_type=demo_income_type,
+                    payment_type=demo_payment_type,
+                    sequence_expiration_date=demo_sequence_expiration,
                     notes=SEED_INVOICE_MARKER,
                 )
 
@@ -323,6 +413,7 @@ class Command(BaseCommand):
                     "product_service": product_software,
                     "unit": unit_service,
                     "tax_rate_ref": tax_itbis_18,
+                    "billing_indicator": demo_billing_indicator,
                     "quantity": Decimal("1.00"),
                     "unit_price": Decimal("1200.00"),
                     "discount_amount": Decimal("0.00"),
@@ -335,6 +426,7 @@ class Command(BaseCommand):
                     "product_service": product_consulting,
                     "unit": unit_service,
                     "tax_rate_ref": tax_itbis_18,
+                    "billing_indicator": demo_billing_indicator,
                     "quantity": Decimal("1.00"),
                     "unit_price": Decimal("1500.00"),
                     "discount_amount": Decimal("0.00"),
@@ -358,7 +450,7 @@ class Command(BaseCommand):
 
             invoice._recalculate_totals()
 
-            self.get_first_or_create(
+            ecf_doc, _ = self.get_first_or_create(
                 ECFDocument,
                 {"invoice": invoice},
                 defaults={
@@ -367,6 +459,10 @@ class Command(BaseCommand):
                     "dgii_status": "NOT_SENT",
                 },
             )
+            # Never populate signature_datetime in seed (signing not implemented).
+            if ecf_doc.signature_datetime is not None:
+                ecf_doc.signature_datetime = None
+                ecf_doc.save(update_fields=["signature_datetime"])
 
             self.stdout.write(self.style.SUCCESS("Demo BCC data seeded."))
             self.stdout.write(

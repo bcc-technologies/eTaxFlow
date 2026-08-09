@@ -101,6 +101,26 @@ Currently available eTaxFlow sources include issuer/customer identity basics, in
 
 This remains **NOT_DGII_COMPLIANT** and not production-ready: no official XML generation, no XSD validation pipeline, no digital signing, and no DGII submission/TrackId.
 
+## Tipo 31 required data model support
+
+Phase 007 adds internal model support for previously missing required Tipo 31 concepts:
+
+| DGII concept | eTaxFlow source |
+|---|---|
+| `eNCF` | existing nullable `Invoice.official_encf` (not auto-generated) |
+| `FechaVencimientoSecuencia` | `Invoice.sequence_expiration_date` |
+| `TipoIngresos` | `FiscalIncomeType` + `Invoice.income_type` |
+| `TipoPago` | `PaymentType` + `Invoice.payment_type` |
+| `IndicadorFacturacion` | `BillingIndicator` + `InvoiceLine.billing_indicator` |
+| `FechaHoraFirma` | `ECFDocument.signature_datetime` placeholder only |
+| `Signature` | still missing (future signed XML / signing service) |
+
+`seed_bcc` populates preliminary income/payment/billing catalogs (codes from Formato/XSD review) and demo invoice/line FKs, plus a synthetic sequence expiry. It does **not** assign `official_encf` and does **not** set `signature_datetime`.
+
+Still missing for DGII-style readiness: assigned official eNCF, real signing datetime, and digital signature material. Official eNCF generation is intentionally unimplemented (needs authorized sequences / DGII workflow). Signature remains missing because certificates/private keys and signing are out of scope.
+
+This still does **not** produce DGII-compliant XML.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from .models import FiscalDocumentType, InternalDocumentCode, TaxRate, UnitOfMeasure
+from .models import (
+    BillingIndicator,
+    FiscalDocumentType,
+    FiscalIncomeType,
+    InternalDocumentCode,
+    PaymentType,
+    TaxRate,
+    UnitOfMeasure,
+)
 
 
 @admin.register(InternalDocumentCode)
@@ -33,5 +41,26 @@ class TaxRateAdmin(admin.ModelAdmin):
 @admin.register(UnitOfMeasure)
 class UnitOfMeasureAdmin(admin.ModelAdmin):
     list_display = ("code", "name", "symbol", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("code", "name")
+
+
+@admin.register(FiscalIncomeType)
+class FiscalIncomeTypeAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "is_active", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("code", "name")
+
+
+@admin.register(PaymentType)
+class PaymentTypeAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "is_active", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("code", "name")
+
+
+@admin.register(BillingIndicator)
+class BillingIndicatorAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "is_active", "updated_at")
     list_filter = ("is_active",)
     search_fields = ("code", "name")

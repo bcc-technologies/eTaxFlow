@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from ecf.dgii.field_catalogs.tipo_ecf_31 import (
     TIPO_ECF_31_CATALOG_STATUS,
@@ -272,6 +272,8 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
 
     official_ncf = invoice.official_ncf
     official_encf = invoice.official_encf
+    income_type = getattr(invoice, "income_type", None)
+    payment_type = getattr(invoice, "payment_type", None)
     identity_fields = [
         _field(
             "identity",
@@ -290,11 +292,68 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
         _field(
             "identity",
             "official_encf",
-            "Official e-NCF / TipoeCF sequence (future DGII)",
+            "Official e-NCF / TipoeCF sequence (future DGII eNCF)",
             official_encf,
-            notes="Distinct from internal_code and official_ncf.",
+            notes="Distinct from internal_code and official_ncf. Not auto-generated.",
+        ),
+        _field(
+            "identity",
+            "sequence_expiration_date",
+            "FechaVencimientoSecuencia (internal)",
+            getattr(invoice, "sequence_expiration_date", None),
+            notes="Nullable model field; demo values are not authorized DGII sequence ranges.",
+        ),
+        _field(
+            "identity",
+            "income_type",
+            "TipoIngresos (internal FiscalIncomeType)",
+            getattr(income_type, "code", None),
+            notes=(
+                f"{getattr(income_type, 'name', '')}".strip()
+                or "Preliminary internal catalog mapping only."
+            ),
+        ),
+        _field(
+            "identity",
+            "payment_type",
+            "TipoPago (internal PaymentType)",
+            getattr(payment_type, "code", None),
+            notes=(
+                f"{getattr(payment_type, 'name', '')}".strip()
+                or "Preliminary internal catalog mapping only. Not a payments module."
+            ),
         ),
     ]
+
+    lines_have_billing = bool(lines) and all(
+        getattr(line, "billing_indicator_id", None) for line in lines
+    )
+    line_fields.append(
+        _field(
+            "lines",
+            "lines[].billing_indicator",
+            "IndicadorFacturacion (internal BillingIndicator)",
+            lines_have_billing,
+            notes="Required Tipo 31 line indicator; catalog codes 0-4 are preliminary.",
+        )
+    )
+
+    signature_dt = None
+    try:
+        ecf_doc = invoice.ecf_document
+    except ObjectDoesNotExist:
+        ecf_doc = None
+    if ecf_doc is not None:
+        signature_dt = getattr(ecf_doc, "signature_datetime", None)
+    identity_fields.append(
+        _field(
+            "identity",
+            "ecf_document.signature_datetime",
+            "FechaHoraFirma placeholder (NOT signing)",
+            signature_dt,
+            notes="Placeholder only; digital signing is not implemented.",
+        )
+    )
     issues.append(
         issue(
             "IDENTITY_FIELDS_DISTINGUISHED",
@@ -328,7 +387,7 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
     if str(fiscal_code) == TIPO_ECF_31_DOCUMENT_TYPE:
         future_catalog = TIPO_ECF_31_FUTURE_CATALOG
         catalog_status = TIPO_ECF_31_CATALOG_STATUS
-        metrics = get_tipo_ecf_31_catalog_metrics()
+        metrics = get_tipo_ecf_31_catalog_metrics(invoice=invoice)
         source_files_reviewed = metrics["source_files_reviewed"]
         available_field_count = metrics["available_field_count"]
         partially_available_field_count = metrics["partially_available_field_count"]

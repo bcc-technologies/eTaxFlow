@@ -4,7 +4,7 @@
 **Catalog status:** `REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT`  
 **Compliance claim:** **NOT_DGII_COMPLIANT**
 
-This catalog is a non-production mapping aid based on local official Formato e-CF v1.0 + XSD e-CF 31 v1.0 review. It does **not** authorize XML generation, signing, authentication, or DGII submission.
+This catalog is a non-production mapping aid based on local official Formato e-CF v1.0 + XSD e-CF 31 v1.0 review. Phase 007 adds internal model support for several previously missing required fields. It does **not** authorize XML generation, signing, authentication, or DGII submission.
 
 ## 1. Source documents reviewed
 
@@ -86,6 +86,21 @@ Still missing for later phases: Emisores Electrónicos PDF, Acuse de Recibo, Nor
 | FechaHoraFirma | FechaHoraFirma | ECF | required | xs:string datetime | 19; dd-MM-yyyy HH:mm:ss |  | Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd | Formato PDF section G / XSD ECF/FechaHoraFirma minOccurs=1 |  |  | missing | Requires signing workflow (explicitly out of scope). | blocked |
 | FirmaDigital | Signature | ECF | required | PDF tag &lt;Signature&gt;; XSD xs:any processContents=skip minOccurs=1 |  |  | Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd | Formato PDF section H tag &lt;Signature&gt;; XSD ECF sequence xs:any after FechaHoraFirma |  |  | missing | Digital signing explicitly out of scope; certificates not stored. | blocked |
 
+
+## 3b. Phase 007 required-field model support
+
+| dgii_field_or_element | etaxflow_source | catalog availability (model) | runtime notes | implementation_status |
+|---|---|---|---|---|
+| `eNCF` | `Invoice.official_encf` | missing until assigned | Field exists/nullable; **not auto-generated**; seed leaves empty | mapped (field only) |
+| `FechaVencimientoSecuencia` | `Invoice.sequence_expiration_date` | available when set | Nullable DateField; demo may populate synthetic expiry | mapped |
+| `TipoIngresos` | `Invoice.income_type` → `FiscalIncomeType.code` | available when set | Catalog codes 01-06 from Formato/XSD review | mapped (preliminary) |
+| `TipoPago` | `Invoice.payment_type` → `PaymentType.code` | available when set | Catalog codes 1\|2\|3 from Formato/XSD review | mapped (preliminary) |
+| `IndicadorFacturacion` | `InvoiceLine.billing_indicator` → `BillingIndicator.code` | available when all lines set | Catalog codes 0-4 from Formato/XSD review | mapped (preliminary) |
+| `FechaHoraFirma` | `ECFDocument.signature_datetime` | missing | Placeholder DateTimeField only; never set by seed/issue/XML draft | pending |
+| `Signature` | future `ECFDocument.xml_signed_file` / signing service | missing | No signature blob, certificates, or private keys stored | blocked |
+
+Still missing at runtime for a typical seeded invoice: **`eNCF`**, **`FechaHoraFirma`**, **`Signature`**.
+
 ## 4. Availability summary (57 catalog rows)
 
 - available: **15**
@@ -111,15 +126,15 @@ Still missing for later phases: Emisores Electrónicos PDF, Acuse de Recibo, Nor
 - `CantidadItem` ← `InvoiceLine.quantity`
 - `PrecioUnitarioItem` ← `InvoiceLine.unit_price`
 
-## 6. Required fields still missing
+## 6. Required fields still missing (runtime)
 
-- `eNCF` (Encabezado): Field exists but typically empty; no sequence assignment workflow yet.
-- `FechaVencimientoSecuencia` (Encabezado): No eTaxFlow model field for authorized sequence expiry.
-- `TipoIngresos` (Encabezado): No Invoice income-type field.
-- `TipoPago` (Encabezado): No payment-type field on Invoice.
-- `IndicadorFacturacion` (DetallesItems): tax_rate_snapshot/tax_rate_ref are candidates but no explicit 0-4 indicator mapping implemented.
-- `FechaHoraFirma` (FechaHoraFirma): Requires signing workflow (explicitly out of scope).
-- `Signature` (FirmaDigital): Digital signing explicitly out of scope; certificates not stored.
+After Phase 007 model support, a seeded demo invoice typically still lacks:
+
+- `eNCF` — `Invoice.official_encf` exists but is intentionally left empty (no eNCF assignment workflow).
+- `FechaHoraFirma` — `ECFDocument.signature_datetime` placeholder exists but is never populated (signing not implemented).
+- `Signature` — no signed XML / certificate storage; remains blocked until a dedicated signing phase.
+
+Now model-supported (may be available when populated): `FechaVencimientoSecuencia`, `TipoIngresos`, `TipoPago`, `IndicadorFacturacion`.
 
 ## 7. Ambiguities / open questions
 
