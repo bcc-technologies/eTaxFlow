@@ -182,12 +182,33 @@ python manage.py generate_tipo31_preview_xml --internal-code BCC-AR-2026-000001 
 - No DGII submission.
 - Demo eNCF is not authorized.
 
+## Tipo 31 unsigned schema-aligned draft
+
+Phase 011 generates an **unsigned**, schema-shaped Tipo e-CF 31 draft rooted at XSD `ECF`, using source-backed tags/order from the local XSD and reviewed field matrix. Signature remains omitted. Status stays **NOT_DGII_COMPLIANT** in diagnostics (not as schema-root attributes).
+
+```bash
+python manage.py seed_bcc
+python manage.py allocate_demo_encf --internal-code BCC-AR-2026-000001 --allow-demo --apply
+python manage.py prepare_signing_placeholder --internal-code BCC-AR-2026-000001 --apply --note "Local placeholder only; no real digital signature"
+python manage.py generate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf
+python manage.py generate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf --stdout
+python manage.py generate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf --diagnostics-json
+```
+
+### Warnings
+
+- Unsigned draft is **not** valid for DGII submission.
+- No XMLDSig / no certificate / no private keys.
+- No TrackId.
+- Demo eNCF is not authorized.
+- Output must be validated later against the official XSD after a real signing path is designed.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.
 - Fiscal catalog data is preliminary internal master data and placeholder-only.
-- Production DGII e-CF XML generation is not implemented (structure preview only).
+- Production DGII e-CF XML generation / submission is not implemented.
 - DGII production connection is not implemented.
 - Digital signing is not implemented.
-- XML schema compliance is not implemented.
+- Full XML schema compliance / instance validation is not implemented.
 - OCR, AI, payments, and a custom frontend are not implemented yet.

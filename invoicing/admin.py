@@ -2,6 +2,8 @@ from django.contrib import admin, messages
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from ecf.dgii.xml_draft.documents import generate_tipo31_unsigned_draft_document
+from ecf.dgii.xml_draft.tipo_ecf_31_unsigned import Tipo31UnsignedDraftError
 from ecf.dgii.xml_preview.documents import generate_tipo31_preview_document
 from ecf.dgii.xml_preview.tipo_ecf_31_preview import Tipo31XmlPreviewError
 from ecf.services.internal_xml_documents import generate_internal_xml_document
@@ -99,6 +101,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "action_allocate_demo_encf",
         "action_prepare_signing_placeholder",
         "action_generate_tipo31_xml_preview",
+        "action_generate_tipo31_unsigned_draft",
     ]
 
     def get_readonly_fields(self, request, obj=None):
@@ -273,6 +276,64 @@ class InvoiceAdmin(admin.ModelAdmin):
                 self.message_user(request, error, level=messages.ERROR)
     action_generate_tipo31_xml_preview.short_description = (
         "Generate Tipo 31 XML preview"
+    )
+
+    def action_generate_tipo31_unsigned_draft(self, request, queryset):
+        """Schema-aligned unsigned Tipo 31 draft — never signs/submits/allocates eNCF."""
+        errors = []
+        generated = []
+        for invoice in queryset:
+            try:
+                before_status = invoice.lifecycle_status
+                before_ecf_id = _ecf_document_id(invoice)
+                before_encf = invoice.official_encf
+                document, created = generate_tipo31_unsigned_draft_document(
+                    invoice,
+                    created_by=request.user,
+                    allow_demo_encf=True,  # admin action is intentionally non-production
+                    require_signing_placeholder=True,
+                )
+                invoice.refresh_from_db()
+                if invoice.lifecycle_status != before_status:
+                    errors.append(
+                        f"{invoice.internal_code}: lifecycle_status unexpectedly changed "
+                        f"from {before_status} to {invoice.lifecycle_status}"
+                    )
+                    continue
+                if invoice.official_encf != before_encf:
+                    errors.append(
+                        f"{invoice.internal_code}: official_encf unexpectedly changed"
+                    )
+                    continue
+                after_ecf_id = _ecf_document_id(invoice)
+                if before_ecf_id is None and after_ecf_id is not None:
+                    errors.append(
+                        f"{invoice.internal_code}: draft unexpectedly created ECFDocument"
+                    )
+                    continue
+                verb = "created" if created else "reused"
+                generated.append(
+                    f"{invoice.internal_code} -> {document.internal_code} ({verb})"
+                )
+            except (ValidationError, Tipo31UnsignedDraftError) as exc:
+                msgs = getattr(exc, "messages", None) or [str(exc)]
+                errors.append(f"{invoice.internal_code}: {'; '.join(msgs)}")
+        if generated:
+            self.message_user(
+                request,
+                _("Tipo 31 unsigned draft (NOT_DGII_COMPLIANT): ") + "; ".join(generated),
+                level=messages.SUCCESS,
+            )
+        if errors:
+            self.message_user(
+                request,
+                _("Some Tipo 31 unsigned draft generations failed:"),
+                level=messages.ERROR,
+            )
+            for error in errors:
+                self.message_user(request, error, level=messages.ERROR)
+    action_generate_tipo31_unsigned_draft.short_description = (
+        "Generate Tipo 31 unsigned draft"
     )
 
 

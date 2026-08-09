@@ -191,3 +191,31 @@ Only fields already represented in the reviewed Tipo 31 field matrix and availab
 ### Why no XMLDSig is emitted
 
 XMLDSig / real digital signing is out of scope. eTaxFlow does not store certificates or private keys, does not create signed XML artifacts for this preview, and does not emit the XMLDSig namespace.
+
+## 10. Schema-aligned unsigned Tipo 31 draft
+
+Phase 011 adds `ecf/dgii/xml_draft/` plus local XSD helpers under `ecf/dgii/xsd/`.
+
+### Uses source-backed tags/order where reviewed
+
+- Root element is XSD `ECF` (extracted from `docs/dgii/sources/e-CF_31_v1.0.xsd`).
+- Child order follows the local XSD sequence: `Encabezado`, `DetallesItems`, then `FechaHoraFirma` (optional sections omitted when not applicable).
+- Nested tags (`IdDoc`, `Emisor`, `Comprador`, `Totales`, `Item`, …) use names from the reviewed Formato/XSD matrix only.
+
+### Signature remains missing
+
+- Local XSD represents Signature as required `xs:any processContents="skip"` after `FechaHoraFirma`.
+- Formato PDF names `<Signature>`.
+- The unsigned draft **omits** Signature / xs:any content entirely.
+- Diagnostics report `Signature` missing and `signature_present=false`.
+
+### Not signed / not submitted / not DGII compliant
+
+- No XMLDSig namespace or signature value.
+- No certificates or private keys.
+- No TrackId and no DGII API calls.
+- Compliance status stays **`NOT_DGII_COMPLIANT`** in diagnostics, AuditEvent metadata, command output, and README — not as attributes on the schema-shaped `ECF` root.
+
+### Generated only for local structural work
+
+This draft exists for laboratory structure alignment against the local XSD/catalog. It is **not** valid for DGII submission and must be revalidated later after a real signing path is designed.
