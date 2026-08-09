@@ -983,9 +983,9 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "etaxflow_source_model": "ECFDocument",
         "etaxflow_source_field": "signature_datetime",
         "availability": "missing",
-        "mapping_notes": "Phase 007: ECFDocument.signature_datetime placeholder exists but is never set by seed/issue/internal XML. Signing not implemented.",
-        "implementation_status": "pending",
-        "notes": "PDF section obligation Tipo31=1; XSD required. Remains missing until digital signing phase."
+        "mapping_notes": "Phase 009: prepare_signing_placeholder may set signature_datetime as a local FechaHoraFirma stub. Not a real digital signature timestamp.",
+        "implementation_status": "mapped",
+        "notes": "PDF section obligation Tipo31=1; XSD required. Placeholder available after prepare_signing_placeholder; NOT real signing.",
     },
     {
         "section": "FirmaDigital",
@@ -998,11 +998,11 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF section H tag <Signature>; XSD ECF sequence xs:any after FechaHoraFirma",
         "etaxflow_source_model": "ECFDocument",
-        "etaxflow_source_field": "xml_signed_file (future)",
+        "etaxflow_source_field": "xml_signed_file (future XMLDSig/signing service)",
         "availability": "missing",
-        "mapping_notes": "No signature blob/certificate storage. Future source may be ECFDocument.xml_signed_file or a signing service. Remains missing until signing phase.",
+        "mapping_notes": "No signature blob/certificate/private-key storage. Remains missing until a future real signing phase.",
         "implementation_status": "blocked",
-        "notes": "PDF names <Signature>; local XSD encodes required wildcard xs:any. NOT implemented.",
+        "notes": "PDF names <Signature>; local XSD encodes required wildcard xs:any. NOT implemented. NOT_DGII_COMPLIANT.",
     }
 ]
 
@@ -1082,7 +1082,13 @@ def resolve_tipo_ecf_31_runtime_availability(invoice, row: dict[str, Any]) -> st
             return "available"
         return "missing"
     if field == "Signature":
-        # Never available until a dedicated signing phase stores signed XML.
+        # Available only when a real signed XML artifact exists (never set by placeholder).
+        try:
+            ecf = invoice.ecf_document
+        except ObjectDoesNotExist:
+            return "missing"
+        if ecf is not None and bool(getattr(ecf, "xml_signed_file", None)):
+            return "available"
         return "missing"
     return static
 

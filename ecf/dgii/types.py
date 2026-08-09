@@ -82,8 +82,8 @@ class DGIIMappingReport:
     missing_required_field_count: int | None = None
     missing_required_fields: list[dict[str, Any]] | None = None
     compliance_claim: str = (
-        "NOT_DGII_COMPLIANT — Phase 008 local eNCF sequence allocation only; "
-        "no official XML, signing, or DGII submission."
+        "NOT_DGII_COMPLIANT — Phase 009 signing placeholder only; "
+        "no real digital signature, certificates, or DGII submission."
     )
 
     @property

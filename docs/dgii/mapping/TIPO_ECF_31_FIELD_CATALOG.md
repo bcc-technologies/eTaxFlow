@@ -96,10 +96,10 @@ Still missing for later phases: Emisores Electrónicos PDF, Acuse de Recibo, Nor
 | `TipoIngresos` | `Invoice.income_type` → `FiscalIncomeType.code` | available when set | Catalog codes 01-06 from Formato/XSD review | mapped (preliminary) |
 | `TipoPago` | `Invoice.payment_type` → `PaymentType.code` | available when set | Catalog codes 1\|2\|3 from Formato/XSD review | mapped (preliminary) |
 | `IndicadorFacturacion` | `InvoiceLine.billing_indicator` → `BillingIndicator.code` | available when all lines set | Catalog codes 0-4 from Formato/XSD review | mapped (preliminary) |
-| `FechaHoraFirma` | `ECFDocument.signature_datetime` | missing | Placeholder DateTimeField only; never set by seed/issue/XML draft | pending |
-| `Signature` | future `ECFDocument.xml_signed_file` / signing service | missing | No signature blob, certificates, or private keys stored | blocked |
+| `FechaHoraFirma` | `ECFDocument.signature_datetime` | placeholder available after `prepare_signing_placeholder` | Local stub only — **not** a real digital signature timestamp | mapped (placeholder) |
+| `Signature` | future XMLDSig / `ECFDocument.xml_signed_file` | missing | No signature blob, certificates, or private keys; real signing blocked | blocked |
 
-Still missing at runtime for a typical seeded invoice: **`eNCF`**, **`FechaHoraFirma`**, **`Signature`**.
+Still missing at runtime after seed + demo eNCF + signing placeholder: **`Signature`** only (plus demo/non-authorized warnings).
 
 ## 4. Availability summary (57 catalog rows)
 
@@ -131,10 +131,10 @@ Still missing at runtime for a typical seeded invoice: **`eNCF`**, **`FechaHoraF
 After Phase 007 model support, a seeded demo invoice typically still lacks:
 
 - `eNCF` — empty until explicitly allocated from `ENCFSequenceRange` (`allocate_demo_encf` / admin action). Demo values remain **not DGII-authorized**.
-- `FechaHoraFirma` — `ECFDocument.signature_datetime` placeholder exists but is never populated (signing not implemented).
-- `Signature` — no signed XML / certificate storage; remains blocked until a dedicated signing phase.
+- `FechaHoraFirma` — can be represented via `prepare_signing_placeholder` (`signature_datetime` + `SIGNING_PLACEHOLDER`); not a real signature timestamp.
+- `Signature` — no signed XML / certificate / private-key storage; remains missing until a future real signing phase.
 
-Now model-supported (may be available when populated): `FechaVencimientoSecuencia`, `TipoIngresos`, `TipoPago`, `IndicadorFacturacion`, and demo `eNCF` after controlled allocation.
+Now model-supported (may be available when populated): `FechaVencimientoSecuencia`, `TipoIngresos`, `TipoPago`, `IndicadorFacturacion`, demo `eNCF` after controlled allocation, and FechaHoraFirma placeholder after `prepare_signing_placeholder`.
 
 ## 7. Ambiguities / open questions
 

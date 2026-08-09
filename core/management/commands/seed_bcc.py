@@ -383,7 +383,8 @@ class Command(BaseCommand):
                 invoice.income_type = demo_income_type
                 invoice.payment_type = demo_payment_type
                 invoice.sequence_expiration_date = demo_sequence_expiration
-                # Intentionally leave official_encf empty (eNCF assignment not implemented).
+                # Demo invoice starts without assigned eNCF; allocate_demo_encf is explicit.
+                invoice.official_encf = None
                 invoice.notes = SEED_INVOICE_MARKER
                 invoice.save()
             else:
@@ -507,10 +508,28 @@ class Command(BaseCommand):
                     "dgii_status": "NOT_SENT",
                 },
             )
-            # Never populate signature_datetime in seed (signing not implemented).
-            if ecf_doc.signature_datetime is not None:
+            # Never auto-prepare signing placeholder in seed (signing not implemented).
+            # Keep ECFDocument in explicit UNSIGNED/NONE state.
+            dirty_signing = (
+                ecf_doc.signature_datetime is not None
+                or ecf_doc.signing_status != "UNSIGNED"
+                or ecf_doc.signing_mode != "NONE"
+                or bool(ecf_doc.signature_placeholder_note)
+                or ecf_doc.signing_attempted_at is not None
+                or ecf_doc.signing_completed_at is not None
+            )
+            if dirty_signing:
                 ecf_doc.signature_datetime = None
-                ecf_doc.save(update_fields=["signature_datetime"])
+                ecf_doc.signing_status = "UNSIGNED"
+                ecf_doc.signing_mode = "NONE"
+                ecf_doc.signature_placeholder_note = ""
+                ecf_doc.signature_digest_algorithm = None
+                ecf_doc.signature_method = None
+                ecf_doc.signature_reference_uri = None
+                ecf_doc.signed_by = None
+                ecf_doc.signing_attempted_at = None
+                ecf_doc.signing_completed_at = None
+                ecf_doc.save()
 
             self.stdout.write(self.style.SUCCESS("Demo BCC data seeded."))
             self.stdout.write(

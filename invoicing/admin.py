@@ -3,6 +3,10 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from ecf.services.internal_xml_documents import generate_internal_xml_document
+from ecf.services.signing_placeholder import (
+    SigningPlaceholderError,
+    prepare_signing_placeholder,
+)
 from fiscal.services.encf_sequences import ENCFAllocationError, allocate_next_encf
 from .models import Invoice, InvoiceLine, ProductService
 
@@ -84,6 +88,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "action_archive_invoices",
         "action_generate_internal_xml_drafts",
         "action_allocate_demo_encf",
+        "action_prepare_signing_placeholder",
     ]
 
     def get_readonly_fields(self, request, obj=None):
@@ -163,6 +168,49 @@ class InvoiceAdmin(admin.ModelAdmin):
                 self.message_user(request, error, level=messages.ERROR)
     action_allocate_demo_encf.short_description = (
         "Allocate demo eNCF from configured range (NOT DGII-authorized)"
+    )
+
+    def action_prepare_signing_placeholder(self, request, queryset):
+        """Prepare FechaHoraFirma placeholder only — never real signing/submission."""
+        errors = []
+        prepared = []
+        for invoice in queryset:
+            try:
+                before_status = invoice.lifecycle_status
+                ecf = prepare_signing_placeholder(
+                    invoice,
+                    actor=request.user,
+                    note="Admin action: local signing placeholder only; no real digital signature.",
+                )
+                invoice.refresh_from_db()
+                if invoice.lifecycle_status != before_status:
+                    errors.append(
+                        f"{invoice.internal_code}: lifecycle_status unexpectedly changed "
+                        f"from {before_status} to {invoice.lifecycle_status}"
+                    )
+                    continue
+                prepared.append(
+                    f"{invoice.internal_code} -> ECF#{ecf.pk} ({ecf.signing_status})"
+                )
+            except (ValidationError, SigningPlaceholderError) as exc:
+                msgs = getattr(exc, "messages", None) or [str(exc)]
+                errors.append(f"{invoice.internal_code}: {'; '.join(msgs)}")
+        if prepared:
+            self.message_user(
+                request,
+                _("Prepared signing placeholder (NOT real signing): ") + "; ".join(prepared),
+                level=messages.SUCCESS,
+            )
+        if errors:
+            self.message_user(
+                request,
+                _("Some signing placeholder preparations failed:"),
+                level=messages.ERROR,
+            )
+            for error in errors:
+                self.message_user(request, error, level=messages.ERROR)
+    action_prepare_signing_placeholder.short_description = (
+        "Prepare signing placeholder (NOT real digital signing)"
     )
 
 

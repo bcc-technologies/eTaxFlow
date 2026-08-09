@@ -339,19 +339,37 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
     )
 
     signature_dt = None
+    signing_status = None
+    signing_mode = None
+    has_signed_xml = False
     try:
         ecf_doc = invoice.ecf_document
     except ObjectDoesNotExist:
         ecf_doc = None
     if ecf_doc is not None:
         signature_dt = getattr(ecf_doc, "signature_datetime", None)
+        signing_status = getattr(ecf_doc, "signing_status", None)
+        signing_mode = getattr(ecf_doc, "signing_mode", None)
+        has_signed_xml = bool(getattr(ecf_doc, "xml_signed_file", None))
     identity_fields.append(
         _field(
             "identity",
             "ecf_document.signature_datetime",
-            "FechaHoraFirma placeholder (NOT signing)",
+            "FechaHoraFirma placeholder (NOT real signing)",
             signature_dt,
-            notes="Placeholder only; digital signing is not implemented.",
+            notes=(
+                f"signing_status={signing_status!r}, signing_mode={signing_mode!r}. "
+                "Placeholder only; not a real digital signature timestamp."
+            ),
+        )
+    )
+    identity_fields.append(
+        _field(
+            "identity",
+            "ecf_document.xml_signed_file",
+            "Signature / signed XML artifact (future)",
+            has_signed_xml,
+            notes="Real Signature remains missing until a future XMLDSig/signing service exists.",
         )
     )
     issues.append(
@@ -403,6 +421,20 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
                     area="identity",
                 )
             )
+
+    if ecf_doc is not None and getattr(ecf_doc, "signing_status", None) == "SIGNING_PLACEHOLDER":
+        issues.append(
+            issue(
+                "SIGNING_PLACEHOLDER_ONLY",
+                (
+                    "ECFDocument.signing_status=SIGNING_PLACEHOLDER: FechaHoraFirma may be "
+                    "represented via signature_datetime, but no real digital signature "
+                    "(Signature/XMLDSig) was created. NOT_DGII_COMPLIANT."
+                ),
+                severity=DGIIIssueSeverity.WARNING,
+                area="signing",
+            )
+        )
 
     future_catalog = None
     catalog_status = None
