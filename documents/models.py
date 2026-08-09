@@ -50,12 +50,24 @@ class Document(models.Model):
     status = models.CharField(max_length=20, choices=STATUSES, default="DRAFT")
     issuer = models.ForeignKey("organizations.Organization", null=True, blank=True, on_delete=models.SET_NULL, related_name="documents")
     related_contact = models.ForeignKey("contacts.Contact", null=True, blank=True, on_delete=models.SET_NULL, related_name="documents")
+    related_invoice = models.ForeignKey(
+        "invoicing.Invoice",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="documents",
+    )
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        previous_invoice = None
+        if not is_new:
+            previous = Document.objects.filter(pk=self.pk).first()
+            previous_invoice = previous.related_invoice if previous else None
+
         file_obj = self.file
         if file_obj:
             self.file_size = file_obj.size
@@ -65,7 +77,9 @@ class Document(models.Model):
             self.sha256_hash = hashlib.sha256(content).hexdigest()
             if not self.mime_type:
                 self.mime_type = getattr(file_obj, "content_type", None) or "application/octet-stream"
+
         super().save(*args, **kwargs)
+
         if is_new:
             AuditEvent.objects.create(
                 actor=self.created_by,
@@ -74,6 +88,19 @@ class Document(models.Model):
                 entity_id=self.pk,
                 message="Document uploaded and stored",
                 metadata={"filename": self.original_filename, "sha256": self.sha256_hash},
+            )
+
+        if self.related_invoice and self.related_invoice != previous_invoice:
+            AuditEvent.objects.create(
+                actor=self.created_by,
+                event_type="document_linked_to_invoice",
+                entity_type="Document",
+                entity_id=self.pk,
+                message=f"Document linked to invoice {self.related_invoice.internal_code}",
+                metadata={
+                    "related_invoice": self.related_invoice.internal_code,
+                    "invoice_id": self.related_invoice.pk,
+                },
             )
 
     def __str__(self):
