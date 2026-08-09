@@ -87,6 +87,25 @@ class Command(BaseCommand):
             self.stdout.write(f"  TipoeCF concept: {report.fiscal_document_type.dgii_tipoe_cf_concept}")
         self.stdout.write(f"future_catalog: {report.future_catalog}")
         self.stdout.write(f"catalog_status: {report.catalog_status}")
+        if report.source_files_reviewed:
+            self.stdout.write(
+                "source_files_reviewed: " + ", ".join(report.source_files_reviewed)
+            )
+        if report.available_field_count is not None:
+            self.stdout.write(f"available_field_count: {report.available_field_count}")
+        if report.partially_available_field_count is not None:
+            self.stdout.write(
+                f"partially_available_field_count: {report.partially_available_field_count}"
+            )
+        if report.derived_field_count is not None:
+            self.stdout.write(f"derived_field_count: {report.derived_field_count}")
+        if report.missing_required_field_count is not None:
+            self.stdout.write(
+                f"missing_required_field_count: {report.missing_required_field_count}"
+            )
+        if report.missing_required_fields:
+            names = ", ".join(item.get("field", "?") for item in report.missing_required_fields)
+            self.stdout.write(f"missing_required_fields: {names}")
         if report.source_inventory_status:
             self.stdout.write(
                 "source_inventory_status: "

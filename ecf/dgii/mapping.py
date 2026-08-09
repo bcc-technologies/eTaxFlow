@@ -10,6 +10,7 @@ from ecf.dgii.field_catalogs.tipo_ecf_31 import (
     TIPO_ECF_31_CATALOG_STATUS,
     TIPO_ECF_31_DOCUMENT_TYPE,
     TIPO_ECF_31_FUTURE_CATALOG,
+    get_tipo_ecf_31_catalog_metrics,
 )
 from ecf.dgii.inventory_status import source_inventory_status
 from ecf.dgii.types import (
@@ -317,10 +318,23 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
 
     future_catalog = None
     catalog_status = None
+    source_files_reviewed = None
+    available_field_count = None
+    partially_available_field_count = None
+    derived_field_count = None
+    missing_required_field_count = None
+    missing_required_fields = None
     inventory = source_inventory_status()
     if str(fiscal_code) == TIPO_ECF_31_DOCUMENT_TYPE:
         future_catalog = TIPO_ECF_31_FUTURE_CATALOG
         catalog_status = TIPO_ECF_31_CATALOG_STATUS
+        metrics = get_tipo_ecf_31_catalog_metrics()
+        source_files_reviewed = metrics["source_files_reviewed"]
+        available_field_count = metrics["available_field_count"]
+        partially_available_field_count = metrics["partially_available_field_count"]
+        derived_field_count = metrics["derived_field_count"]
+        missing_required_field_count = metrics["missing_required_field_count"]
+        missing_required_fields = metrics["missing_required_fields"]
         if catalog_status == "SKELETON_PENDING_OFFICIAL_SOURCE_REVIEW":
             issues.append(
                 issue(
@@ -334,6 +348,34 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
                     area="catalog",
                 )
             )
+        elif catalog_status == "REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT":
+            issues.append(
+                issue(
+                    "TIPO_ECF_31_FIELD_MATRIX_REVIEWED_NOT_COMPLIANT",
+                    (
+                        "Tipo e-CF 31 obligation matrix was reviewed from local "
+                        "Formato/XSD sources, but this is still "
+                        "NOT_DGII_COMPLIANT (no official XML/signing/submission)."
+                    ),
+                    severity=DGIIIssueSeverity.WARNING,
+                    area="catalog",
+                )
+            )
+            if missing_required_field_count:
+                names = ", ".join(item["field"] for item in missing_required_fields[:12])
+                issues.append(
+                    issue(
+                        "TIPO_ECF_31_REQUIRED_FIELDS_MISSING_IN_MODEL",
+                        (
+                            f"{missing_required_field_count} required Tipo 31 catalog "
+                            f"field(s) are missing in eTaxFlow models/workflows "
+                            f"(e.g. {names}). Does not by itself block future "
+                            f"internal draft readiness."
+                        ),
+                        severity=DGIIIssueSeverity.WARNING,
+                        area="catalog",
+                    )
+                )
 
     blocking = [i for i in issues if i.severity == DGIIIssueSeverity.BLOCKING]
     enough = len(blocking) == 0
@@ -368,6 +410,12 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
             "missing_count": inventory["missing_count"],
             "expected_count": inventory["expected_count"],
         },
+        source_files_reviewed=source_files_reviewed,
+        available_field_count=available_field_count,
+        partially_available_field_count=partially_available_field_count,
+        derived_field_count=derived_field_count,
+        missing_required_field_count=missing_required_field_count,
+        missing_required_fields=missing_required_fields,
     )
 
     # Guard: report generation must not mutate invoice in-memory or in DB.

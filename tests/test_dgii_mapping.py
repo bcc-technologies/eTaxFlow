@@ -11,8 +11,14 @@ from django.test import TestCase
 from contacts.models import Contact
 from documents.models import Document
 from ecf.dgii.field_catalogs.tipo_ecf_31 import (
+    FIELD_CATALOG,
+    SOURCE_FILES_REVIEWED,
     TIPO_ECF_31_CATALOG_STATUS,
     TIPO_ECF_31_FUTURE_CATALOG,
+    get_tipo_ecf_31_available_fields,
+    get_tipo_ecf_31_catalog_status,
+    get_tipo_ecf_31_field_catalog,
+    get_tipo_ecf_31_required_missing_fields,
 )
 from ecf.dgii.mapping import build_invoice_dgii_mapping_report
 from ecf.dgii.types import DGIIMappingStatus
@@ -123,8 +129,16 @@ class DGIIMappingReportTests(TestCase):
         self.assertEqual(report.fiscal_document_type.internal_code, "31")
         self.assertEqual(report.future_catalog, TIPO_ECF_31_FUTURE_CATALOG)
         self.assertEqual(report.catalog_status, TIPO_ECF_31_CATALOG_STATUS)
+        self.assertEqual(report.catalog_status, "REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT")
+        self.assertIsNotNone(report.source_files_reviewed)
+        self.assertGreater(report.available_field_count or 0, 0)
+        self.assertIsNotNone(report.missing_required_field_count)
+        self.assertIsInstance(report.missing_required_fields, list)
+        self.assertIn("NOT_DGII_COMPLIANT", report.compliance_claim)
         codes = {i.code for i in report.issues}
-        self.assertIn("TIPO_ECF_31_CATALOG_PENDING_SOURCE_REVIEW", codes)
+        self.assertIn("TIPO_ECF_31_FIELD_MATRIX_REVIEWED_NOT_COMPLIANT", codes)
+        self.assertNotIn("TIPO_ECF_31_CATALOG_PENDING_SOURCE_REVIEW", codes)
+        self.assertEqual(report.status, DGIIMappingStatus.READY_FOR_FUTURE_DRAFT)
 
     def test_report_identifies_missing_issuer_or_customer_rnc(self):
         self.issuer.rnc = ""
@@ -231,6 +245,11 @@ class InspectDGIIMappingCommandTests(TestCase):
         self.assertIn("internal_code", output)
         self.assertIn("NOT DGII-compliant", output)
         self.assertIn(self.invoice.internal_code, output)
+        self.assertIn("catalog_status:", output)
+        self.assertIn("REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT", output)
+        self.assertIn("source_files_reviewed:", output)
+        self.assertIn("available_field_count:", output)
+        self.assertIn("missing_required_field_count:", output)
 
     def test_json_output_is_parseable(self):
         out = StringIO()
@@ -248,6 +267,11 @@ class InspectDGIIMappingCommandTests(TestCase):
         self.assertEqual(payload["future_catalog"], TIPO_ECF_31_FUTURE_CATALOG)
         self.assertEqual(payload["catalog_status"], TIPO_ECF_31_CATALOG_STATUS)
         self.assertIn("source_inventory_status", payload)
+        self.assertIn("source_files_reviewed", payload)
+        self.assertIn("available_field_count", payload)
+        self.assertIn("missing_required_field_count", payload)
+        self.assertIn("missing_required_fields", payload)
+        self.assertIn("NOT_DGII_COMPLIANT", payload["compliance_claim"])
 
     def test_strict_fails_on_blocking_issues(self):
         broken = Invoice.objects.create(
@@ -276,6 +300,21 @@ class InspectDGIIMappingCommandTests(TestCase):
 
 
 class DGIISourceAndCatalogScaffoldTests(TestCase):
+    REQUIRED_CATALOG_KEYS = {
+        "section",
+        "field",
+        "parent_path",
+        "required_status",
+        "type_or_format",
+        "etaxflow_source_model",
+        "etaxflow_source_field",
+        "availability",
+        "implementation_status",
+        "source_document",
+        "source_location",
+        "notes",
+    }
+
     def test_dgii_inventory_file_exists(self):
         self.assertTrue(Path("docs/dgii/DGII_ECF_DOCUMENT_INVENTORY.md").exists())
 
@@ -285,13 +324,39 @@ class DGIISourceAndCatalogScaffoldTests(TestCase):
     def test_tipo_ecf_31_catalog_markdown_exists(self):
         self.assertTrue(Path("docs/dgii/mapping/TIPO_ECF_31_FIELD_CATALOG.md").exists())
 
-    def test_tipo_ecf_31_python_catalog_marked_pending(self):
+    def test_tipo_ecf_31_source_notes_exist(self):
+        self.assertTrue(Path("docs/dgii/mapping/TIPO_ECF_31_SOURCE_NOTES.md").exists())
+
+    def test_tipo_ecf_31_catalog_status_reviewed_not_compliant(self):
         self.assertEqual(
             TIPO_ECF_31_CATALOG_STATUS,
-            "SKELETON_PENDING_OFFICIAL_SOURCE_REVIEW",
+            "REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT",
+        )
+        self.assertEqual(
+            get_tipo_ecf_31_catalog_status(),
+            "REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT",
         )
 
-    def test_type_31_report_includes_catalog_fields_and_warning(self):
+    def test_tipo_ecf_31_field_catalog_non_empty_with_required_keys(self):
+        catalog = get_tipo_ecf_31_field_catalog()
+        self.assertGreater(len(catalog), 0)
+        self.assertEqual(len(catalog), len(FIELD_CATALOG))
+        for row in catalog:
+            for key in self.REQUIRED_CATALOG_KEYS:
+                self.assertIn(key, row)
+            has_source = bool(row.get("source_document")) and bool(row.get("source_location"))
+            marked_todo = "TODO" in str(row.get("notes", "")).upper() or row.get(
+                "required_status"
+            ) == "ambiguous"
+            self.assertTrue(
+                has_source or marked_todo,
+                msg=f"Row {row.get('field')} lacks source citation or TODO/ambiguous mark",
+            )
+        self.assertGreater(len(get_tipo_ecf_31_available_fields()), 0)
+        self.assertIsInstance(get_tipo_ecf_31_required_missing_fields(), list)
+        self.assertTrue(SOURCE_FILES_REVIEWED)
+
+    def test_type_31_report_includes_catalog_metrics_and_warning(self):
         user = get_user_model().objects.create_user(username="cat", password="x")
         issuer = Organization.objects.create(legal_name="BCC", rnc="1310000000")
         customer = Contact.objects.create(
@@ -324,11 +389,23 @@ class DGIISourceAndCatalogScaffoldTests(TestCase):
             tax_amount=Decimal("1.80"),
             line_total=Decimal("11.80"),
         )
+        before_docs = Document.objects.count()
+        before_ecf = ECFDocument.objects.count()
         report = build_invoice_dgii_mapping_report(invoice)
         self.assertEqual(report.future_catalog, "TIPO_ECF_31")
-        self.assertEqual(report.catalog_status, "SKELETON_PENDING_OFFICIAL_SOURCE_REVIEW")
+        self.assertEqual(report.catalog_status, "REVIEWED_FIELD_MATRIX_NOT_XML_COMPLIANT")
         self.assertTrue(
-            any(i.code == "TIPO_ECF_31_CATALOG_PENDING_SOURCE_REVIEW" for i in report.issues)
+            any(
+                i.code == "TIPO_ECF_31_FIELD_MATRIX_REVIEWED_NOT_COMPLIANT"
+                for i in report.issues
+            )
         )
         self.assertIsNotNone(report.source_inventory_status)
         self.assertIn("summary", report.source_inventory_status)
+        self.assertEqual(report.source_files_reviewed, list(SOURCE_FILES_REVIEWED))
+        self.assertGreater(report.available_field_count, 0)
+        self.assertIsInstance(report.missing_required_fields, list)
+        self.assertGreaterEqual(report.missing_required_field_count, 0)
+        self.assertIn("NOT_DGII_COMPLIANT", report.compliance_claim)
+        self.assertEqual(Document.objects.count(), before_docs)
+        self.assertEqual(ECFDocument.objects.count(), before_ecf)

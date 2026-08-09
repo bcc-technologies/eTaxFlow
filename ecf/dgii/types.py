@@ -75,8 +75,14 @@ class DGIIMappingReport:
     future_catalog: str | None = None
     catalog_status: str | None = None
     source_inventory_status: dict[str, Any] | None = None
+    source_files_reviewed: list[str] | None = None
+    available_field_count: int | None = None
+    partially_available_field_count: int | None = None
+    derived_field_count: int | None = None
+    missing_required_field_count: int | None = None
+    missing_required_fields: list[dict[str, Any]] | None = None
     compliance_claim: str = (
-        "NOT_DGII_COMPLIANT — Phase 005 mapping report only; "
+        "NOT_DGII_COMPLIANT — Phase 006 reviewed Tipo 31 field matrix only; "
         "no official XML, signing, or DGII submission."
     )
 

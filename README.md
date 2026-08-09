@@ -81,6 +81,26 @@ python manage.py inspect_dgii_mapping --invoice-id 1 --strict
 - It does **not** send anything to DGII
 - Official DGII documents must be collected and reviewed before claiming compliance
 
+## Tipo e-CF 31 field catalog
+
+Phase 006 reviewed local official sources and produced a Tipo e-CF 31 obligation matrix:
+
+- `docs/dgii/sources/Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf`
+- `docs/dgii/sources/e-CF_31_v1.0.xsd`
+- Context: `docs/dgii/sources/Informe_Tecnico_e-CF_v1.0.pdf`
+
+Artifacts:
+
+- Human matrix: `docs/dgii/mapping/TIPO_ECF_31_FIELD_CATALOG.md`
+- Source notes: `docs/dgii/mapping/TIPO_ECF_31_SOURCE_NOTES.md`
+- Machine-readable catalog: `ecf/dgii/field_catalogs/tipo_ecf_31.py`
+
+The matrix records DGII field/element names, parent paths, required/optional/conditional status from Formato+XSD, types/constraints, eTaxFlow model availability (`available` / `partially_available` / `derived` / `missing` / `not_applicable`), and implementation status.
+
+Currently available eTaxFlow sources include issuer/customer identity basics, invoice dates/totals, and line quantity/price/name snapshots. Still missing required catalog fields such as assigned `eNCF`, `FechaVencimientoSecuencia`, `TipoIngresos`, `TipoPago`, explicit `IndicadorFacturacion`, plus signing fields (`FechaHoraFirma`, `Signature`).
+
+This remains **NOT_DGII_COMPLIANT** and not production-ready: no official XML generation, no XSD validation pipeline, no digital signing, and no DGII submission/TrackId.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.
