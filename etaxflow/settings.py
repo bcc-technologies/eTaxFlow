@@ -109,4 +109,17 @@ SIGNING_CERT_PATH = os.getenv("SIGNING_CERT_PATH", "")
 SIGNING_KEY_PATH = os.getenv("SIGNING_KEY_PATH", "")
 SIGNING_PASS_ENV_VAR = os.getenv("SIGNING_PASS_ENV_VAR", "")
 
+# DGII service-contract placeholders. Defaults are mock/offline only and contain
+# no live endpoint or credential. Phase 019 adds no HTTP transport.
+DGII_ENVIRONMENT = os.getenv("DGII_ENVIRONMENT", "MOCK")
+DGII_SOFTWARE_NAME = os.getenv("DGII_SOFTWARE_NAME", "eTaxFlow")
+DGII_SOFTWARE_VERSION = os.getenv("DGII_SOFTWARE_VERSION", "MVP")
+DGII_SOFTWARE_TYPE = os.getenv("DGII_SOFTWARE_TYPE", "INTERNAL")
+DGII_URL_RECEPCION = os.getenv("DGII_URL_RECEPCION", "")
+DGII_URL_APROBACION_COMERCIAL = os.getenv("DGII_URL_APROBACION_COMERCIAL", "")
+DGII_URL_AUTENTICACION = os.getenv("DGII_URL_AUTENTICACION", "")
+DGII_LIVE_TRANSPORT_ENABLED = os.getenv(
+    "DGII_LIVE_TRANSPORT_ENABLED", "false"
+).lower() in {"1", "true", "yes", "on"}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
