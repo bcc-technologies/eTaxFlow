@@ -63,6 +63,24 @@ This project now includes preliminary internal fiscal master data for demo and w
 - Use the admin action `Generate internal XML draft documents` on invoices to create XML artifacts from normalized invoice data.
 - This XML is a deterministic internal draft only and not DGII-compliant or signed.
 
+## DGII schema mapping groundwork
+
+Phase 005 maps existing normalized invoice data to **future** DGII e-CF concepts only.
+
+```bash
+python manage.py inspect_dgii_mapping --internal-code BCC-AR-2026-000001
+python manage.py inspect_dgii_mapping --internal-code BCC-AR-2026-000001 --json
+python manage.py inspect_dgii_mapping --invoice-id 1 --strict
+```
+
+- Inventory of official DGII source documents: `docs/dgii/DGII_ECF_DOCUMENT_INVENTORY.md`
+- Mapping package: `ecf/dgii/`
+- This phase does **not** generate DGII-compliant XML
+- It does **not** digitally sign
+- It does **not** authenticate with DGII (semilla/token)
+- It does **not** send anything to DGII
+- Official DGII documents must be collected and reviewed before claiming compliance
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

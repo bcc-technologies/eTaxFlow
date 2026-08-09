@@ -1,0 +1,36 @@
+{
+  "fixture_kind": "synthetic",
+  "official": false,
+  "dgii_compliant": false,
+  "purpose": "internal_mapping_tests_only",
+  "disclaimer": "SYNTHETIC — not an official DGII certification fixture and not DGII-compliant XML.",
+  "invoice": {
+    "internal_code": "BCC-AR-SYNTH-000001",
+    "official_ncf": null,
+    "official_encf": null,
+    "fiscal_document_type_code": "31",
+    "currency": "DOP",
+    "issuer": {
+      "rnc": "1310000000",
+      "legal_name": "BARREIRO CASANOVA CASTILLO TECHNOLOGIES, S.R.L."
+    },
+    "customer": {
+      "rnc_or_id": "123456789",
+      "legal_name": "Demo Client S.R.L."
+    },
+    "lines": [
+      {
+        "line_order": 1,
+        "description": "Synthetic software service",
+        "quantity": "1.00",
+        "unit_price": "100.00",
+        "tax_rate": "18.00"
+      }
+    ],
+    "totals": {
+      "subtotal": "100.00",
+      "tax_total": "18.00",
+      "grand_total": "118.00"
+    }
+  }
+}

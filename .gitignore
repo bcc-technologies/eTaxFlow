@@ -205,3 +205,20 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# DGII official source downloads (keep README + .gitkeep tracked)
+docs/dgii/sources/*
+!docs/dgii/sources/.gitkeep
+!docs/dgii/sources/README.md
+# Explicitly ignore common official-binary extensions if pattern above is relaxed later
+docs/dgii/sources/**/*.pdf
+docs/dgii/sources/**/*.PDF
+docs/dgii/sources/**/*.xsd
+docs/dgii/sources/**/*.XSD
+docs/dgii/sources/**/*.xml
+docs/dgii/sources/**/*.XML
+docs/dgii/sources/**/*.xls
+docs/dgii/sources/**/*.xlsx
+docs/dgii/sources/**/*.zip
+docs/dgii/sources/**/*.rar
+
