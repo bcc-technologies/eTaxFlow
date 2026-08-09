@@ -219,3 +219,19 @@ Phase 011 adds `ecf/dgii/xml_draft/` plus local XSD helpers under `ecf/dgii/xsd/
 ### Generated only for local structural work
 
 This draft exists for laboratory structure alignment against the local XSD/catalog. It is **not** valid for DGII submission and must be revalidated later after a real signing path is designed.
+
+## 11. Local XSD validation of unsigned draft
+
+Phase 012 validates the unsigned `ECF` draft against local `docs/dgii/sources/e-CF_31_v1.0.xsd` using `lxml` (stdlib cannot validate XSD).
+
+### What this means
+
+- Unsigned draft is validated locally for structural feedback only.
+- Failure is **expected** because Signature/XMLDSig is missing (required XSD `xs:any` after `FechaHoraFirma`).
+- Demo eNCF remains unauthorized and may also fail length/pattern facets.
+- Validation failure is **not** a runtime/application failure for eTaxFlow commands.
+- No DGII submission, TrackId, certificates, or private keys are involved.
+
+### Local XSD compile note
+
+The checked-in local XSD references `IndicadorServicioTodoIncluidoType` without defining it. Local validation may apply an **experimental in-memory stub** so instance checks can run; that stub is not official DGII schema content and is not compliance evidence.

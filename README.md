@@ -203,6 +203,24 @@ python manage.py generate_tipo31_unsigned_draft --internal-code BCC-AR-2026-0000
 - Demo eNCF is not authorized.
 - Output must be validated later against the official XSD after a real signing path is designed.
 
+## Local Tipo 31 XSD validation
+
+Phase 012 runs an offline XSD validation experiment against `docs/dgii/sources/e-CF_31_v1.0.xsd` using `lxml` (added because Python stdlib cannot validate XSD).
+
+```bash
+python manage.py generate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf
+python manage.py validate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf
+python manage.py validate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf --json
+python manage.py validate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf --write-report /tmp/tipo31_unsigned_validation.md
+```
+
+### Warnings
+
+- Validation failure is **expected** for unsigned drafts (Signature missing).
+- This is **not** certification evidence and **not** DGII compliance.
+- No signing / authentication / DGII submission exists.
+- Local XSD may need an experimental type stub to compile; that stub is not official.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

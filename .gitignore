@@ -210,6 +210,12 @@ __marimo__/
 docs/dgii/sources/*
 !docs/dgii/sources/.gitkeep
 !docs/dgii/sources/README.md
+
+# Local XSD validation reports (keep README tracked; ignore generated artifacts)
+docs/dgii/validation_reports/*
+!docs/dgii/validation_reports/README.md
+!docs/dgii/validation_reports/.gitkeep
+
 # Explicitly ignore common official-binary extensions if pattern above is relaxed later
 docs/dgii/sources/**/*.pdf
 docs/dgii/sources/**/*.PDF

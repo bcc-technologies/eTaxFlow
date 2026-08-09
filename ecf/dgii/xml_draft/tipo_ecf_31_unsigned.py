@@ -52,6 +52,11 @@ class Tipo31UnsignedDraftDiagnostics:
     root_name: str = "ECF"
     top_level_sequence: list[str] = field(default_factory=list)
     available_field_count: int | None = None
+    local_xsd_validation_available: bool = False
+    local_xsd_validation_expected_to_fail: bool = True
+    expected_failure_reason: str = (
+        "Signature missing / unsigned draft"
+    )
     notes: str = (
         "Unsigned schema-aligned local draft only. Signature omitted. "
         "Not valid for DGII submission."
@@ -258,6 +263,9 @@ def build_tipo31_unsigned_draft_diagnostics(
         warning_codes.append("UNSIGNED_DRAFT_SIGNATURE_OMITTED")
         warning_codes.sort()
 
+    # Lazy import avoids circular import with xsd.tipo31_unsigned_validation.
+    from ecf.dgii.xsd.validation import lxml_available
+
     return Tipo31UnsignedDraftDiagnostics(
         compliance_status=COMPLIANCE_CLAIM,
         draft_type="UNSIGNED_SCHEMA_ALIGNED_DRAFT",
@@ -272,6 +280,9 @@ def build_tipo31_unsigned_draft_diagnostics(
         root_name=summary["root_name"],
         top_level_sequence=list(summary["top_level_sequence"]),
         available_field_count=metrics.get("available_field_count"),
+        local_xsd_validation_available=lxml_available() and DEFAULT_XSD_PATH.is_file(),
+        local_xsd_validation_expected_to_fail=True,
+        expected_failure_reason="Signature missing / unsigned draft",
     )
 
 
