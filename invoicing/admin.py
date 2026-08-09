@@ -1,7 +1,9 @@
 from django.contrib import admin, messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from ecf.dgii.xml_preview.documents import generate_tipo31_preview_document
+from ecf.dgii.xml_preview.tipo_ecf_31_preview import Tipo31XmlPreviewError
 from ecf.services.internal_xml_documents import generate_internal_xml_document
 from ecf.services.signing_placeholder import (
     SigningPlaceholderError,
@@ -9,6 +11,13 @@ from ecf.services.signing_placeholder import (
 )
 from fiscal.services.encf_sequences import ENCFAllocationError, allocate_next_encf
 from .models import Invoice, InvoiceLine, ProductService
+
+
+def _ecf_document_id(invoice):
+    try:
+        return invoice.ecf_document.pk
+    except ObjectDoesNotExist:
+        return None
 
 
 class InvoiceLineInline(admin.TabularInline):
@@ -89,6 +98,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "action_generate_internal_xml_drafts",
         "action_allocate_demo_encf",
         "action_prepare_signing_placeholder",
+        "action_generate_tipo31_xml_preview",
     ]
 
     def get_readonly_fields(self, request, obj=None):
@@ -211,6 +221,58 @@ class InvoiceAdmin(admin.ModelAdmin):
                 self.message_user(request, error, level=messages.ERROR)
     action_prepare_signing_placeholder.short_description = (
         "Prepare signing placeholder (NOT real digital signing)"
+    )
+
+    def action_generate_tipo31_xml_preview(self, request, queryset):
+        """Non-production Tipo 31 structure preview only — never signs/submits."""
+        errors = []
+        generated = []
+        for invoice in queryset:
+            try:
+                before_status = invoice.lifecycle_status
+                before_ecf_id = _ecf_document_id(invoice)
+                document, created = generate_tipo31_preview_document(
+                    invoice,
+                    created_by=request.user,
+                    allow_demo_encf=True,  # admin action is intentionally non-production
+                    require_signing_placeholder=True,
+                )
+                invoice.refresh_from_db()
+                if invoice.lifecycle_status != before_status:
+                    errors.append(
+                        f"{invoice.internal_code}: lifecycle_status unexpectedly changed "
+                        f"from {before_status} to {invoice.lifecycle_status}"
+                    )
+                    continue
+                after_ecf_id = _ecf_document_id(invoice)
+                if before_ecf_id is None and after_ecf_id is not None:
+                    errors.append(
+                        f"{invoice.internal_code}: preview unexpectedly created ECFDocument"
+                    )
+                    continue
+                verb = "created" if created else "reused"
+                generated.append(
+                    f"{invoice.internal_code} -> {document.internal_code} ({verb})"
+                )
+            except (ValidationError, Tipo31XmlPreviewError) as exc:
+                msgs = getattr(exc, "messages", None) or [str(exc)]
+                errors.append(f"{invoice.internal_code}: {'; '.join(msgs)}")
+        if generated:
+            self.message_user(
+                request,
+                _("Tipo 31 XML preview (NOT_DGII_COMPLIANT): ") + "; ".join(generated),
+                level=messages.SUCCESS,
+            )
+        if errors:
+            self.message_user(
+                request,
+                _("Some Tipo 31 XML preview generations failed:"),
+                level=messages.ERROR,
+            )
+            for error in errors:
+                self.message_user(request, error, level=messages.ERROR)
+    action_generate_tipo31_xml_preview.short_description = (
+        "Generate Tipo 31 XML preview"
     )
 
 

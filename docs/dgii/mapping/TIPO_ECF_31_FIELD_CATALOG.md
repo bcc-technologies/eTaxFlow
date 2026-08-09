@@ -153,3 +153,41 @@ Now model-supported (may be available when populated): `FechaVencimientoSecuenci
 - Production e-CF XML generation
 - Claiming DGII compliance
 - Inventing DGII field names not visible in local sources
+
+## 9. Non-production Tipo 31 XML preview
+
+Phase 010 adds `ecf/dgii/xml_preview/` to emit a **deterministic structure preview** only.
+
+### Preview source fields
+
+| Preview area | Sources used |
+|---|---|
+| EncabezadoPreview | `TipoeCF`, `official_encf`, `sequence_expiration_date`, `income_type`, `payment_type`, `due_date`, `internal_code`, currency |
+| EmisorPreview | issuer RNC/legal/commercial/address/phone/email + `issue_date` |
+| CompradorPreview | customer RNC/ID, legal name, email, address, id_type |
+| TotalesPreview | invoice subtotal / discount / tax / grand_total |
+| DetallesItemsPreview | line snapshots + billing_indicator (ordered by `line_order`, then `id`) |
+| FechaHoraFirmaPreview | `ECFDocument.signature_datetime` when signing placeholder exists |
+| SignaturePreview | diagnostic only — Signature remains missing |
+
+### Which fields are included
+
+Only fields already represented in the reviewed Tipo 31 field matrix and available from mapped invoice/issuer/customer/line data (plus explicit preview diagnostics). No invented production DGII payload fields beyond that matrix.
+
+### Signature remains missing
+
+- Root attributes: `xml_signature="NOT_IMPLEMENTED"`, `signature_field="MISSING"`.
+- `SignaturePreview` states Signature is not implemented and not present.
+- No fake `<Signature>` element, no signature value, no certificate material.
+
+### Why this is not DGII-compliant
+
+- Root is `ETaxFlowTipo31EcfPreview`, not a production DGII e-CF submission root.
+- Attributes force `dgii_compliance="NOT_DGII_COMPLIANT"` and `production_submission="FORBIDDEN"`.
+- Demo/non-authorized eNCF requires an explicit allow flag and is warned.
+- FechaHoraFirma (if present) is only a local signing-placeholder timestamp.
+- Required Signature compliance field remains missing.
+
+### Why no XMLDSig is emitted
+
+XMLDSig / real digital signing is out of scope. eTaxFlow does not store certificates or private keys, does not create signed XML artifacts for this preview, and does not emit the XMLDSig namespace.

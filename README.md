@@ -157,11 +157,36 @@ python manage.py inspect_dgii_mapping --internal-code BCC-AR-2026-000001
 - Mapping warns with `SIGNING_PLACEHOLDER_ONLY` and remains **NOT_DGII_COMPLIANT**.
 - `seed_bcc` does **not** auto-create a signing placeholder.
 
+## Tipo 31 XML preview
+
+Phase 010 adds a non-production **structure preview** XML for Tipo e-CF 31 (`ETaxFlowTipo31EcfPreview`). It is deterministic, marked `NOT_DGII_COMPLIANT`, leaves Signature missing, and never calls DGII.
+
+```bash
+python manage.py seed_bcc
+python manage.py allocate_demo_encf --internal-code BCC-AR-2026-000001 --allow-demo --apply
+python manage.py prepare_signing_placeholder --internal-code BCC-AR-2026-000001 --apply --note "Local placeholder only; no real digital signature"
+python manage.py generate_tipo31_preview_xml --internal-code BCC-AR-2026-000001 --allow-demo-encf
+python manage.py generate_tipo31_preview_xml --internal-code BCC-AR-2026-000001 --allow-demo-encf --stdout
+```
+
+- Default mode saves/reuses an internal `Document` (`tipo31-preview-…xml`) with sha256 idempotence.
+- `--stdout` prints XML and does **not** create a Document.
+- Demo/non-authorized eNCF requires `--allow-demo-encf`.
+- Preview does **not** create `ECFDocument`, signed XML, TrackId, or DGII submissions.
+
+### Warnings
+
+- Preview XML is **not** DGII e-CF XML.
+- Not signed (Signature missing; XMLDSig not implemented).
+- No TrackId.
+- No DGII submission.
+- Demo eNCF is not authorized.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.
 - Fiscal catalog data is preliminary internal master data and placeholder-only.
-- e-CF XML generation is not implemented yet.
+- Production DGII e-CF XML generation is not implemented (structure preview only).
 - DGII production connection is not implemented.
 - Digital signing is not implemented.
 - XML schema compliance is not implemented.
