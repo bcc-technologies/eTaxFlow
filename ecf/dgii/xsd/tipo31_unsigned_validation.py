@@ -9,14 +9,16 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
-from xml.etree import ElementTree as ET
 
 from ecf.dgii.field_catalogs.tipo_ecf_31 import COMPLIANCE_CLAIM
 from ecf.dgii.xml_draft.tipo_ecf_31_unsigned import (
     build_tipo31_unsigned_draft_diagnostics,
     build_tipo31_unsigned_xml_draft,
 )
-from ecf.dgii.xsd.tipo_ecf_31_structure import DEFAULT_XSD_PATH
+from ecf.dgii.xsd.tipo_ecf_31_structure import (
+    DEFAULT_XSD_PATH,
+    compare_tipo31_unsigned_body_structure,
+)
 from ecf.dgii.xsd.validation import (
     XSDValidationResult,
     lxml_available,
@@ -31,15 +33,27 @@ EXPECTED_FAILURE_REASON = (
 ERROR_GROUP_SIGNATURE = "signature_missing_expected"
 ERROR_GROUP_DEMO_FACET = "demo_facet_mismatch"
 ERROR_GROUP_XSD_STUB = "local_xsd_stub_required"
-ERROR_GROUP_STRUCTURAL = "structural_mismatch"
+ERROR_GROUP_STRUCTURAL_ORDER = "structural_element_order_mismatch"
+ERROR_GROUP_STRUCTURAL_MISSING = "structural_missing_element"
+ERROR_GROUP_STRUCTURAL_UNEXPECTED = "structural_unexpected_element"
+ERROR_GROUP_STRUCTURAL_TYPE = "structural_type_or_value_mismatch"
 ERROR_GROUP_UNKNOWN = "unknown"
+
+STRUCTURAL_ERROR_GROUPS = (
+    ERROR_GROUP_STRUCTURAL_ORDER,
+    ERROR_GROUP_STRUCTURAL_MISSING,
+    ERROR_GROUP_STRUCTURAL_UNEXPECTED,
+    ERROR_GROUP_STRUCTURAL_TYPE,
+)
 
 
 def classify_xsd_validation_error(message: str) -> str:
-    """Classify one XSD validator message into a Phase 013 error group."""
+    """Classify one local XSD message into a stable validation group."""
     msg = (message or "").lower()
     if "missing child" in msg or ("expected is one of" in msg and "*" in msg):
-        return ERROR_GROUP_SIGNATURE
+        if "*" in msg:
+            return ERROR_GROUP_SIGNATURE
+        return ERROR_GROUP_STRUCTURAL_MISSING
     if "encf" in msg and (
         "pattern" in msg or "maxlength" in msg or "minlength" in msg or "length" in msg
     ):
@@ -48,6 +62,12 @@ def classify_xsd_validation_error(message: str) -> str:
         return ERROR_GROUP_DEMO_FACET
     if "indicadorserviciotodoincluido" in msg or "does not resolve" in msg:
         return ERROR_GROUP_XSD_STUB
+    if "not expected" in msg or "expected is" in msg:
+        return ERROR_GROUP_STRUCTURAL_ORDER
+    if "unexpected" in msg or "extra content" in msg:
+        return ERROR_GROUP_STRUCTURAL_UNEXPECTED
+    if "invalid" in msg or "value" in msg or "type" in msg:
+        return ERROR_GROUP_STRUCTURAL_TYPE
     return ERROR_GROUP_UNKNOWN
 
 
@@ -60,7 +80,10 @@ def classify_validation_errors(
         ERROR_GROUP_SIGNATURE: [],
         ERROR_GROUP_DEMO_FACET: [],
         ERROR_GROUP_XSD_STUB: [],
-        ERROR_GROUP_STRUCTURAL: [],
+        ERROR_GROUP_STRUCTURAL_ORDER: [],
+        ERROR_GROUP_STRUCTURAL_MISSING: [],
+        ERROR_GROUP_STRUCTURAL_UNEXPECTED: [],
+        ERROR_GROUP_STRUCTURAL_TYPE: [],
         ERROR_GROUP_UNKNOWN: [],
     }
     for err in errors:
@@ -96,6 +119,7 @@ class Tipo31UnsignedValidationReport:
     known_missing_required_fields: list[str] = field(default_factory=list)
     validation_errors: list[dict[str, Any]] = field(default_factory=list)
     structural_mismatches: list[str] = field(default_factory=list)
+    structure_comparison: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     expected_failure_reasons: list[str] = field(default_factory=list)
@@ -108,7 +132,12 @@ class Tipo31UnsignedValidationReport:
     avoidable_demo_facet_error_count: int = 0
     local_xsd_stub_error_count: int = 0
     structural_mismatch_count: int = 0
+    non_signature_structural_mismatch_count: int = 0
+    signature_missing_expected_count: int = 0
+    facet_mismatch_count: int = 0
+    xsd_stub_informational_count: int = 0
     unknown_error_count: int = 0
+    unsigned_body_structurally_aligned_except_signature: bool = False
     error_groups: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     uses_demo_encf: bool = False
     signature_present: bool = False
@@ -121,56 +150,49 @@ class Tipo31UnsignedValidationReport:
         return asdict(self)
 
 
-def _classify_structural_mismatches(
-    xml_bytes: bytes,
-    xsd_result: XSDValidationResult,
-    *,
-    uses_demo_encf: bool,
-) -> list[str]:
-    mismatches: list[str] = []
-    root = ET.fromstring(xml_bytes)
-    child_tags = [child.tag for child in list(root)]
-
-    if "Signature" in child_tags:
-        mismatches.append("Unexpected Signature element present in unsigned draft.")
-    else:
-        mismatches.append(
-            "Signature / required XSD xs:any after FechaHoraFirma is omitted "
-            "(expected for unsigned draft)."
+def _structure_issue_items(comparison: dict[str, Any]) -> list[dict[str, Any]]:
+    """Convert source-backed body comparison differences into report items."""
+    items: list[dict[str, Any]] = []
+    for name in comparison.get("missing_top_level_elements", []):
+        items.append(
+            {
+                "message": f"Draft is missing XSD top-level element {name!r}.",
+                "error_group": ERROR_GROUP_STRUCTURAL_MISSING,
+                "synthetic": True,
+            }
         )
-
-    if "FechaHoraFirma" not in child_tags:
-        mismatches.append("FechaHoraFirma element missing from unsigned draft XML.")
-
-    if uses_demo_encf:
-        mismatches.append(
-            "official_encf appears demo/non-authorized and is not DGII-authorized."
+    for name in comparison.get("unexpected_top_level_elements", []):
+        items.append(
+            {
+                "message": f"Draft has unexpected top-level element {name!r}.",
+                "error_group": ERROR_GROUP_STRUCTURAL_UNEXPECTED,
+                "synthetic": True,
+            }
         )
-
-    for err in xsd_result.errors:
-        msg = (err.message or "").lower()
-        if "encf" in msg and ("pattern" in msg or "maxlength" in msg or "length" in msg):
-            item = f"XSD facet mismatch on eNCF: {err.message}"
-            if item not in mismatches:
-                mismatches.append(item)
-        if "missing child" in msg or ("expected is one of" in msg and "*" in msg):
-            item = (
-                "XSD reports missing required child after FechaHoraFirma "
-                f"(Signature/xs:any): {err.message}"
-            )
-            if item not in mismatches:
-                mismatches.append(item)
-
-    if xsd_result.schema_mode == "SCHEMA_COMPILE_FAILED":
-        mismatches.append(
-            "Local XSD failed to compile; instance validation could not complete."
+    for mismatch in comparison.get("order_mismatches", []):
+        items.append(
+            {
+                "message": (
+                    "Draft top-level element order differs from XSD at position "
+                    f"{mismatch.get('position')}: expected "
+                    f"{mismatch.get('expected')!r}, got {mismatch.get('actual')!r}."
+                ),
+                "error_group": ERROR_GROUP_STRUCTURAL_ORDER,
+                "synthetic": True,
+            }
         )
-    if xsd_result.schema_repair_applied:
-        mismatches.append(
-            "Validation used experimental local stub for missing "
-            "IndicadorServicioTodoIncluidoType (not official DGII schema)."
+    if comparison.get("xsd_root") != comparison.get("draft_root"):
+        items.append(
+            {
+                "message": (
+                    f"Draft root {comparison.get('draft_root')!r} does not match "
+                    f"XSD root {comparison.get('xsd_root')!r}."
+                ),
+                "error_group": ERROR_GROUP_STRUCTURAL_TYPE,
+                "synthetic": True,
+            }
         )
-    return mismatches
+    return items
 
 
 def validate_tipo31_unsigned_draft(
@@ -221,20 +243,42 @@ def validate_tipo31_unsigned_draft(
             "Local XSD could not be compiled without repair; validation remains experimental"
         )
 
-    structural = _classify_structural_mismatches(
-        xml_bytes,
-        xsd_result,
-        uses_demo_encf=diagnostics.uses_demo_encf,
-    )
+    structure_comparison = compare_tipo31_unsigned_body_structure(xml_bytes, path)
+    structure_issue_items = _structure_issue_items(structure_comparison)
 
     validation_errors = [e.to_dict() for e in xsd_result.errors]
     error_groups = classify_validation_errors(
         validation_errors,
         schema_repair_applied=xsd_result.schema_repair_applied,
     )
+    for item in structure_issue_items:
+        error_groups[item["error_group"]].append(item)
+    signature_omitted = any(
+        item.get("omitted_as_unsigned_draft")
+        for item in structure_comparison.get("known_omitted_signature_xs_any", [])
+    )
+    if signature_omitted and not error_groups[ERROR_GROUP_SIGNATURE]:
+        error_groups[ERROR_GROUP_SIGNATURE].append(
+            {
+                "message": (
+                    "Unsigned draft omits the required XSD xs:any Signature particle."
+                ),
+                "error_group": ERROR_GROUP_SIGNATURE,
+                "synthetic": True,
+            }
+        )
     # Annotate raw errors with groups for JSON consumers.
     for err in validation_errors:
         err["error_group"] = classify_xsd_validation_error(err.get("message") or "")
+
+    structural_mismatches = [item["message"] for item in structure_issue_items]
+    signature_items = error_groups[ERROR_GROUP_SIGNATURE]
+    if signature_omitted:
+        structural_mismatches.insert(
+            0,
+            "Signature / required XSD xs:any after FechaHoraFirma is omitted "
+            "(expected for unsigned draft).",
+        )
 
     warnings = sorted(
         set(diagnostics.warnings)
@@ -266,7 +310,8 @@ def validate_tipo31_unsigned_draft(
         compliance_status=COMPLIANCE_CLAIM,
         known_missing_required_fields=missing,
         validation_errors=validation_errors,
-        structural_mismatches=structural,
+        structural_mismatches=structural_mismatches,
+        structure_comparison=structure_comparison,
         warnings=warnings,
         notes=notes,
         expected_failure_reasons=expected_reasons,
@@ -275,11 +320,25 @@ def validate_tipo31_unsigned_draft(
         schema_repair_applied=xsd_result.schema_repair_applied,
         error_count=xsd_result.error_count,
         total_error_count=xsd_result.error_count,
-        intentional_unsigned_error_count=len(error_groups[ERROR_GROUP_SIGNATURE]),
+        intentional_unsigned_error_count=len(signature_items),
         avoidable_demo_facet_error_count=len(error_groups[ERROR_GROUP_DEMO_FACET]),
         local_xsd_stub_error_count=len(error_groups[ERROR_GROUP_XSD_STUB]),
-        structural_mismatch_count=len(structural),
+        structural_mismatch_count=(
+            len(signature_items)
+            + sum(len(error_groups[group]) for group in STRUCTURAL_ERROR_GROUPS)
+        ),
+        non_signature_structural_mismatch_count=sum(
+            len(error_groups[group]) for group in STRUCTURAL_ERROR_GROUPS
+        ),
+        signature_missing_expected_count=len(signature_items),
+        facet_mismatch_count=len(error_groups[ERROR_GROUP_DEMO_FACET]),
+        xsd_stub_informational_count=len(error_groups[ERROR_GROUP_XSD_STUB]),
         unknown_error_count=len(error_groups[ERROR_GROUP_UNKNOWN]),
+        unsigned_body_structurally_aligned_except_signature=bool(
+            structure_comparison.get(
+                "unsigned_body_structurally_aligned_except_signature", False
+            )
+        ),
         error_groups=error_groups,
         uses_demo_encf=diagnostics.uses_demo_encf,
         signature_present=False,
@@ -317,7 +376,13 @@ def render_tipo31_unsigned_validation_markdown(
         f"- avoidable_demo_facet_error_count: `{report.avoidable_demo_facet_error_count}`",
         f"- local_xsd_stub_error_count: `{report.local_xsd_stub_error_count}`",
         f"- structural_mismatch_count: `{report.structural_mismatch_count}`",
+        f"- non_signature_structural_mismatch_count: `{report.non_signature_structural_mismatch_count}`",
+        f"- signature_missing_expected_count: `{report.signature_missing_expected_count}`",
+        f"- facet_mismatch_count: `{report.facet_mismatch_count}`",
+        f"- xsd_stub_informational_count: `{report.xsd_stub_informational_count}`",
         f"- unknown_error_count: `{report.unknown_error_count}`",
+        "- unsigned_body_structurally_aligned_except_signature: "
+        f"`{report.unsigned_body_structurally_aligned_except_signature}`",
         "",
         "## Error groups",
         "",
@@ -345,6 +410,21 @@ def render_tipo31_unsigned_validation_markdown(
     lines.extend(["", "## Structural mismatches", ""])
     for item in report.structural_mismatches:
         lines.append(f"- {item}")
+    lines.extend(["", "## Structure comparison", ""])
+    comparison = report.structure_comparison or {}
+    for key in (
+        "xsd_root",
+        "draft_root",
+        "xsd_top_level_sequence",
+        "draft_top_level_sequence",
+        "missing_top_level_elements",
+        "omitted_optional_top_level_elements",
+        "unexpected_top_level_elements",
+        "order_mismatches",
+        "known_omitted_signature_xs_any",
+        "unsigned_body_structurally_aligned_except_signature",
+    ):
+        lines.append(f"- `{key}`: `{comparison.get(key)}`")
     lines.extend(["", "## Validation errors", ""])
     if not report.validation_errors:
         lines.append("- (none)")

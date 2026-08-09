@@ -34,6 +34,10 @@ from ecf.dgii.xsd.facets import (
 from ecf.dgii.xsd.tipo31_unsigned_validation import (
     ERROR_GROUP_DEMO_FACET,
     ERROR_GROUP_SIGNATURE,
+    ERROR_GROUP_STRUCTURAL_MISSING,
+    ERROR_GROUP_STRUCTURAL_ORDER,
+    ERROR_GROUP_STRUCTURAL_TYPE,
+    ERROR_GROUP_STRUCTURAL_UNEXPECTED,
     classify_xsd_validation_error,
     validate_tipo31_unsigned_draft,
 )
@@ -204,6 +208,32 @@ class ValidationErrorGroupingTests(TestCase):
             ),
             ERROR_GROUP_DEMO_FACET,
         )
+
+    def test_classify_structural_categories_separately(self):
+        self.assertEqual(
+            classify_xsd_validation_error(
+                "Element 'ECF': Missing child element(s). Expected is one of ( 'Totales' )."
+            ),
+            ERROR_GROUP_STRUCTURAL_MISSING,
+        )
+        self.assertEqual(
+            classify_xsd_validation_error(
+                "Element 'FechaHoraFirma': This element is not expected. Expected is ( 'Totales' )."
+            ),
+            ERROR_GROUP_STRUCTURAL_ORDER,
+        )
+        self.assertEqual(
+            classify_xsd_validation_error(
+                "Unexpected element 'Unexpected': extra content."
+            ),
+            ERROR_GROUP_STRUCTURAL_UNEXPECTED,
+        )
+        self.assertEqual(
+            classify_xsd_validation_error(
+                "Element 'MontoTotal': The value is invalid for the declared type."
+            ),
+            ERROR_GROUP_STRUCTURAL_TYPE,
+        )
         self.assertEqual(
             classify_xsd_validation_error(
                 "Element 'RNCEmisor': [facet 'pattern'] The value '1310000000' "
@@ -286,7 +316,16 @@ class ValidationErrorGroupingTests(TestCase):
         self.assertIn("avoidable_demo_facet_error_count", payload)
         self.assertIn("intentional_unsigned_error_count", payload)
         self.assertIn("error_groups", payload)
+        self.assertIn("non_signature_structural_mismatch_count", payload)
+        self.assertIn("signature_missing_expected_count", payload)
+        self.assertIn("facet_mismatch_count", payload)
+        self.assertIn("xsd_stub_informational_count", payload)
+        self.assertIn("unsigned_body_structurally_aligned_except_signature", payload)
         self.assertEqual(payload["avoidable_demo_facet_error_count"], 0)
+        self.assertEqual(payload["facet_mismatch_count"], 0)
         self.assertGreaterEqual(payload["intentional_unsigned_error_count"], 1)
+        self.assertEqual(payload["signature_missing_expected_count"], 1)
+        self.assertEqual(payload["non_signature_structural_mismatch_count"], 0)
+        self.assertTrue(payload["unsigned_body_structurally_aligned_except_signature"])
         self.assertEqual(payload["compliance_status"], "NOT_DGII_COMPLIANT")
         self.assertFalse(payload["signature_present"])

@@ -124,7 +124,24 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"structural_mismatch_count: {report.structural_mismatch_count}"
             )
+            self.stdout.write(
+                "non_signature_structural_mismatch_count: "
+                f"{report.non_signature_structural_mismatch_count}"
+            )
+            self.stdout.write(
+                "signature_missing_expected_count: "
+                f"{report.signature_missing_expected_count}"
+            )
+            self.stdout.write(f"facet_mismatch_count: {report.facet_mismatch_count}")
+            self.stdout.write(
+                "xsd_stub_informational_count: "
+                f"{report.xsd_stub_informational_count}"
+            )
             self.stdout.write(f"unknown_error_count: {report.unknown_error_count}")
+            self.stdout.write(
+                "unsigned_body_structurally_aligned_except_signature: "
+                f"{report.unsigned_body_structurally_aligned_except_signature}"
+            )
             self.stdout.write(f"compliance_status: {report.compliance_status}")
             self.stdout.write(
                 "known_missing_required_fields: "

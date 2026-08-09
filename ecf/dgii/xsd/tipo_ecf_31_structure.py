@@ -233,3 +233,117 @@ def get_tipo31_xsd_structure_summary(
             "and does not perform instance validation."
         ),
     }
+
+
+def compare_tipo31_unsigned_body_structure(
+    xml_bytes: bytes,
+    xsd_path: Path | str | None = None,
+) -> dict[str, Any]:
+    """Compare an XML body's root and top-level sequence with the local XSD.
+
+    The local Tipo 31 XSD represents the final Signature as a required
+    ``xs:any`` particle.  The unsigned draft intentionally omits that particle,
+    so it is reported separately and does not count as a non-signature body
+    mismatch.  This helper only compares source-backed element names/order; it
+    does not claim DGII compliance and does not perform network I/O.
+    """
+    path = Path(xsd_path) if xsd_path is not None else DEFAULT_XSD_PATH
+    root = ET.fromstring(xml_bytes)
+    xsd_root = extract_tipo31_root_name(path)
+    xsd_particles = extract_tipo31_top_level_sequence(path)
+
+    xsd_top_level = [str(p.get("name")) for p in xsd_particles if p.get("name")]
+    signature_particles = [
+        p for p in xsd_particles if p.get("kind") == "any" and p.get("name") == "Signature"
+    ]
+    body_xsd_particles = [
+        particle for particle in xsd_particles if particle.get("kind") != "any"
+    ]
+    body_xsd_top_level = [str(particle.get("name")) for particle in body_xsd_particles]
+    required_body_xsd_top_level = [
+        str(particle.get("name"))
+        for particle in body_xsd_particles
+        if int(particle.get("min_occurs") or 0) > 0
+    ]
+    optional_body_xsd_top_level = [
+        str(particle.get("name"))
+        for particle in body_xsd_particles
+        if int(particle.get("min_occurs") or 0) == 0
+    ]
+    draft_top_level = [str(child.tag) for child in list(root)]
+
+    missing = [
+        name for name in required_body_xsd_top_level if name not in draft_top_level
+    ]
+    omitted_optional = [
+        name for name in optional_body_xsd_top_level if name not in draft_top_level
+    ]
+    unexpected = [name for name in draft_top_level if name not in body_xsd_top_level]
+
+    expected_common = [name for name in body_xsd_top_level if name in draft_top_level]
+    draft_common = [name for name in draft_top_level if name in body_xsd_top_level]
+    order_mismatches: list[dict[str, Any]] = []
+    if expected_common != draft_common:
+        for index, (expected, actual) in enumerate(
+            zip(expected_common, draft_common), start=1
+        ):
+            if expected != actual:
+                order_mismatches.append(
+                    {
+                        "position": index,
+                        "expected": expected,
+                        "actual": actual,
+                    }
+                )
+        if len(expected_common) != len(draft_common):
+            order_mismatches.append(
+                {
+                    "position": None,
+                    "expected": expected_common,
+                    "actual": draft_common,
+                }
+            )
+
+    signature_present = any(
+        child.tag == "Signature" or child.tag.endswith("}Signature")
+        for child in list(root)
+    )
+    known_omitted_signature_xs_any = [
+        {
+            "name": "Signature",
+            "xsd_representation": "xs:any",
+            "min_occurs": particle.get("min_occurs"),
+            "max_occurs": particle.get("max_occurs"),
+            "present": signature_present,
+            "omitted_as_unsigned_draft": not signature_present,
+        }
+        for particle in signature_particles
+    ]
+
+    unsigned_body_structurally_aligned_except_signature = bool(
+        root.tag == xsd_root
+        and not missing
+        and not unexpected
+        and not order_mismatches
+        and signature_particles
+        and not signature_present
+    )
+    return {
+        "xsd_root": xsd_root,
+        "draft_root": root.tag,
+        "xsd_top_level_sequence": xsd_top_level,
+        "draft_top_level_sequence": draft_top_level,
+        "missing_top_level_elements": missing,
+        "omitted_optional_top_level_elements": omitted_optional,
+        "unexpected_top_level_elements": unexpected,
+        "order_mismatches": order_mismatches,
+        "known_omitted_signature_xs_any": known_omitted_signature_xs_any,
+        "unsigned_body_structurally_aligned_except_signature": (
+            unsigned_body_structurally_aligned_except_signature
+        ),
+        "notes": (
+            "Top-level comparison is source-backed and local-only. Signature is "
+            "intentionally omitted from the unsigned draft; this is not DGII "
+            "compliance or certification evidence."
+        ),
+    }

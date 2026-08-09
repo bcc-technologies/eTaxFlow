@@ -19,6 +19,7 @@ from ecf.dgii.xml_draft.tipo_ecf_31_unsigned import (
     build_tipo31_unsigned_xml_draft,
 )
 from ecf.dgii.xsd.tipo_ecf_31_structure import (
+    compare_tipo31_unsigned_body_structure,
     extract_tipo31_root_name,
     extract_tipo31_top_level_sequence,
     get_tipo31_xsd_structure_summary,
@@ -218,6 +219,44 @@ class Tipo31UnsignedDraftBuilderTests(Tipo31UnsignedDraftBase):
         ]
         self.assertEqual(emitted, xsd_names)
         self.assertEqual(emitted, ["Encabezado", "DetallesItems", "FechaHoraFirma"])
+
+    def test_structure_comparison_allows_only_known_signature_omission(self):
+        xml_bytes = build_tipo31_unsigned_xml_draft(self.invoice, allow_demo_encf=True)
+        comparison = compare_tipo31_unsigned_body_structure(xml_bytes)
+        self.assertEqual(comparison["xsd_root"], "ECF")
+        self.assertEqual(comparison["draft_root"], "ECF")
+        self.assertEqual(
+            comparison["xsd_top_level_sequence"],
+            [
+                "Encabezado",
+                "DetallesItems",
+                "Subtotales",
+                "DescuentosORecargos",
+                "Paginacion",
+                "InformacionReferencia",
+                "FechaHoraFirma",
+                "Signature",
+            ],
+        )
+        self.assertEqual(
+            comparison["draft_top_level_sequence"],
+            ["Encabezado", "DetallesItems", "FechaHoraFirma"],
+        )
+        self.assertEqual(comparison["missing_top_level_elements"], [])
+        self.assertEqual(
+            comparison["omitted_optional_top_level_elements"],
+            ["Subtotales", "DescuentosORecargos", "Paginacion", "InformacionReferencia"],
+        )
+        self.assertEqual(comparison["unexpected_top_level_elements"], [])
+        self.assertEqual(comparison["order_mismatches"], [])
+        self.assertTrue(
+            comparison["known_omitted_signature_xs_any"][0][
+                "omitted_as_unsigned_draft"
+            ]
+        )
+        self.assertTrue(
+            comparison["unsigned_body_structurally_aligned_except_signature"]
+        )
 
     def test_diagnostics_not_dgii_compliant_and_signature_missing(self):
         diag = build_tipo31_unsigned_draft_diagnostics(
