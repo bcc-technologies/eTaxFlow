@@ -89,4 +89,24 @@ STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
 
+# Signing architecture placeholders. All defaults are disabled and test-safe;
+# Phase 015 does not implement XMLDSig or load any certificate/key material.
+SIGNING_MODE = os.getenv("SIGNING_MODE", "DISABLED")
+SIGNING_BACKEND = os.getenv("SIGNING_BACKEND", "NONE")
+SIGNING_ENABLED = os.getenv("SIGNING_ENABLED", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+SIGNING_ALLOW_TEST_ONLY = os.getenv("SIGNING_ALLOW_TEST_ONLY", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+SIGNING_CERT_PATH = os.getenv("SIGNING_CERT_PATH", "")
+SIGNING_KEY_PATH = os.getenv("SIGNING_KEY_PATH", "")
+SIGNING_PASS_ENV_VAR = os.getenv("SIGNING_PASS_ENV_VAR", "")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
