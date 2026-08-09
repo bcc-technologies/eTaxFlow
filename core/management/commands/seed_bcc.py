@@ -20,6 +20,7 @@ from core.seed_demo import (
 from ecf.models import ECFDocument
 from fiscal.models import (
     BillingIndicator,
+    ENCFSequenceRange,
     FiscalDocumentType,
     FiscalIncomeType,
     InternalDocumentCode,
@@ -450,6 +451,53 @@ class Command(BaseCommand):
 
             invoice._recalculate_totals()
 
+            # Local demo eNCF range only — does NOT allocate official_encf automatically.
+            # Format DEMO-E31-###### is a local demo format (NOT XSD 13-char / NOT DGII-authorized).
+            demo_range_filters = {
+                "issuer": issuer,
+                "fiscal_document_type": fiscal_catalog["31"],
+                "prefix": "DEMO-E31-",
+                "environment": "DEV",
+            }
+            existing_range = (
+                ENCFSequenceRange.objects.filter(**demo_range_filters, is_active=True)
+                .order_by("pk")
+                .first()
+            )
+            demo_range_notes = (
+                "LOCAL DEMO ONLY — not DGII-authorized. Not requested from DGII. "
+                "Prefix DEMO-E31- is a local non-production format and is NOT claimed "
+                "to satisfy official eNCF authorization or XSD length-13 production rules."
+            )
+            if existing_range:
+                existing_range.start_number = 1
+                existing_range.end_number = 999999
+                existing_range.number_pad_width = 6
+                existing_range.sequence_expiration_date = date(date.today().year + 1, 12, 31)
+                existing_range.source = "MANUAL_DEMO"
+                existing_range.is_authorized_by_dgii = False
+                existing_range.is_active = True
+                existing_range.notes = demo_range_notes
+                # Preserve next_number so re-seed does not rewind allocations.
+                existing_range.save()
+                demo_range = existing_range
+            else:
+                demo_range = ENCFSequenceRange.objects.create(
+                    issuer=issuer,
+                    fiscal_document_type=fiscal_catalog["31"],
+                    prefix="DEMO-E31-",
+                    start_number=1,
+                    end_number=999999,
+                    next_number=1,
+                    number_pad_width=6,
+                    sequence_expiration_date=date(date.today().year + 1, 12, 31),
+                    environment="DEV",
+                    source="MANUAL_DEMO",
+                    is_authorized_by_dgii=False,
+                    is_active=True,
+                    notes=demo_range_notes,
+                )
+
             ecf_doc, _ = self.get_first_or_create(
                 ECFDocument,
                 {"invoice": invoice},
@@ -471,4 +519,8 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 f"Contacts used: client_pk={client.pk}, supplier_pk={supplier.pk}"
+            )
+            self.stdout.write(
+                f"Demo eNCF range: id={demo_range.pk} prefix={demo_range.prefix!r} "
+                f"next={demo_range.next_number} (not auto-allocated; NOT DGII-authorized)"
             )

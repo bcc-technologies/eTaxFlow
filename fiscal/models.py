@@ -181,3 +181,118 @@ class BillingIndicator(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.name}"
+
+
+class ENCFSequenceRange(models.Model):
+    """Local e-NCF sequence range for controlled allocation.
+
+    Non-production by default. Does not request or verify DGII authorization.
+    Demo values are NOT DGII-compliant.
+    """
+
+    ENVIRONMENTS = [
+        ("DEV", "Development"),
+        ("PRE_CERTIFICATION", "Pre-certification"),
+        ("CERTIFICATION", "Certification"),
+        ("PRODUCTION", "Production"),
+    ]
+    SOURCES = [
+        ("MANUAL_DEMO", "Manual demo (local only)"),
+        ("MANUAL_AUTHORIZED", "Manual authorized (operator-entered)"),
+        ("IMPORTED", "Imported"),
+        ("OTHER", "Other"),
+    ]
+
+    issuer = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.PROTECT,
+        related_name="encf_sequence_ranges",
+    )
+    fiscal_document_type = models.ForeignKey(
+        FiscalDocumentType,
+        on_delete=models.PROTECT,
+        related_name="encf_sequence_ranges",
+    )
+    prefix = models.CharField(max_length=32)
+    start_number = models.PositiveIntegerField()
+    end_number = models.PositiveIntegerField()
+    next_number = models.PositiveIntegerField()
+    number_pad_width = models.PositiveIntegerField(
+        default=6,
+        help_text="Zero-pad width for the numeric portion of local/demo eNCF values.",
+    )
+    sequence_expiration_date = models.DateField(null=True, blank=True)
+    environment = models.CharField(max_length=30, choices=ENVIRONMENTS, default="DEV")
+    source = models.CharField(max_length=30, choices=SOURCES, default="MANUAL_DEMO")
+    is_authorized_by_dgii = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["issuer_id", "fiscal_document_type_id", "prefix", "environment"]
+        verbose_name = "eNCF sequence range"
+        verbose_name_plural = "eNCF sequence ranges"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["issuer", "fiscal_document_type", "prefix", "environment"],
+                condition=models.Q(is_active=True),
+                name="uniq_active_encf_range_issuer_type_prefix_env",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(start_number__lte=models.F("end_number")),
+                name="encf_range_start_lte_end",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.prefix}[{self.start_number}-{self.end_number}] "
+            f"next={self.next_number} ({self.environment})"
+        )
+
+    @property
+    def is_demo_or_unauthorized(self) -> bool:
+        return self.source == "MANUAL_DEMO" or not self.is_authorized_by_dgii
+
+    def format_encf(self, number: int) -> str:
+        """Build local eNCF string: prefix + zero-padded number.
+
+        Official XSD e-CF 31 expects exactly 13 alphanumeric chars. Demo prefixes
+        such as ``DEMO-E31-`` are intentionally local/non-XSD and NOT DGII-compliant.
+        """
+        return f"{self.prefix}{number:0{self.number_pad_width}d}"
+
+    def peek_next_encf(self) -> str:
+        return self.format_encf(self.next_number)
+
+    def clean(self):
+        errors = {}
+        if self.start_number and self.end_number and self.start_number > self.end_number:
+            errors["end_number"] = "end_number must be greater than or equal to start_number."
+        if self.next_number is not None and self.start_number and self.end_number:
+            if self.next_number < self.start_number or self.next_number > self.end_number + 1:
+                errors["next_number"] = (
+                    "next_number must be between start_number and end_number + 1 "
+                    "(end_number + 1 means the range is exhausted)."
+                )
+        if self.environment == "PRODUCTION" and not self.is_authorized_by_dgii:
+            errors["is_authorized_by_dgii"] = (
+                "PRODUCTION ranges require is_authorized_by_dgii=True. "
+                "This app does not obtain DGII authorization itself."
+            )
+        demo_like = self.source == "MANUAL_DEMO" or self.environment == "DEV"
+        if not demo_like and self.sequence_expiration_date is None:
+            errors["sequence_expiration_date"] = (
+                "sequence_expiration_date is required unless the range is clearly "
+                "demo/non-production (MANUAL_DEMO or DEV)."
+            )
+        if self.number_pad_width is not None and self.number_pad_width < 1:
+            errors["number_pad_width"] = "number_pad_width must be at least 1."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

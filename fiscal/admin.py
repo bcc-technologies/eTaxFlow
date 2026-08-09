@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import (
     BillingIndicator,
+    ENCFSequenceRange,
     FiscalDocumentType,
     FiscalIncomeType,
     InternalDocumentCode,
@@ -64,3 +65,39 @@ class BillingIndicatorAdmin(admin.ModelAdmin):
     list_display = ("code", "name", "is_active", "updated_at")
     list_filter = ("is_active",)
     search_fields = ("code", "name")
+
+
+@admin.register(ENCFSequenceRange)
+class ENCFSequenceRangeAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "issuer",
+        "fiscal_document_type",
+        "prefix",
+        "start_number",
+        "end_number",
+        "next_number",
+        "number_pad_width",
+        "sequence_expiration_date",
+        "environment",
+        "source",
+        "is_authorized_by_dgii",
+        "is_active",
+    )
+    list_filter = (
+        "issuer",
+        "fiscal_document_type",
+        "environment",
+        "source",
+        "is_authorized_by_dgii",
+        "is_active",
+    )
+    search_fields = (
+        "prefix",
+        "notes",
+        "issuer__legal_name",
+        "issuer__commercial_name",
+        "issuer__rnc",
+    )
+    autocomplete_fields = ("issuer", "fiscal_document_type")
+    readonly_fields = ("created_at", "updated_at")

@@ -9,6 +9,7 @@ from contacts.models import Contact
 from ecf.models import ECFDocument
 from fiscal.models import (
     BillingIndicator,
+    ENCFSequenceRange,
     FiscalDocumentType,
     FiscalIncomeType,
     InternalDocumentCode,
@@ -160,6 +161,10 @@ class SeedBCCCommandTests(TestCase):
         self.assertEqual(FiscalIncomeType.objects.count(), 6)
         self.assertEqual(PaymentType.objects.count(), 3)
         self.assertEqual(BillingIndicator.objects.count(), 5)
+        self.assertEqual(
+            ENCFSequenceRange.objects.filter(prefix="DEMO-E31-", environment="DEV").count(),
+            1,
+        )
         self.assertEqual(TaxRate.objects.count(), 3)
         self.assertEqual(UnitOfMeasure.objects.count(), 3)
         self.assertEqual(ProductService.objects.count(), 2)

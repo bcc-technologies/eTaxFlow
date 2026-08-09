@@ -80,11 +80,11 @@ FIELD_CATALOG: list[dict[str, Any]] = [
         "source_document": "Formato_Comprobante_Fiscal_Electronico_e-CF_v1.0.pdf; e-CF_31_v1.0.xsd",
         "source_location": "Formato PDF ~p.6 field #3 / XSD IdDoc/eNCF",
         "etaxflow_source_model": "Invoice",
-        "etaxflow_source_field": "official_encf",
+        "etaxflow_source_field": "official_encf via ENCFSequenceRange allocation",
         "availability": "missing",
-        "mapping_notes": "Model field Invoice.official_encf exists and is nullable; eNCF assignment workflow is not implemented and seed leaves it empty.",
+        "mapping_notes": "Phase 008: local ENCFSequenceRange can allocate demo/non-authorized values into Invoice.official_encf. Demo format prefix+padded number is NOT DGII-authorized and may not match XSD length-13.",
         "implementation_status": "mapped",
-        "notes": "PDF Tipo31=1; XSD required. Distinct from internal_code. Still missing until officially assigned."
+        "notes": "Demo allocation supported; DGII authorization / production ranges not implemented. NOT_DGII_COMPLIANT.",
     },
     {
         "section": "Encabezado",

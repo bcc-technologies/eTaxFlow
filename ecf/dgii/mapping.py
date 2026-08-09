@@ -374,6 +374,35 @@ def build_invoice_dgii_mapping_report(invoice: Invoice) -> DGIIMappingReport:
                 area="identity",
             )
         )
+    else:
+        from fiscal.models import ENCFSequenceRange
+
+        demo_encf = False
+        encf_text = str(official_encf)
+        if encf_text.startswith("DEMO-") or encf_text.startswith("DEMO"):
+            demo_encf = True
+        ranges = ENCFSequenceRange.objects.filter(
+            issuer_id=getattr(invoice, "issuer_id", None),
+            fiscal_document_type_id=getattr(invoice, "fiscal_document_type_ref_id", None),
+            is_active=True,
+        )
+        for seq_range in ranges:
+            if encf_text.startswith(seq_range.prefix) and seq_range.is_demo_or_unauthorized:
+                demo_encf = True
+                break
+        if demo_encf:
+            issues.append(
+                issue(
+                    "DEMO_OR_UNAUTHORIZED_ENCF",
+                    (
+                        f"official_encf={official_encf!r} appears to come from a "
+                        "demo/non-authorized local sequence range. "
+                        "NOT DGII-authorized and NOT_DGII_COMPLIANT."
+                    ),
+                    severity=DGIIIssueSeverity.WARNING,
+                    area="identity",
+                )
+            )
 
     future_catalog = None
     catalog_status = None

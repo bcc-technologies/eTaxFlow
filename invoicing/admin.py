@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from ecf.services.internal_xml_documents import generate_internal_xml_document
+from fiscal.services.encf_sequences import ENCFAllocationError, allocate_next_encf
 from .models import Invoice, InvoiceLine, ProductService
 
 
@@ -82,6 +83,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "action_mark_issued",
         "action_archive_invoices",
         "action_generate_internal_xml_drafts",
+        "action_allocate_demo_encf",
     ]
 
     def get_readonly_fields(self, request, obj=None):
@@ -129,6 +131,39 @@ class InvoiceAdmin(admin.ModelAdmin):
             "Generated internal XML draft documents for selected invoices.",
         )
     action_generate_internal_xml_drafts.short_description = "Generate internal XML draft documents"
+
+    def action_allocate_demo_encf(self, request, queryset):
+        """Explicit demo-only allocation; never silent production allocation."""
+        errors = []
+        allocated = []
+        for invoice in queryset:
+            try:
+                value = allocate_next_encf(
+                    invoice,
+                    actor=request.user,
+                    allow_demo=True,
+                )
+                allocated.append(f"{invoice.internal_code} -> {value}")
+            except (ValidationError, ENCFAllocationError) as exc:
+                msgs = getattr(exc, "messages", None) or [str(exc)]
+                errors.append(f"{invoice.internal_code}: {'; '.join(msgs)}")
+        if allocated:
+            self.message_user(
+                request,
+                _("Allocated demo eNCF (NOT DGII-authorized): ") + "; ".join(allocated),
+                level=messages.SUCCESS,
+            )
+        if errors:
+            self.message_user(
+                request,
+                _("Some demo eNCF allocations failed:"),
+                level=messages.ERROR,
+            )
+            for error in errors:
+                self.message_user(request, error, level=messages.ERROR)
+    action_allocate_demo_encf.short_description = (
+        "Allocate demo eNCF from configured range (NOT DGII-authorized)"
+    )
 
 
 @admin.register(InvoiceLine)

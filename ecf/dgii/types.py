@@ -82,7 +82,7 @@ class DGIIMappingReport:
     missing_required_field_count: int | None = None
     missing_required_fields: list[dict[str, Any]] | None = None
     compliance_claim: str = (
-        "NOT_DGII_COMPLIANT — Phase 007 Tipo 31 required model fields only; "
+        "NOT_DGII_COMPLIANT — Phase 008 local eNCF sequence allocation only; "
         "no official XML, signing, or DGII submission."
     )
 
