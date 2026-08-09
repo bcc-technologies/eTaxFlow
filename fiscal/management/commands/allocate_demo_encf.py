@@ -26,6 +26,15 @@ class Command(BaseCommand):
             help="Required to allocate from demo/non-authorized ranges.",
         )
         parser.add_argument(
+            "--xsd-facet-demo",
+            action="store_true",
+            dest="xsd_facet_demo",
+            help=(
+                "Allocate from the synthetic XSD_FACET_DEMO range (13-char local "
+                "pattern). Still requires --allow-demo. NOT DGII-authorized."
+            ),
+        )
+        parser.add_argument(
             "--actor",
             dest="actor_username",
             help="Optional username recorded on the AuditEvent.",
@@ -47,6 +56,7 @@ class Command(BaseCommand):
         invoice_id = options.get("invoice_id")
         range_id = options.get("range_id")
         allow_demo = bool(options.get("allow_demo"))
+        xsd_facet_demo = bool(options.get("xsd_facet_demo"))
         apply = bool(options.get("apply"))
         dry_run = bool(options.get("dry_run"))
         actor_username = options.get("actor_username")
@@ -55,6 +65,11 @@ class Command(BaseCommand):
             raise CommandError("Use either --dry-run or --apply, not both.")
         if bool(internal_code) == bool(invoice_id):
             raise CommandError("Provide exactly one of --internal-code or --invoice-id.")
+        if xsd_facet_demo and apply and not allow_demo:
+            raise CommandError(
+                "--xsd-facet-demo apply requires --allow-demo "
+                "(values remain NOT DGII-authorized)."
+            )
 
         qs = Invoice.objects.select_related(
             "issuer", "fiscal_document_type_ref", "ecf_document"
@@ -81,6 +96,7 @@ class Command(BaseCommand):
                 invoice,
                 range_id=range_id,
                 allow_demo=True if not apply else allow_demo,
+                xsd_facet_demo=xsd_facet_demo,
             )
         except ENCFAllocationError as exc:
             raise CommandError("; ".join(exc.messages)) from exc
@@ -97,11 +113,19 @@ class Command(BaseCommand):
         self.stdout.write(f"source: {preview['source']}")
         self.stdout.write(f"is_authorized_by_dgii: {preview['is_authorized_by_dgii']}")
         self.stdout.write(f"is_demo_or_unauthorized: {preview['is_demo_or_unauthorized']}")
+        self.stdout.write(f"is_xsd_facet_demo: {preview.get('is_xsd_facet_demo')}")
         self.stdout.write(f"format_note: {preview['format_note']}")
         if preview["is_demo_or_unauthorized"] and not allow_demo:
             self.stdout.write(
                 self.style.WARNING(
                     "This range is demo/non-authorized. Apply requires --allow-demo."
+                )
+            )
+        if xsd_facet_demo:
+            self.stdout.write(
+                self.style.WARNING(
+                    "XSD-facet demo mode: synthetic 13-char eNCF for local facet "
+                    "feedback only. Still NOT DGII-authorized / NOT_DGII_COMPLIANT."
                 )
             )
 
@@ -119,6 +143,7 @@ class Command(BaseCommand):
                 range_id=range_id,
                 actor=actor,
                 allow_demo=allow_demo,
+                xsd_facet_demo=xsd_facet_demo,
             )
         except ENCFAllocationError as exc:
             raise CommandError("; ".join(exc.messages)) from exc

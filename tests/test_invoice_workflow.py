@@ -6,6 +6,7 @@ from django.test import TestCase
 
 from audit.models import AuditEvent
 from contacts.models import Contact
+from core.seed_demo import DEMO_ISSUER_RNC
 from ecf.models import ECFDocument
 from fiscal.models import (
     BillingIndicator,
@@ -27,7 +28,7 @@ class InvoiceWorkflowTests(TestCase):
         self.issuer = Organization.objects.create(
             legal_name="BCC Technologies",
             commercial_name="BCC Technologies",
-            rnc="1310000000",
+            rnc=DEMO_ISSUER_RNC,
         )
         self.customer = Contact.objects.create(
             contact_type="CLIENT",
@@ -113,7 +114,7 @@ class SeedBCCCommandTests(TestCase):
         self.issuer = Organization.objects.create(
             legal_name="BCC Technologies",
             commercial_name="BCC Technologies",
-            rnc="1310000000",
+            rnc=DEMO_ISSUER_RNC,
         )
         self.customer = Contact.objects.create(
             contact_type="CLIENT",
@@ -137,7 +138,7 @@ class SeedBCCCommandTests(TestCase):
 
         call_command("seed_bcc")
         first_invoice_count = Invoice.objects.count()
-        first_default_org = Organization.objects.filter(rnc="1310000000").count()
+        first_default_org = Organization.objects.filter(rnc=DEMO_ISSUER_RNC).count()
         first_fiscal_types = FiscalDocumentType.objects.count()
         first_tax_rates = TaxRate.objects.count()
         first_units = UnitOfMeasure.objects.count()
@@ -145,7 +146,7 @@ class SeedBCCCommandTests(TestCase):
 
         call_command("seed_bcc")
         self.assertEqual(Invoice.objects.count(), first_invoice_count)
-        self.assertEqual(Organization.objects.filter(rnc="1310000000").count(), first_default_org)
+        self.assertEqual(Organization.objects.filter(rnc=DEMO_ISSUER_RNC).count(), first_default_org)
         self.assertEqual(FiscalDocumentType.objects.count(), first_fiscal_types)
         self.assertEqual(TaxRate.objects.count(), first_tax_rates)
         self.assertEqual(UnitOfMeasure.objects.count(), first_units)
@@ -168,7 +169,7 @@ class SeedBCCCommandTests(TestCase):
         self.assertEqual(TaxRate.objects.count(), 3)
         self.assertEqual(UnitOfMeasure.objects.count(), 3)
         self.assertEqual(ProductService.objects.count(), 2)
-        self.assertEqual(Organization.objects.filter(rnc="1310000000").count(), 1)
+        self.assertEqual(Organization.objects.filter(rnc=DEMO_ISSUER_RNC).count(), 1)
         self.assertEqual(
             Contact.objects.filter(contact_type="CLIENT", rnc_or_id="123456789").count(),
             1,
@@ -463,7 +464,7 @@ class SeedBCCCleanDatabaseTests(TestCase):
         call_command("seed_bcc", stdout=out)
 
         self.assertIn("Demo BCC data seeded.", out.getvalue())
-        self.assertEqual(Organization.objects.filter(rnc="1310000000").count(), 1)
+        self.assertEqual(Organization.objects.filter(rnc=DEMO_ISSUER_RNC).count(), 1)
         self.assertEqual(Contact.objects.filter(contact_type="CLIENT", rnc_or_id="123456789").count(), 1)
         self.assertEqual(Contact.objects.filter(contact_type="SUPPLIER", rnc_or_id="987654321").count(), 1)
         self.assertEqual(FiscalDocumentType.objects.count(), 10)

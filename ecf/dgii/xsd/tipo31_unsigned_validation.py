@@ -28,6 +28,62 @@ EXPECTED_FAILURE_REASON = (
     "Signature missing / unsigned draft (required XSD xs:any / Formato Signature omitted)"
 )
 
+ERROR_GROUP_SIGNATURE = "signature_missing_expected"
+ERROR_GROUP_DEMO_FACET = "demo_facet_mismatch"
+ERROR_GROUP_XSD_STUB = "local_xsd_stub_required"
+ERROR_GROUP_STRUCTURAL = "structural_mismatch"
+ERROR_GROUP_UNKNOWN = "unknown"
+
+
+def classify_xsd_validation_error(message: str) -> str:
+    """Classify one XSD validator message into a Phase 013 error group."""
+    msg = (message or "").lower()
+    if "missing child" in msg or ("expected is one of" in msg and "*" in msg):
+        return ERROR_GROUP_SIGNATURE
+    if "encf" in msg and (
+        "pattern" in msg or "maxlength" in msg or "minlength" in msg or "length" in msg
+    ):
+        return ERROR_GROUP_DEMO_FACET
+    if "rnc" in msg and "pattern" in msg:
+        return ERROR_GROUP_DEMO_FACET
+    if "indicadorserviciotodoincluido" in msg or "does not resolve" in msg:
+        return ERROR_GROUP_XSD_STUB
+    return ERROR_GROUP_UNKNOWN
+
+
+def classify_validation_errors(
+    errors: list[dict[str, Any]],
+    *,
+    schema_repair_applied: bool,
+) -> dict[str, list[dict[str, Any]]]:
+    groups: dict[str, list[dict[str, Any]]] = {
+        ERROR_GROUP_SIGNATURE: [],
+        ERROR_GROUP_DEMO_FACET: [],
+        ERROR_GROUP_XSD_STUB: [],
+        ERROR_GROUP_STRUCTURAL: [],
+        ERROR_GROUP_UNKNOWN: [],
+    }
+    for err in errors:
+        item = dict(err)
+        group = classify_xsd_validation_error(item.get("message") or "")
+        item["error_group"] = group
+        groups[group].append(item)
+    if schema_repair_applied and not groups[ERROR_GROUP_XSD_STUB]:
+        groups[ERROR_GROUP_XSD_STUB].append(
+            {
+                "message": (
+                    "Local XSD compile required experimental stub for "
+                    "IndicadorServicioTodoIncluidoType (declared type name has "
+                    "leading whitespace in source file)."
+                ),
+                "line": None,
+                "column": None,
+                "error_group": ERROR_GROUP_XSD_STUB,
+                "informational": True,
+            }
+        )
+    return groups
+
 
 @dataclass
 class Tipo31UnsignedValidationReport:
@@ -47,6 +103,13 @@ class Tipo31UnsignedValidationReport:
     schema_mode: str = "UNAVAILABLE"
     schema_repair_applied: bool = False
     error_count: int = 0
+    total_error_count: int = 0
+    intentional_unsigned_error_count: int = 0
+    avoidable_demo_facet_error_count: int = 0
+    local_xsd_stub_error_count: int = 0
+    structural_mismatch_count: int = 0
+    unknown_error_count: int = 0
+    error_groups: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     uses_demo_encf: bool = False
     signature_present: bool = False
     dgii_submission_allowed: bool = False
@@ -145,12 +208,13 @@ def validate_tipo31_unsigned_draft(
     expected_reasons = [EXPECTED_FAILURE_REASON]
     if diagnostics.uses_demo_encf:
         expected_reasons.append(
-            "Demo/non-authorized eNCF is not DGII-authorized and may violate eNCF facets"
+            "Demo/non-authorized eNCF remains NOT DGII-authorized "
+            "(even when pattern-compatible via XSD_FACET_DEMO)."
         )
     if xsd_result.schema_repair_applied:
         expected_reasons.append(
             "Local XSD required experimental type stub to compile "
-            "(IndicadorServicioTodoIncluidoType missing in source file)"
+            "(IndicadorServicioTodoIncluidoType name whitespace defect in source file)"
         )
     if not xsd_result.schema_compiled:
         expected_reasons.append(
@@ -162,6 +226,15 @@ def validate_tipo31_unsigned_draft(
         xsd_result,
         uses_demo_encf=diagnostics.uses_demo_encf,
     )
+
+    validation_errors = [e.to_dict() for e in xsd_result.errors]
+    error_groups = classify_validation_errors(
+        validation_errors,
+        schema_repair_applied=xsd_result.schema_repair_applied,
+    )
+    # Annotate raw errors with groups for JSON consumers.
+    for err in validation_errors:
+        err["error_group"] = classify_xsd_validation_error(err.get("message") or "")
 
     warnings = sorted(
         set(diagnostics.warnings)
@@ -181,10 +254,8 @@ def validate_tipo31_unsigned_draft(
     if xsd_result.notes:
         notes.append(xsd_result.notes)
 
-    # Expected invalid: either schema says invalid, or known Signature omission.
-    is_valid = bool(xsd_result.is_valid) and diagnostics.signature_present
-    # Signature is never present in this phase → always expected invalid.
-    is_valid = False if not diagnostics.signature_present else is_valid
+    # Expected invalid: Signature omission keeps draft non-compliant.
+    is_valid = False if not diagnostics.signature_present else bool(xsd_result.is_valid)
 
     return Tipo31UnsignedValidationReport(
         invoice_internal_code=invoice.internal_code,
@@ -194,7 +265,7 @@ def validate_tipo31_unsigned_draft(
         expected_validity=False,
         compliance_status=COMPLIANCE_CLAIM,
         known_missing_required_fields=missing,
-        validation_errors=[e.to_dict() for e in xsd_result.errors],
+        validation_errors=validation_errors,
         structural_mismatches=structural,
         warnings=warnings,
         notes=notes,
@@ -203,6 +274,13 @@ def validate_tipo31_unsigned_draft(
         schema_mode=xsd_result.schema_mode,
         schema_repair_applied=xsd_result.schema_repair_applied,
         error_count=xsd_result.error_count,
+        total_error_count=xsd_result.error_count,
+        intentional_unsigned_error_count=len(error_groups[ERROR_GROUP_SIGNATURE]),
+        avoidable_demo_facet_error_count=len(error_groups[ERROR_GROUP_DEMO_FACET]),
+        local_xsd_stub_error_count=len(error_groups[ERROR_GROUP_XSD_STUB]),
+        structural_mismatch_count=len(structural),
+        unknown_error_count=len(error_groups[ERROR_GROUP_UNKNOWN]),
+        error_groups=error_groups,
         uses_demo_encf=diagnostics.uses_demo_encf,
         signature_present=False,
         dgii_submission_allowed=False,
@@ -234,11 +312,31 @@ def render_tipo31_unsigned_validation_markdown(
         f"- compliance_status: `{report.compliance_status}`",
         f"- signature_present: `{report.signature_present}`",
         f"- uses_demo_encf: `{report.uses_demo_encf}`",
-        f"- error_count: `{report.error_count}`",
+        f"- error_count / total_error_count: `{report.total_error_count}`",
+        f"- intentional_unsigned_error_count: `{report.intentional_unsigned_error_count}`",
+        f"- avoidable_demo_facet_error_count: `{report.avoidable_demo_facet_error_count}`",
+        f"- local_xsd_stub_error_count: `{report.local_xsd_stub_error_count}`",
+        f"- structural_mismatch_count: `{report.structural_mismatch_count}`",
+        f"- unknown_error_count: `{report.unknown_error_count}`",
         "",
-        "## Expected failure reasons",
+        "## Error groups",
         "",
     ]
+    for group_name, items in (report.error_groups or {}).items():
+        lines.append(f"### `{group_name}` ({len(items)})")
+        lines.append("")
+        if not items:
+            lines.append("- (none)")
+        else:
+            for err in items:
+                lines.append(f"- {err.get('message')}")
+        lines.append("")
+    lines.extend(
+        [
+            "## Expected failure reasons",
+            "",
+        ]
+    )
     for reason in report.expected_failure_reasons:
         lines.append(f"- {reason}")
     lines.extend(["", "## Known missing required fields", ""])

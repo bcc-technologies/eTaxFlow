@@ -221,6 +221,28 @@ python manage.py validate_tipo31_unsigned_draft --internal-code BCC-AR-2026-0000
 - No signing / authentication / DGII submission exists.
 - Local XSD may need an experimental type stub to compile; that stub is not official.
 
+## Demo facet hardening (Phase 013)
+
+Phase 013 reduces **avoidable** local XSD facet noise from seed/demo data. It does **not** implement signing, DGII submission, or compliance.
+
+Adjusted synthetic demo values (see `core/demo_profiles.py` and `docs/dgii/mapping/TIPO31_XSD_FACET_NOTES.md`):
+
+- Issuer RNC: `131000001` (9 digits; local `RNCValidationType`) — synthetic, not a verified real BCC RNC
+- Customer / supplier RNCs remain 9-digit synthetic values
+- Optional `XSD_FACET_DEMO` eNCF range: prefix `E31` + 10 digits (13 alphanumeric chars; local `eNCFValidationType`) — still `is_authorized_by_dgii=False`, `environment=DEV`
+
+Classic `DEMO-E31-` range remains the default allocation path. Facet-safe eNCF requires an explicit flag:
+
+```bash
+python manage.py seed_bcc
+python manage.py allocate_demo_encf --internal-code BCC-AR-2026-000001 --xsd-facet-demo --allow-demo --apply
+python manage.py prepare_signing_placeholder --internal-code BCC-AR-2026-000001 --apply --note "Local placeholder only; no real digital signature"
+python manage.py generate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf
+python manage.py validate_tipo31_unsigned_draft --internal-code BCC-AR-2026-000001 --allow-demo-encf --json
+```
+
+Validation reports group errors (`signature_missing_expected`, `demo_facet_mismatch`, `local_xsd_stub_required`, etc.). After facet-safe seed/allocation, `avoidable_demo_facet_error_count` should drop; Signature remains intentionally missing and status stays `NOT_DGII_COMPLIANT`.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

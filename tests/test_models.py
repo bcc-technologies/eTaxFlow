@@ -11,6 +11,7 @@ from documents.models import Document
 from invoicing.models import Invoice, InvoiceLine
 from organizations.models import Organization
 from fiscal.models import InternalDocumentCode
+from core.seed_demo import DEMO_ISSUER_RNC
 
 
 class ETaxFlowModelTests(TestCase):
@@ -19,7 +20,7 @@ class ETaxFlowModelTests(TestCase):
         self.issuer = Organization.objects.create(
             legal_name="BARREIRO CASANOVA CASTILLO TECHNOLOGIES, S.R.L.",
             commercial_name="BCC Technologies",
-            rnc="1310000000",
+            rnc=DEMO_ISSUER_RNC,
             address="Santo Domingo",
             phone="809-000-0000",
             email="info@bcc.com",

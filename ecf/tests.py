@@ -17,6 +17,7 @@ from ecf.services.internal_xml_documents import generate_internal_xml_document
 from fiscal.models import FiscalDocumentType, TaxRate, UnitOfMeasure
 from invoicing.models import Invoice, InvoiceLine, ProductService
 from organizations.models import Organization
+from core.seed_demo import DEMO_ISSUER_RNC
 
 
 class InternalInvoiceXMLTests(TestCase):
@@ -25,7 +26,7 @@ class InternalInvoiceXMLTests(TestCase):
         self.issuer = Organization.objects.create(
             legal_name="BCC Technologies",
             commercial_name="BCC Technologies",
-            rnc="1310000000",
+            rnc=DEMO_ISSUER_RNC,
         )
         self.customer = Contact.objects.create(
             contact_type="CLIENT",

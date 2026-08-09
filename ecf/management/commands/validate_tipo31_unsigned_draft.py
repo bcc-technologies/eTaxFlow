@@ -111,11 +111,30 @@ class Command(BaseCommand):
             self.stdout.write(f"is_valid: {report.is_valid}")
             self.stdout.write(f"expected_validity: {report.expected_validity}")
             self.stdout.write(f"error_count: {report.error_count}")
+            self.stdout.write(f"total_error_count: {report.total_error_count}")
+            self.stdout.write(
+                f"intentional_unsigned_error_count: {report.intentional_unsigned_error_count}"
+            )
+            self.stdout.write(
+                f"avoidable_demo_facet_error_count: {report.avoidable_demo_facet_error_count}"
+            )
+            self.stdout.write(
+                f"local_xsd_stub_error_count: {report.local_xsd_stub_error_count}"
+            )
+            self.stdout.write(
+                f"structural_mismatch_count: {report.structural_mismatch_count}"
+            )
+            self.stdout.write(f"unknown_error_count: {report.unknown_error_count}")
             self.stdout.write(f"compliance_status: {report.compliance_status}")
             self.stdout.write(
                 "known_missing_required_fields: "
                 + ", ".join(report.known_missing_required_fields)
             )
+            self.stdout.write("error_groups:")
+            for group_name, items in (report.error_groups or {}).items():
+                self.stdout.write(f"  {group_name}: {len(items)}")
+                for err in items[:10]:
+                    self.stdout.write(f"    - {err.get('message')}")
             self.stdout.write("expected_failure_reasons:")
             for reason in report.expected_failure_reasons:
                 self.stdout.write(f"  - {reason}")
@@ -131,7 +150,8 @@ class Command(BaseCommand):
                         if err.get("column") is not None:
                             loc += f":C{err['column']}"
                         loc += " "
-                    self.stdout.write(f"  - {loc}{err.get('message')}")
+                    group = err.get("error_group") or ""
+                    self.stdout.write(f"  - [{group}] {loc}{err.get('message')}")
 
         notice_stream = self.stderr if json_flag else self.stdout
         if report.expected_invalid_unsigned_draft and not report.is_valid:

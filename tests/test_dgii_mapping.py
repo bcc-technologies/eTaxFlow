@@ -9,6 +9,7 @@ from django.core.management.base import CommandError
 from django.test import TestCase
 
 from contacts.models import Contact
+from core.seed_demo import DEMO_ISSUER_RNC
 from documents.models import Document
 from ecf.dgii.field_catalogs.tipo_ecf_31 import (
     FIELD_CATALOG,
@@ -39,7 +40,7 @@ class DGIIMappingReportTests(TestCase):
         self.issuer = Organization.objects.create(
             legal_name="BCC Technologies",
             commercial_name="BCC",
-            rnc="1310000000",
+            rnc=DEMO_ISSUER_RNC,
             address="Santo Domingo",
             email="info@bcc.com",
         )
@@ -215,7 +216,7 @@ class InspectDGIIMappingCommandTests(TestCase):
         self.user = get_user_model().objects.create_user(username="inspector", password="x")
         self.issuer = Organization.objects.create(
             legal_name="BCC Technologies",
-            rnc="1310000000",
+            rnc=DEMO_ISSUER_RNC,
         )
         self.customer = Contact.objects.create(
             contact_type="CLIENT",
@@ -378,7 +379,7 @@ class DGIISourceAndCatalogScaffoldTests(TestCase):
 
     def test_type_31_report_includes_catalog_metrics_and_warning(self):
         user = get_user_model().objects.create_user(username="cat", password="x")
-        issuer = Organization.objects.create(legal_name="BCC", rnc="1310000000")
+        issuer = Organization.objects.create(legal_name="BCC", rnc=DEMO_ISSUER_RNC)
         customer = Contact.objects.create(
             contact_type="CLIENT",
             legal_name="Client",

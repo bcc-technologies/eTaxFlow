@@ -198,6 +198,7 @@ class ENCFSequenceRange(models.Model):
     ]
     SOURCES = [
         ("MANUAL_DEMO", "Manual demo (local only)"),
+        ("XSD_FACET_DEMO", "XSD facet-safe synthetic demo (local only)"),
         ("MANUAL_AUTHORIZED", "Manual authorized (operator-entered)"),
         ("IMPORTED", "Imported"),
         ("OTHER", "Other"),
@@ -254,13 +255,22 @@ class ENCFSequenceRange(models.Model):
 
     @property
     def is_demo_or_unauthorized(self) -> bool:
-        return self.source == "MANUAL_DEMO" or not self.is_authorized_by_dgii
+        return (
+            self.source in {"MANUAL_DEMO", "XSD_FACET_DEMO"}
+            or not self.is_authorized_by_dgii
+        )
+
+    @property
+    def is_xsd_facet_demo(self) -> bool:
+        return self.source == "XSD_FACET_DEMO"
 
     def format_encf(self, number: int) -> str:
         """Build local eNCF string: prefix + zero-padded number.
 
-        Official XSD e-CF 31 expects exactly 13 alphanumeric chars. Demo prefixes
-        such as ``DEMO-E31-`` are intentionally local/non-XSD and NOT DGII-compliant.
+        Official XSD e-CF 31 expects exactly 13 alphanumeric chars.
+        ``MANUAL_DEMO`` prefixes such as ``DEMO-E31-`` are intentionally
+        local/non-XSD. ``XSD_FACET_DEMO`` ranges use synthetic 13-char values
+        for local facet feedback only and remain NOT DGII-authorized.
         """
         return f"{self.prefix}{number:0{self.number_pad_width}d}"
 

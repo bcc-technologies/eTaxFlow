@@ -9,14 +9,26 @@ from contacts.natural_keys import (
     find_contacts_by_natural_key,
     resolve_contact_by_natural_key,
 )
+from core.demo_profiles import (
+    DEMO_XSD_FACET_ENCF_END,
+    DEMO_XSD_FACET_ENCF_ENVIRONMENT,
+    DEMO_XSD_FACET_ENCF_PAD_WIDTH,
+    DEMO_XSD_FACET_ENCF_PREFIX,
+    DEMO_XSD_FACET_ENCF_SOURCE,
+    DEMO_XSD_FACET_ENCF_START,
+    DEMO_XSD_FACET_NOTES,
+)
 from core.seed_demo import (
     DEMO_CLIENT_DEFAULTS,
     DEMO_CLIENT_RNC,
+    DEMO_ISSUER_LEGAL_NAME,
     DEMO_ISSUER_RNC,
     DEMO_SUPPLIER_DEFAULTS,
     DEMO_SUPPLIER_RNC,
+    LEGACY_DEMO_ISSUER_RNCS,
     SEED_INVOICE_MARKER,
 )
+from ecf.dgii.xsd.facets import rnc_matches_xsd_facet
 from ecf.models import ECFDocument
 from fiscal.models import (
     BillingIndicator,
@@ -91,10 +103,46 @@ class Command(BaseCommand):
                 demo_user.set_unusable_password()
                 demo_user.save(update_fields=["password"])
 
+            # Migrate clearly owned legacy demo issuer RNC (10 digits → facet-safe 9).
+            legacy_issuer = (
+                Organization.objects.filter(
+                    rnc__in=LEGACY_DEMO_ISSUER_RNCS,
+                    is_default_issuer=True,
+                    legal_name=DEMO_ISSUER_LEGAL_NAME,
+                )
+                .order_by("pk")
+                .first()
+            )
+            if legacy_issuer and legacy_issuer.rnc != DEMO_ISSUER_RNC:
+                conflict = (
+                    Organization.objects.filter(rnc=DEMO_ISSUER_RNC)
+                    .exclude(pk=legacy_issuer.pk)
+                    .exists()
+                )
+                if conflict:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"WARNING: Cannot migrate demo issuer pk={legacy_issuer.pk} "
+                            f"from rnc={legacy_issuer.rnc!r} to {DEMO_ISSUER_RNC!r}: "
+                            "target RNC already used by another organization."
+                        )
+                    )
+                else:
+                    old_rnc = legacy_issuer.rnc
+                    legacy_issuer.rnc = DEMO_ISSUER_RNC
+                    legacy_issuer.save(update_fields=["rnc", "updated_at"])
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Updated owned demo issuer RNC {old_rnc!r} -> "
+                            f"{DEMO_ISSUER_RNC!r} for local XSD facet safety "
+                            "(synthetic; NOT DGII-authorized)."
+                        )
+                    )
+
             issuer, _ = self._get_organization(
                 DEMO_ISSUER_RNC,
                 defaults={
-                    "legal_name": "BARREIRO CASANOVA CASTILLO TECHNOLOGIES, S.R.L.",
+                    "legal_name": DEMO_ISSUER_LEGAL_NAME,
                     "commercial_name": "BCC Technologies",
                     "address": "Santo Domingo",
                     "phone": "809-000-0000",
@@ -103,6 +151,13 @@ class Command(BaseCommand):
                     "is_default_issuer": True,
                 },
             )
+            if not rnc_matches_xsd_facet(issuer.rnc):
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"WARNING: Issuer rnc={issuer.rnc!r} is not compatible with "
+                        "local XSD RNCValidationType ([0-9]{9}|[0-9]{11})."
+                    )
+                )
 
             client, _, _ = resolve_contact_by_natural_key(
                 "CLIENT",
@@ -129,6 +184,28 @@ class Command(BaseCommand):
                             f"using first pk={contact.pk}."
                         )
                     )
+                if contact.id_type == "RNC" and not rnc_matches_xsd_facet(contact.rnc_or_id):
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"WARNING: Demo {contact_type} rnc_or_id={contact.rnc_or_id!r} "
+                            "is not compatible with local XSD RNCValidationType."
+                        )
+                    )
+
+            # Do not mutate non-demo organizations with facet-invalid RNCs.
+            for org in Organization.objects.exclude(pk=issuer.pk).iterator():
+                if not org.rnc:
+                    continue
+                if rnc_matches_xsd_facet(org.rnc):
+                    continue
+                if org.legal_name == DEMO_ISSUER_LEGAL_NAME and org.is_default_issuer:
+                    continue
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"WARNING: Non-demo Organization pk={org.pk} "
+                        f"rnc={org.rnc!r} fails local XSD RNC facet; left unchanged."
+                    )
+                )
 
             fiscal_types = [
                 ("31", "Factura de Crédito Fiscal Electrónica", "INVOICE", "OUTBOUND"),
@@ -499,6 +576,51 @@ class Command(BaseCommand):
                     notes=demo_range_notes,
                 )
 
+            # Separate synthetic XSD-facet-safe range (13-char alphanumerics).
+            # Remains DEV / unauthorized. Used only via allocate_demo_encf --xsd-facet-demo.
+            facet_range_filters = {
+                "issuer": issuer,
+                "fiscal_document_type": fiscal_catalog["31"],
+                "prefix": DEMO_XSD_FACET_ENCF_PREFIX,
+                "environment": DEMO_XSD_FACET_ENCF_ENVIRONMENT,
+            }
+            existing_facet_range = (
+                ENCFSequenceRange.objects.filter(**facet_range_filters, is_active=True)
+                .order_by("pk")
+                .first()
+            )
+            if existing_facet_range:
+                existing_facet_range.start_number = DEMO_XSD_FACET_ENCF_START
+                existing_facet_range.end_number = DEMO_XSD_FACET_ENCF_END
+                existing_facet_range.number_pad_width = DEMO_XSD_FACET_ENCF_PAD_WIDTH
+                existing_facet_range.sequence_expiration_date = date(
+                    date.today().year + 1, 12, 31
+                )
+                existing_facet_range.source = DEMO_XSD_FACET_ENCF_SOURCE
+                existing_facet_range.is_authorized_by_dgii = False
+                existing_facet_range.is_active = True
+                existing_facet_range.notes = DEMO_XSD_FACET_NOTES
+                if existing_facet_range.next_number < DEMO_XSD_FACET_ENCF_START:
+                    existing_facet_range.next_number = DEMO_XSD_FACET_ENCF_START
+                existing_facet_range.save()
+                facet_range = existing_facet_range
+            else:
+                facet_range = ENCFSequenceRange.objects.create(
+                    issuer=issuer,
+                    fiscal_document_type=fiscal_catalog["31"],
+                    prefix=DEMO_XSD_FACET_ENCF_PREFIX,
+                    start_number=DEMO_XSD_FACET_ENCF_START,
+                    end_number=DEMO_XSD_FACET_ENCF_END,
+                    next_number=DEMO_XSD_FACET_ENCF_START,
+                    number_pad_width=DEMO_XSD_FACET_ENCF_PAD_WIDTH,
+                    sequence_expiration_date=date(date.today().year + 1, 12, 31),
+                    environment=DEMO_XSD_FACET_ENCF_ENVIRONMENT,
+                    source=DEMO_XSD_FACET_ENCF_SOURCE,
+                    is_authorized_by_dgii=False,
+                    is_active=True,
+                    notes=DEMO_XSD_FACET_NOTES,
+                )
+
             ecf_doc, _ = self.get_first_or_create(
                 ECFDocument,
                 {"invoice": invoice},
@@ -542,4 +664,10 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"Demo eNCF range: id={demo_range.pk} prefix={demo_range.prefix!r} "
                 f"next={demo_range.next_number} (not auto-allocated; NOT DGII-authorized)"
+            )
+            self.stdout.write(
+                f"XSD-facet demo eNCF range: id={facet_range.pk} "
+                f"prefix={facet_range.prefix!r} next={facet_range.next_number} "
+                f"source={facet_range.source} (synthetic 13-char; NOT DGII-authorized; "
+                "allocate with --xsd-facet-demo --allow-demo --apply)"
             )

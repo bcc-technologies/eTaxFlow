@@ -46,6 +46,7 @@ def _select_range(
     *,
     range_id: int | None,
     allow_demo: bool,
+    xsd_facet_demo: bool = False,
 ) -> ENCFSequenceRange:
     qs = ENCFSequenceRange.objects.select_for_update().filter(
         issuer_id=invoice.issuer_id,
@@ -58,8 +59,24 @@ def _select_range(
             raise ENCFAllocationError(
                 f"No active ENCFSequenceRange id={range_id} matching invoice issuer/type."
             )
+        if xsd_facet_demo and not seq_range.is_xsd_facet_demo:
+            raise ENCFAllocationError(
+                f"Range id={range_id} is not source=XSD_FACET_DEMO; "
+                "refuse --xsd-facet-demo against a non-facet-demo range."
+            )
+    elif xsd_facet_demo:
+        seq_range = qs.filter(source="XSD_FACET_DEMO").order_by("pk").first()
+        if seq_range is None:
+            raise ENCFAllocationError(
+                "No active XSD_FACET_DEMO ENCFSequenceRange found for this issuer/type. "
+                "Run seed_bcc to create the synthetic facet-safe range."
+            )
     else:
-        seq_range = qs.order_by("pk").first()
+        # Prefer classic MANUAL_DEMO over XSD_FACET_DEMO for default allocation.
+        seq_range = (
+            qs.filter(source="MANUAL_DEMO").order_by("pk").first()
+            or qs.order_by("pk").first()
+        )
         if seq_range is None:
             raise ENCFAllocationError(
                 "No active ENCFSequenceRange found for this issuer and fiscal document type."
@@ -73,6 +90,11 @@ def _select_range(
         raise ENCFAllocationError(
             "Refusing demo/non-authorized eNCF range unless allow_demo=True. "
             "These values are NOT DGII-authorized."
+        )
+    if xsd_facet_demo and not allow_demo:
+        raise ENCFAllocationError(
+            "XSD facet-safe demo allocation requires allow_demo=True. "
+            "Values remain NOT DGII-authorized."
         )
     return seq_range
 
@@ -99,39 +121,30 @@ def preview_next_encf(
     *,
     range_id: int | None = None,
     allow_demo: bool = False,
+    xsd_facet_demo: bool = False,
 ) -> dict:
     """Return candidate range/eNCF without mutating state."""
     _require_invoice_ready(invoice)
     with transaction.atomic():
-        # Use unlocked read for dry-run preview (no mutation).
-        qs = ENCFSequenceRange.objects.filter(
-            issuer_id=invoice.issuer_id,
-            fiscal_document_type_id=invoice.fiscal_document_type_ref_id,
-            is_active=True,
+        seq_range = _select_range(
+            invoice,
+            range_id=range_id,
+            allow_demo=allow_demo,
+            xsd_facet_demo=xsd_facet_demo,
         )
-        if range_id is not None:
-            seq_range = qs.filter(pk=range_id).first()
-            if seq_range is None:
-                raise ENCFAllocationError(
-                    f"No active ENCFSequenceRange id={range_id} matching invoice issuer/type."
-                )
-        else:
-            seq_range = qs.order_by("pk").first()
-            if seq_range is None:
-                raise ENCFAllocationError(
-                    "No active ENCFSequenceRange found for this issuer and fiscal document type."
-                )
-        if seq_range.environment == "PRODUCTION" and not seq_range.is_authorized_by_dgii:
-            raise ENCFAllocationError(
-                "Refusing PRODUCTION range that is not marked is_authorized_by_dgii=True."
-            )
-        if seq_range.is_demo_or_unauthorized and not allow_demo:
-            raise ENCFAllocationError(
-                "Refusing demo/non-authorized eNCF range unless allow_demo=True. "
-                "These values are NOT DGII-authorized."
-            )
         _assert_range_allocable(seq_range)
         candidate = seq_range.peek_next_encf()
+        if seq_range.is_xsd_facet_demo:
+            format_note = (
+                "Synthetic XSD-facet demo format = prefix + zero-padded number "
+                "sized to local eNCFValidationType (13 alphanumerics). "
+                "NOT DGII-authorized and NOT_DGII_COMPLIANT."
+            )
+        else:
+            format_note = (
+                "Local demo format = prefix + zero-padded number; "
+                "not claimed to match DGII-authorized eNCF issuance."
+            )
         return {
             "range_id": seq_range.pk,
             "prefix": seq_range.prefix,
@@ -143,10 +156,8 @@ def preview_next_encf(
             "source": seq_range.source,
             "is_authorized_by_dgii": seq_range.is_authorized_by_dgii,
             "is_demo_or_unauthorized": seq_range.is_demo_or_unauthorized,
-            "format_note": (
-                "Local demo format = prefix + zero-padded number; "
-                "not claimed to match DGII-authorized eNCF issuance."
-            ),
+            "is_xsd_facet_demo": seq_range.is_xsd_facet_demo,
+            "format_note": format_note,
         }
 
 
@@ -157,6 +168,7 @@ def allocate_next_encf(
     range_id: int | None = None,
     actor=None,
     allow_demo: bool = False,
+    xsd_facet_demo: bool = False,
 ) -> str:
     """Allocate next eNCF from a configured range onto the invoice.
 
@@ -169,7 +181,12 @@ def allocate_next_encf(
     invoice = Invoice.objects.select_for_update().get(pk=invoice.pk)
     _require_invoice_ready(invoice)
 
-    seq_range = _select_range(invoice, range_id=range_id, allow_demo=allow_demo)
+    seq_range = _select_range(
+        invoice,
+        range_id=range_id,
+        allow_demo=allow_demo,
+        xsd_facet_demo=xsd_facet_demo,
+    )
     _assert_range_allocable(seq_range)
 
     allocated_number = seq_range.next_number
@@ -200,7 +217,9 @@ def allocate_next_encf(
             "source": seq_range.source,
             "is_authorized_by_dgii": seq_range.is_authorized_by_dgii,
             "is_demo_or_unauthorized": seq_range.is_demo_or_unauthorized,
+            "is_xsd_facet_demo": seq_range.is_xsd_facet_demo,
             "allow_demo": allow_demo,
+            "xsd_facet_demo": xsd_facet_demo,
             "sequence_expiration_date": (
                 seq_range.sequence_expiration_date.isoformat()
                 if seq_range.sequence_expiration_date

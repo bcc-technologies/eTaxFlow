@@ -12,6 +12,7 @@ from documents.models import Document
 from ecf.services.internal_invoice_xml import build_internal_invoice_xml
 from invoicing.models import Invoice, InvoiceLine
 from organizations.models import Organization
+from core.seed_demo import DEMO_ISSUER_RNC
 
 
 class DiagnoseSeedDuplicatesTests(TestCase):
@@ -54,7 +55,7 @@ class CleanupSeedDemoDataTests(TestCase):
         self.user = get_user_model().objects.create_user(username="cleaner", password="x")
         self.issuer = Organization.objects.create(
             legal_name="BCC Technologies",
-            rnc="1310000000",
+            rnc=DEMO_ISSUER_RNC,
         )
 
     def test_dry_run_changes_nothing(self):

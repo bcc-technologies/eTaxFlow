@@ -228,10 +228,31 @@ Phase 012 validates the unsigned `ECF` draft against local `docs/dgii/sources/e-
 
 - Unsigned draft is validated locally for structural feedback only.
 - Failure is **expected** because Signature/XMLDSig is missing (required XSD `xs:any` after `FechaHoraFirma`).
-- Demo eNCF remains unauthorized and may also fail length/pattern facets.
+- Demo eNCF remains unauthorized. Classic `DEMO-E31-` values fail length/pattern facets; optional `XSD_FACET_DEMO` values can satisfy local facets while staying non-authorized.
 - Validation failure is **not** a runtime/application failure for eTaxFlow commands.
 - No DGII submission, TrackId, certificates, or private keys are involved.
 
 ### Local XSD compile note
 
-The checked-in local XSD references `IndicadorServicioTodoIncluidoType` without defining it. Local validation may apply an **experimental in-memory stub** so instance checks can run; that stub is not official DGII schema content and is not compliance evidence.
+The checked-in local XSD references `IndicadorServicioTodoIncluidoType` without defining it under the exact type name (declared name has a leading space). Local validation may apply an **experimental in-memory stub** so instance checks can run; that stub is not official DGII schema content and is not compliance evidence.
+
+## 12. Demo facet hardening (Phase 013)
+
+Phase 013 hardens seed/demo identity values for local XSD facet feedback only. See `TIPO31_XSD_FACET_NOTES.md`.
+
+| local facet | XSD type | respected by |
+|---|---|---|
+| RNC 9 or 11 digits | `RNCValidationType` | synthetic issuer `131000001`, customer/supplier 9-digit demos |
+| eNCF exactly 13 `[A-Za-z0-9]` | `eNCFValidationType` | optional `XSD_FACET_DEMO` range (`E31` + 10 digits) |
+
+### Why synthetic
+
+- Values are lab placeholders, not verified production RNCs or DGII-authorized e-NCF sequences.
+- Pattern-compatible does **not** mean DGII-authorized or production-ready.
+
+### Why still NOT_DGII_COMPLIANT
+
+- Signature / XMLDSig remains intentionally omitted.
+- `XSD_FACET_DEMO` ranges stay `is_authorized_by_dgii=False` / `environment=DEV`.
+- Mapping and validation still emit `DEMO_OR_UNAUTHORIZED_ENCF` when demo ranges are used.
+- Local XSD stub remains experimental and non-official.
