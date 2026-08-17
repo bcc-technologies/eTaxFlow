@@ -67,7 +67,7 @@ eTaxFlow repo policy: **no private keys committed**; production signer not appro
 | URL Aprobación Comercial | `https://etaxflow.bcctechnologies.com.do/fe/aprobacioncomercial/api/ecf` | Pre-Cert first | _TBD_ | _TBD_ | BLOCKED / DESIGN_ONLY |
 | URL Autenticación | `https://etaxflow.bcctechnologies.com.do/fe/autenticacion/api/[semilla]validacioncertificado` | Pre-Cert first | _TBD_ | _TBD_ | BLOCKED / DESIGN_ONLY |
 
-Phase 025 documents these in `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`. Inspect with `python manage.py dgii_endpoint_plan`. **Do not submit to DGII portal until DNS, HTTPS, and internet accessibility are verified.** Route stubs exist but return 503 DISABLED when `ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`.
+Phase 025 documents these in `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`. Phase 026 adds `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md` and `.env.staging.example` for staging/pre-certification deployment planning only. Inspect with `python manage.py dgii_endpoint_plan`. **Do not submit to DGII portal until DNS, HTTPS, and internet accessibility are verified.** Route stubs exist but return 503 DISABLED when `ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`. No live transport, no production signing.
 
 ## Pre-certification / certification go-no-go
 

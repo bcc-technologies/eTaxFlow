@@ -82,21 +82,25 @@ Rules:
 - **HTTPS required** for any public DGII-facing host (traditional ports, internet-accessible, no blocked/proxy-avoidance domains per emitter technical description).
 - **No private keys, passphrases, or certificates** in the repository or committed settings.
 - **Logs** must redact tokens, certificate material, and signature blobs when implemented.
-- **Request size limits** to be defined at implementation (Phase 026+).
+- **Request size limits** to be defined at implementation (Phase 027+).
 - **Audit events** for any future accepted/rejected receiver traffic.
 - **Allowlist / rate limiting** — decision pending security review.
 - **Staging isolated from production** — separate host, certs, DB, secrets.
 - **Default:** `ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=False` — route stubs return safe 503 JSON, not live processing.
 
-Disabled stub response shape:
+Disabled stub response shape (Phase 026 hardened):
 
 ```json
 {
   "status": "DISABLED",
   "compliance_status": "NOT_DGII_COMPLIANT",
-  "dgii_submission_allowed": false
+  "dgii_submission_allowed": false,
+  "track_id": null,
+  "message": "Public DGII-facing endpoints are disabled in this environment."
 }
 ```
+
+POST/GET to disabled routes returns **503** with the JSON above — no XML parse, no TrackId, no database writes, no live transport.
 
 ## 7. Go / no-go gate (before DGII postulation)
 
@@ -116,9 +120,11 @@ Do **not** fill or submit the DGII software postulation form until **all** are a
 
 - `docs/dgii/governance/PHASE_024_DGII_AUTHORIZATION_GATE.md`
 - `docs/dgii/PRE_CERTIFICATION_READINESS_CHECKLIST.md`
+- `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md` — Phase 026 staging DNS/SSL checklist (manual verification only)
+- `.env.staging.example` — staging env placeholders (no real secrets)
 - `ecf/dgii/endpoints.py` — URL composition helper
 - `ecf/management/commands/dgii_endpoint_plan.py` — read-only plan command
 
 ## Next phase
 
-**Phase 026 — Staging DNS/SSL deployment checklist** (if route stubs shipped in 025) or **disabled endpoint stub hardening** — still no DGII submission.
+**Phase 027 — Pre-certification receiver endpoint implementation plan** — internal contract and tests for ARECF/ACECF/ECF received; still no DGII live transport.

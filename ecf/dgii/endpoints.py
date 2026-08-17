@@ -65,22 +65,34 @@ def get_software_registration_metadata() -> dict[str, Any]:
 
     url_status = "BLOCKED" if not public_base_url else readiness_status
 
+    endpoints_enabled_flag = endpoints_enabled
+    deployment_readiness_status = "BLOCKED"
+    endpoint_routes_status = "DISABLED" if not endpoints_enabled_flag else "NOT_IMPLEMENTED"
+
     return {
         "software_type": software_type,
         "software_name": software_name,
         "software_version": software_version,
         "public_base_url": public_base_url,
+        "public_base_url_configured": bool(public_base_url),
         "recepcion_path": recepcion_path,
         "aprobacion_comercial_path": aprobacion_path,
         "autenticacion_path_template": autenticacion_template,
         "recepcion_url": recepcion_url,
         "aprobacion_comercial_url": aprobacion_comercial_url,
         "autenticacion_url_template": autenticacion_url_template,
-        "endpoints_enabled": endpoints_enabled,
+        "endpoints_enabled": endpoints_enabled_flag,
         "readiness_status": readiness_status,
         "url_status": url_status,
         "compliance_status": "NOT_DGII_COMPLIANT",
         "dgii_submission_allowed": False,
         "design_only": True,
+        "planned_host": "etaxflow.bcctechnologies.com.do",
         "planned_host_example": "etaxflow.bcctechnologies.com.do",
+        "staging_dns_status": "UNVERIFIED",
+        "staging_ssl_status": "UNVERIFIED",
+        "staging_external_reachability_status": "UNVERIFIED",
+        "endpoint_routes_status": endpoint_routes_status,
+        "deployment_readiness_status": deployment_readiness_status,
+        "manual_verification_required": True,
     }

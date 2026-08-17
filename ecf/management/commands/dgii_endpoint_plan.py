@@ -29,6 +29,14 @@ class Command(BaseCommand):
         self.stdout.write(f"endpoints_enabled: {meta['endpoints_enabled']}")
         self.stdout.write(f"readiness_status: {meta['readiness_status']}")
         self.stdout.write(f"url_status: {meta['url_status']}")
+        self.stdout.write(f"deployment_readiness_status: {meta['deployment_readiness_status']}")
+        self.stdout.write(f"staging_dns_status: {meta['staging_dns_status']}")
+        self.stdout.write(f"staging_ssl_status: {meta['staging_ssl_status']}")
+        self.stdout.write(
+            f"staging_external_reachability_status: {meta['staging_external_reachability_status']}"
+        )
+        self.stdout.write(f"endpoint_routes_status: {meta['endpoint_routes_status']}")
+        self.stdout.write(f"manual_verification_required: {meta['manual_verification_required']}")
         self.stdout.write(f"compliance_status: {meta['compliance_status']}")
         self.stdout.write(f"dgii_submission_allowed: {meta['dgii_submission_allowed']}")
         self.stdout.write("")

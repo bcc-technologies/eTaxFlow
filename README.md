@@ -259,6 +259,17 @@ Default settings (`ETAXFLOW_*`) keep `ETAXFLOW_PUBLIC_BASE_URL` blank and `ETAXF
 
 **Do not submit portal URLs to DGII** until DNS, HTTPS, internet accessibility, roles, certificate, and authorization gate are human-approved. See `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`.
 
+## Staging DNS/SSL deployment checklist (Phase 026)
+
+Phase 026 adds a **checklist-only** staging/pre-certification deployment guide. No deploy, no live DGII calls, no production signing, no compliance claim.
+
+- Checklist: `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md`
+- Staging env template: `.env.staging.example` (placeholders only — do not commit real `.env`)
+- Route stubs remain **503 DISABLED** by default (`ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`)
+- `dgii_endpoint_plan --json` reports `deployment_readiness_status: BLOCKED`, staging DNS/SSL/reachability `UNVERIFIED`, and `manual_verification_required: true`
+
+**Do not submit URLs to DGII** until DNS, SSL, external reachability, and human sign-off (security, tax/compliance, staging owner) are complete.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

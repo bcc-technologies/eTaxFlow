@@ -201,6 +201,7 @@ def build_readiness_report() -> dict:
             "MOCK service contracts and TEST_ONLY signing do not establish DGII readiness.",
             "Phase 024 source intake does not authorize live DGII calls or compliance.",
             "Phase 025 endpoint plan is DESIGN_ONLY; do not submit portal URLs until deployed.",
+            "Phase 026 staging DNS/SSL checklist is manual only; no deployment performed.",
             f"Existing ECFDocument rows: {ECFDocument.objects.count()} (not approval evidence).",
         ],
     }

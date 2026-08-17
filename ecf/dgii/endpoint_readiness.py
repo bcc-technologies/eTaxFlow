@@ -52,6 +52,47 @@ def build_endpoint_readiness_checks() -> tuple[dict[str, dict[str, Any]], list[d
             "NOT_IMPLEMENTED",
             "Receiver/auth routes are design stubs only; no real XML/auth processing.",
         ),
+        # Phase 026 — staging DNS/SSL deployment checklist blockers (manual verification only)
+        _check(
+            "staging_dns_not_verified",
+            "UNVERIFIED",
+            "Staging/pre-cert DNS for planned host is not verified (manual dig check pending).",
+        ),
+        _check(
+            "staging_ssl_not_verified",
+            "UNVERIFIED",
+            "HTTPS/TLS certificate for staging/pre-cert host is not verified.",
+        ),
+        _check(
+            "staging_external_reachability_not_verified",
+            "UNVERIFIED",
+            "External internet reachability of staging/pre-cert host is not verified.",
+        ),
+        _check(
+            "staging_environment_not_deployed",
+            "BLOCKED",
+            "Staging/pre-cert environment is not deployed; checklist only in repo.",
+        ),
+        _check(
+            "public_endpoint_routes_disabled",
+            meta["endpoint_routes_status"],
+            "Public /fe/... route stubs remain disabled (503 DISABLED JSON).",
+        ),
+        _check(
+            "disabled_stub_only",
+            "DISABLED",
+            "Only disabled stub responses are available; no live receiver/auth processing.",
+        ),
+        _check(
+            "production_signing_not_approved",
+            "BLOCKED",
+            "Production signing architecture is not approved; signing settings remain disabled.",
+        ),
+        _check(
+            "endpoint_security_owner_not_assigned",
+            "MANUAL_REQUIRED",
+            "Endpoint/security owner for staging exposure is not recorded in governance gate.",
+        ),
     ]
 
     recepcion_status = meta["url_status"] if base_url else "BLOCKED"

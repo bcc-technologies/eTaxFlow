@@ -12,12 +12,14 @@ is an operational gap report, not certification evidence. Run:
 
 Phase 024 added source-backed checklist items from newly collected DGII PDFs.
 Phase 025 adds endpoint design metadata (`dgii_endpoint_plan`) — URLs remain BLOCKED until deployed.
+Phase 026 adds staging DNS/SSL deployment checklist and hardened disabled route stubs — still no live DGII, no production signing.
 
 See also:
 - `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
 - `docs/dgii/governance/PHASE_024_DGII_AUTHORIZATION_GATE.md`
-- `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`
 - `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md` (Phase 025 — design-only URLs)
+- `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md` (Phase 026 — staging DNS/SSL checklist)
+- `.env.staging.example` (Phase 026 — staging env placeholders only)
 
 ## Checklist
 
@@ -44,7 +46,7 @@ See also:
 | Acuse de Recibo (ARECF) support | NOT_IMPLEMENTED | Signed receipt-ack service; requires live endpoint + production signing. |
 | Aprobación Comercial (ACECF) support | NOT_IMPLEMENTED | Signed commercial-approval service; requires live endpoint + production signing. |
 | XML validation | PARTIAL | Resolve source/stub limitations; no empty tags; XML naming per emitter technical doc. |
-| SSL + internet-accessible receiver services | BLOCKED | Required when live; design in Phase 025, deploy later with human approval. |
+| SSL + internet-accessible receiver services | BLOCKED | Required when live; design in Phase 025, staging checklist in Phase 026 (`docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md`). Deploy only with human approval. |
 | Contingency policy | NOT_IMPLEMENTED | Approve and implement contingency per Instructivo Contingencia FE. |
 | Printed representation policy | PARTIAL | Review official RI models; local PDF remains NON_PRODUCTION_DRAFT. |
 | Logs/audit retention | PARTIAL | Define retention, export, monitoring, and review controls. |

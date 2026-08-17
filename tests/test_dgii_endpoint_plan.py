@@ -69,6 +69,8 @@ class DGIIEndpointPlanCommandTests(TestCase):
         self.assertFalse(payload["endpoints_enabled"])
         self.assertEqual(payload["compliance_status"], "NOT_DGII_COMPLIANT")
         self.assertFalse(payload["dgii_submission_allowed"])
+        self.assertEqual(payload["deployment_readiness_status"], "BLOCKED")
+        self.assertTrue(payload["manual_verification_required"])
 
 
 class DGIIPublicEndpointStubTests(TestCase):
@@ -98,6 +100,8 @@ class DGIIPublicEndpointStubTests(TestCase):
             self.assertEqual(payload["status"], "DISABLED")
             self.assertEqual(payload["compliance_status"], "NOT_DGII_COMPLIANT")
             self.assertFalse(payload["dgii_submission_allowed"])
+            self.assertIsNone(payload["track_id"])
+            self.assertIn("message", payload)
         self.assertEqual(ECFDocument.objects.count(), before_ecf)
 
     @override_settings(ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=True)

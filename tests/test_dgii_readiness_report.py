@@ -29,6 +29,17 @@ class DGIIRreadinessReportTests(TestCase):
         "autenticacion_url_blocked",
     )
 
+    PHASE_026_BLOCKERS = (
+        "staging_dns_not_verified",
+        "staging_ssl_not_verified",
+        "staging_external_reachability_not_verified",
+        "staging_environment_not_deployed",
+        "public_endpoint_routes_disabled",
+        "disabled_stub_only",
+        "production_signing_not_approved",
+        "endpoint_security_owner_not_assigned",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -44,6 +55,8 @@ class DGIIRreadinessReportTests(TestCase):
         for blocker in self.PHASE_024_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_025_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_026_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 
