@@ -59,15 +59,15 @@ Document at minimum:
 
 eTaxFlow repo policy: **no private keys committed**; production signer not approved.
 
-## Public URLs (required for solicitud — not deployed)
+## Public URLs (required for solicitud — design in Phase 025, not deployed)
 
-| URL field | Planned value | Environment | SSL verified | Owner | Status |
+| URL field | Planned value (example host) | Environment | SSL verified | Owner | Status |
 |---|---|---|---|---|---|
-| URL Recepción | _TBD_ | Pre-Cert / Cert / Prod | _TBD_ | _TBD_ | BLOCKED |
-| URL Aprobación Comercial | _TBD_ | Pre-Cert / Cert / Prod | _TBD_ | _TBD_ | BLOCKED |
-| URL Autenticación | _TBD_ | Pre-Cert / Cert / Prod | _TBD_ | _TBD_ | BLOCKED |
+| URL Recepción | `https://etaxflow.bcctechnologies.com.do/fe/recepcion/api/ecf` | Pre-Cert first | _TBD_ | _TBD_ | BLOCKED / DESIGN_ONLY |
+| URL Aprobación Comercial | `https://etaxflow.bcctechnologies.com.do/fe/aprobacioncomercial/api/ecf` | Pre-Cert first | _TBD_ | _TBD_ | BLOCKED / DESIGN_ONLY |
+| URL Autenticación | `https://etaxflow.bcctechnologies.com.do/fe/autenticacion/api/[semilla]validacioncertificado` | Pre-Cert first | _TBD_ | _TBD_ | BLOCKED / DESIGN_ONLY |
 
-Phase 025 will produce **design-only** endpoint specs; Phase 024 does not deploy them.
+Phase 025 documents these in `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`. Inspect with `python manage.py dgii_endpoint_plan`. **Do not submit to DGII portal until DNS, HTTPS, and internet accessibility are verified.** Route stubs exist but return 503 DISABLED when `ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`.
 
 ## Pre-certification / certification go-no-go
 

@@ -243,6 +243,22 @@ python manage.py validate_tipo31_unsigned_draft --internal-code BCC-AR-2026-0000
 
 Validation reports group errors (`signature_missing_expected`, `demo_facet_mismatch`, `local_xsd_stub_required`, etc.). After facet-safe seed/allocation, `avoidable_demo_facet_error_count` should drop; Signature remains intentionally missing and status stays `NOT_DGII_COMPLIANT`.
 
+## Pre-certification endpoint design (Phase 025)
+
+Phase 025 defines **design-only** DGII portal URL metadata for software registration. No live endpoints, no DGII calls, no compliance claim.
+
+Planned host example (not configured by default): `etaxflow.bcctechnologies.com.do`
+
+```bash
+python manage.py dgii_endpoint_plan
+python manage.py dgii_endpoint_plan --json
+python manage.py dgii_readiness_report --json
+```
+
+Default settings (`ETAXFLOW_*`) keep `ETAXFLOW_PUBLIC_BASE_URL` blank and `ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`. Route stubs at `/fe/recepcion/api/ecf`, `/fe/aprobacioncomercial/api/ecf`, and `/fe/autenticacion/api/{semilla,validacioncertificado}` return **503 DISABLED** JSON — not live DGII integration.
+
+**Do not submit portal URLs to DGII** until DNS, HTTPS, internet accessibility, roles, certificate, and authorization gate are human-approved. See `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

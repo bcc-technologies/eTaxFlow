@@ -4,6 +4,8 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from ecf.dgii.endpoint_readiness import build_endpoint_readiness_checks
+from ecf.dgii.endpoints import get_software_registration_metadata
 from ecf.dgii.inventory_status import source_inventory_status
 from ecf.models import ECFDocument
 from organizations.models import Organization
@@ -20,6 +22,8 @@ def _check(name: str, status: str, detail: str, *, blocker: bool = False) -> dic
 
 def build_readiness_report() -> dict:
     inventory = source_inventory_status()
+    endpoint_meta = get_software_registration_metadata()
+    endpoint_checks, endpoint_blocker_checks = build_endpoint_readiness_checks()
     configured_rnc_count = Organization.objects.exclude(rnc="").count()
     default_issuer_count = Organization.objects.filter(is_default_issuer=True).count()
     xsd_present = Path("docs/dgii/sources/e-CF_31_v1.0.xsd").is_file()
@@ -130,8 +134,11 @@ def build_readiness_report() -> dict:
         ),
         _check(
             "public_urls_not_deployed",
-            "BLOCKED",
-            "URL Recepción, URL Aprobación Comercial, and URL Autenticación are not deployed.",
+            endpoint_meta["url_status"],
+            (
+                "URL Recepción, URL Aprobación Comercial, and URL Autenticación are not "
+                "deployed or verified for DGII portal submission."
+            ),
             blocker=True,
         ),
         _check(
@@ -146,27 +153,8 @@ def build_readiness_report() -> dict:
             "Contingency process is not approved or implemented per Instructivo Contingencia FE.",
             blocker=True,
         ),
+        *endpoint_blocker_checks,
     ]
-    endpoint_checks = {
-        "url_recepcion": _check(
-            "url_recepcion",
-            "BLOCKED",
-            "Blank by default; no live reception endpoint is configured.",
-            blocker=True,
-        ),
-        "url_aprobacion_comercial": _check(
-            "url_aprobacion_comercial",
-            "BLOCKED",
-            "Blank by default; no live commercial approval endpoint is configured.",
-            blocker=True,
-        ),
-        "url_autenticacion": _check(
-            "url_autenticacion",
-            "BLOCKED",
-            "Blank by default; no live authentication endpoint is configured.",
-            blocker=True,
-        ),
-    }
     blockers = [item["name"] for item in checks if item["blocker"]]
     blockers.extend(name for name, item in endpoint_checks.items() if item["blocker"])
     missing_docs = [
@@ -181,12 +169,15 @@ def build_readiness_report() -> dict:
         "dgii_call_made": False,
         "track_id": None,
         "software": {
-            "name": settings.DGII_SOFTWARE_NAME,
-            "version": settings.DGII_SOFTWARE_VERSION,
-            "type": settings.DGII_SOFTWARE_TYPE,
+            "name": endpoint_meta["software_name"],
+            "version": endpoint_meta["software_version"],
+            "type": endpoint_meta["software_type"],
             "environment": settings.DGII_ENVIRONMENT,
-            "status": "READY",
+            "status": endpoint_meta["readiness_status"],
+            "public_base_url": endpoint_meta["public_base_url"],
+            "endpoints_enabled": endpoint_meta["endpoints_enabled"],
         },
+        "endpoint_plan": endpoint_meta,
         "endpoints": endpoint_checks,
         "checks": checks,
         "blockers": blockers,
@@ -209,6 +200,7 @@ def build_readiness_report() -> dict:
             "Read-only local report; no data mutation or network call occurred.",
             "MOCK service contracts and TEST_ONLY signing do not establish DGII readiness.",
             "Phase 024 source intake does not authorize live DGII calls or compliance.",
+            "Phase 025 endpoint plan is DESIGN_ONLY; do not submit portal URLs until deployed.",
             f"Existing ECFDocument rows: {ECFDocument.objects.count()} (not approval evidence).",
         ],
     }

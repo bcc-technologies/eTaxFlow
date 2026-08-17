@@ -11,19 +11,28 @@ is an operational gap report, not certification evidence. Run:
 ```
 
 Phase 024 added source-backed checklist items from newly collected DGII PDFs.
+Phase 025 adds endpoint design metadata (`dgii_endpoint_plan`) — URLs remain BLOCKED until deployed.
+
 See also:
 - `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
 - `docs/dgii/governance/PHASE_024_DGII_AUTHORIZATION_GATE.md`
+- `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`
+- `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md` (Phase 025 — design-only URLs)
 
 ## Checklist
 
 | Area | Current status | Required human/engineering action |
 |---|---|---|
 | Official source inventory reviewed | MANUAL_REQUIRED | Human review of Phase 024 inventory matrix; mark gate in authorization doc. |
-| Software name/version/type | READY (local metadata) | Confirm final registration metadata for DGII solicitud. |
-| URL Recepción | BLOCKED | Obtain and approve environment-specific HTTPS endpoint (internet-accessible). |
-| URL Aprobación Comercial | BLOCKED | Obtain and approve environment-specific HTTPS endpoint. |
-| URL Autenticación | BLOCKED | Obtain and approve environment-specific HTTPS endpoint. |
+| Endpoint design (Phase 025) | DESIGN_ONLY | Run `dgii_endpoint_plan`; URLs blocked until DNS/HTTPS/deploy approved. |
+| Software name/version/type | READY (local metadata) | Confirm final registration metadata for DGII solicitud (`PROPIO` / eTaxFlow / 0.1.0). |
+| URL Recepción | BLOCKED | Planned path `/fe/recepcion/api/ecf`; not deployed or HTTPS-verified. |
+| URL Aprobación Comercial | BLOCKED | Planned path `/fe/aprobacioncomercial/api/ecf`; not deployed. |
+| URL Autenticación | BLOCKED | Planned template `/fe/autenticacion/api/[semilla]validacioncertificado`; not deployed. |
+| Public base URL configured | BLOCKED | `ETAXFLOW_PUBLIC_BASE_URL` blank by default. |
+| Public DGII endpoints enabled | BLOCKED | `ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`; stubs return 503 DISABLED. |
+| Endpoint SSL verified | BLOCKED | HTTPS/TLS not verified for public host. |
+| Endpoint internet access verified | BLOCKED | External reachability not verified. |
 | RNC registered | PARTIAL | Verify issuer RNC and taxpayer records with tax owner (not demo synthetic). |
 | OFV access | MANUAL_REQUIRED | Confirm OFV enrollment, access, and responsible operator. |
 | Alta NCF / authorized eNCF | MANUAL_REQUIRED | Confirm authorized NCF/eNCF range workflow; local demo/XSD-facet ranges are not authorization. |

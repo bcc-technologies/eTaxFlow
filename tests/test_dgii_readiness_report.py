@@ -18,6 +18,17 @@ class DGIIRreadinessReportTests(TestCase):
         "contingency_process_not_approved",
     )
 
+    PHASE_025_BLOCKERS = (
+        "public_base_url_not_configured",
+        "public_dgii_endpoints_disabled",
+        "endpoint_ssl_not_verified",
+        "endpoint_internet_access_not_verified",
+        "endpoint_routes_not_implemented_or_not_verified",
+        "recepcion_url_blocked",
+        "aprobacion_comercial_url_blocked",
+        "autenticacion_url_blocked",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -31,6 +42,8 @@ class DGIIRreadinessReportTests(TestCase):
         self.assertIn("signing_readiness", report["blockers"])
         self.assertIn("url_recepcion", report["blockers"])
         for blocker in self.PHASE_024_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_025_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 
@@ -61,3 +74,4 @@ class DGIIRreadinessReportTests(TestCase):
         self.assertEqual(report["compliance_status"], "NOT_DGII_COMPLIANT")
         notes = " ".join(report.get("notes", []))
         self.assertIn("Phase 024", notes)
+        self.assertIn("endpoint_plan", report)

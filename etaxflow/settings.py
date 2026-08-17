@@ -122,4 +122,24 @@ DGII_LIVE_TRANSPORT_ENABLED = os.getenv(
     "DGII_LIVE_TRANSPORT_ENABLED", "false"
 ).lower() in {"1", "true", "yes", "on"}
 
+# Phase 025 — pre-certification endpoint design placeholders (disabled by default).
+# These are for DGII portal registration metadata composition only; not live endpoints.
+ETAXFLOW_SOFTWARE_NAME = os.getenv("ETAXFLOW_SOFTWARE_NAME", "eTaxFlow")
+ETAXFLOW_SOFTWARE_VERSION = os.getenv("ETAXFLOW_SOFTWARE_VERSION", "0.1.0")
+ETAXFLOW_SOFTWARE_TYPE = os.getenv("ETAXFLOW_SOFTWARE_TYPE", "PROPIO")
+ETAXFLOW_PUBLIC_BASE_URL = os.getenv("ETAXFLOW_PUBLIC_BASE_URL", "")
+ETAXFLOW_DGII_RECEPCION_PATH = os.getenv(
+    "ETAXFLOW_DGII_RECEPCION_PATH", "/fe/recepcion/api/ecf"
+)
+ETAXFLOW_DGII_APROBACION_COMERCIAL_PATH = os.getenv(
+    "ETAXFLOW_DGII_APROBACION_COMERCIAL_PATH", "/fe/aprobacioncomercial/api/ecf"
+)
+ETAXFLOW_DGII_AUTENTICACION_PATH_TEMPLATE = os.getenv(
+    "ETAXFLOW_DGII_AUTENTICACION_PATH_TEMPLATE",
+    "/fe/autenticacion/api/[semilla]validacioncertificado",
+)
+ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS = os.getenv(
+    "ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS", "false"
+).lower() in {"1", "true", "yes", "on"}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
