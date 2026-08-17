@@ -121,10 +121,13 @@ Do **not** fill or submit the DGII software postulation form until **all** are a
 - `docs/dgii/governance/PHASE_024_DGII_AUTHORIZATION_GATE.md`
 - `docs/dgii/PRE_CERTIFICATION_READINESS_CHECKLIST.md`
 - `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md` — Phase 026 staging DNS/SSL checklist (manual verification only)
+- `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md` — Phase 027 receiver contract (internal design only)
 - `.env.staging.example` — staging env placeholders (no real secrets)
+- `ecf/dgii/receiver.py` — internal classification skeleton
 - `ecf/dgii/endpoints.py` — URL composition helper
 - `ecf/management/commands/dgii_endpoint_plan.py` — read-only plan command
+- `ecf/management/commands/dgii_receiver_contract.py` — receiver support matrix
 
 ## Next phase
 
-**Phase 027 — Pre-certification receiver endpoint implementation plan** — internal contract and tests for ARECF/ACECF/ECF received; still no DGII live transport.
+**Phase 028 — Non-production inbound XML lab** — controlled synthetic XML testing internally, no public network, no DGII.

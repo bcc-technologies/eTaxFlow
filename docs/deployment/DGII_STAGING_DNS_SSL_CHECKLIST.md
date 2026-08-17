@@ -21,8 +21,10 @@ Environment separation: **Pre-Certificación**, **Certificación**, and **Produc
 Related artifacts:
 
 - `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`
+- `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md` (Phase 027 — internal receiver contract; routes remain disabled)
 - `.env.staging.example`
 - `python manage.py dgii_endpoint_plan`
+- `python manage.py dgii_receiver_contract`
 
 ## 2. Planned host
 

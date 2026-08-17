@@ -270,6 +270,23 @@ Phase 026 adds a **checklist-only** staging/pre-certification deployment guide. 
 
 **Do not submit URLs to DGII** until DNS, SSL, external reachability, and human sign-off (security, tax/compliance, staging owner) are complete.
 
+## Pre-certification receiver endpoint contract (Phase 027)
+
+Phase 027 defines the **internal receiver contract** for future ECF / ARECF / ACECF handling. No live processing, no persistence, no signature verification, no DGII calls.
+
+- Contract: `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md`
+- Internal module: `ecf/dgii/receiver.py` (classification helpers for contract/testing only)
+- Command: `python manage.py dgii_receiver_contract` / `--json`
+
+Public `/fe/...` routes remain **503 DISABLED**. Classification functions are not invoked from disabled public views.
+
+```bash
+python manage.py dgii_receiver_contract
+python manage.py dgii_receiver_contract --json
+```
+
+Next: **Phase 028 — Non-production inbound XML lab** (controlled synthetic XML internally; no public network; no DGII).
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

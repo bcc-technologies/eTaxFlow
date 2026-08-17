@@ -40,6 +40,17 @@ class DGIIRreadinessReportTests(TestCase):
         "endpoint_security_owner_not_assigned",
     )
 
+    PHASE_027_BLOCKERS = (
+        "receiver_processing_not_implemented",
+        "inbound_xml_signature_verification_not_implemented",
+        "inbound_persistence_not_implemented",
+        "inbound_duplicate_detection_not_implemented",
+        "acuse_receiver_workflow_not_implemented",
+        "aprobacion_comercial_receiver_workflow_not_implemented",
+        "ecf_receiver_workflow_not_implemented",
+        "receiver_security_controls_not_approved",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -57,6 +68,8 @@ class DGIIRreadinessReportTests(TestCase):
         for blocker in self.PHASE_025_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_026_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_027_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 

@@ -7,18 +7,12 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-_DISABLED_MESSAGE = "Public DGII-facing endpoints are disabled in this environment."
+from ecf.dgii.receiver import build_disabled_receiver_response
 
 
 def disabled_endpoint_payload() -> dict:
-    """Safe JSON body for disabled public DGII route stubs."""
-    return {
-        "status": "DISABLED",
-        "compliance_status": "NOT_DGII_COMPLIANT",
-        "dgii_submission_allowed": False,
-        "track_id": None,
-        "message": _DISABLED_MESSAGE,
-    }
+    """Backward-compatible alias for disabled stub JSON."""
+    return build_disabled_receiver_response()
 
 
 def _endpoint_response(request: HttpRequest) -> HttpResponse:
@@ -36,7 +30,7 @@ def _endpoint_response(request: HttpRequest) -> HttpResponse:
             },
             status=503,
         )
-    return JsonResponse(disabled_endpoint_payload(), status=503)
+    return JsonResponse(build_disabled_receiver_response(), status=503)
 
 
 @csrf_exempt

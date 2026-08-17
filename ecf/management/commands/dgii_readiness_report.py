@@ -7,6 +7,8 @@ from django.core.management.base import BaseCommand
 from ecf.dgii.endpoint_readiness import build_endpoint_readiness_checks
 from ecf.dgii.endpoints import get_software_registration_metadata
 from ecf.dgii.inventory_status import source_inventory_status
+from ecf.dgii.receiver import get_receiver_contract_metadata
+from ecf.dgii.receiver_readiness import build_receiver_readiness_checks
 from ecf.models import ECFDocument
 from organizations.models import Organization
 
@@ -23,7 +25,9 @@ def _check(name: str, status: str, detail: str, *, blocker: bool = False) -> dic
 def build_readiness_report() -> dict:
     inventory = source_inventory_status()
     endpoint_meta = get_software_registration_metadata()
+    receiver_meta = get_receiver_contract_metadata()
     endpoint_checks, endpoint_blocker_checks = build_endpoint_readiness_checks()
+    receiver_blocker_checks = build_receiver_readiness_checks()
     configured_rnc_count = Organization.objects.exclude(rnc="").count()
     default_issuer_count = Organization.objects.filter(is_default_issuer=True).count()
     xsd_present = Path("docs/dgii/sources/e-CF_31_v1.0.xsd").is_file()
@@ -154,6 +158,7 @@ def build_readiness_report() -> dict:
             blocker=True,
         ),
         *endpoint_blocker_checks,
+        *receiver_blocker_checks,
     ]
     blockers = [item["name"] for item in checks if item["blocker"]]
     blockers.extend(name for name, item in endpoint_checks.items() if item["blocker"])
@@ -178,6 +183,7 @@ def build_readiness_report() -> dict:
             "endpoints_enabled": endpoint_meta["endpoints_enabled"],
         },
         "endpoint_plan": endpoint_meta,
+        "receiver_contract": receiver_meta,
         "endpoints": endpoint_checks,
         "checks": checks,
         "blockers": blockers,
@@ -202,6 +208,7 @@ def build_readiness_report() -> dict:
             "Phase 024 source intake does not authorize live DGII calls or compliance.",
             "Phase 025 endpoint plan is DESIGN_ONLY; do not submit portal URLs until deployed.",
             "Phase 026 staging DNS/SSL checklist is manual only; no deployment performed.",
+            "Phase 027 receiver contract is internal design only; no live receiver processing.",
             f"Existing ECFDocument rows: {ECFDocument.objects.count()} (not approval evidence).",
         ],
     }
