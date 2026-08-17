@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NON_OFFICIAL_SYNTHETIC_SAMPLE — DO NOT SUBMIT TO DGII -->
+<!-- FAKE placeholder Signature — not valid production signature -->
+<ARECF>
+  <DetalleAcuse>
+    <RNCEmisor>000000000</RNCEmisor>
+    <eNCF>LAB0000000004</eNCF>
+  </DetalleAcuse>
+  <Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo/></Signature>
+</ARECF>

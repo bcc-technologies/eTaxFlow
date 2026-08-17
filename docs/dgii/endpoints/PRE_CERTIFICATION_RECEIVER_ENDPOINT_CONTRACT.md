@@ -143,6 +143,10 @@ Do **not** enable public receiver processing until:
 - `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md` — portal URL design
 - `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md` — staging DNS/SSL checklist
 
+- `ecf/dgii/inbound_lab.py` — non-production lab analysis (Phase 028)
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_XML_LAB.md` — lab documentation
+- `ecf/management/commands/dgii_inbound_xml_lab.py` — lab command
+
 ## Next phase
 
-**Phase 028 — Non-production inbound XML lab** — controlled synthetic XML testing internally, no public network, no DGII.
+**Phase 029 — Local inbound schema validation lab** — connect synthetic fixtures to local XSD offline; still no certification claim.

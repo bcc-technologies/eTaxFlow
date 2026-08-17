@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NON_OFFICIAL_SYNTHETIC_SAMPLE — DO NOT SUBMIT TO DGII -->
+<ECF>
+  <Encabezado>
+    <Emisor><RNCEmisor>000000000</RNCEmisor></Emisor>
+    <eNCF>LAB0000000001</eNCF>
+  </Encabezado>
+</ECF>

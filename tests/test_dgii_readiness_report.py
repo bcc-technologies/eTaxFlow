@@ -51,6 +51,16 @@ class DGIIRreadinessReportTests(TestCase):
         "receiver_security_controls_not_approved",
     )
 
+    PHASE_028_BLOCKERS = (
+        "inbound_lab_synthetic_only",
+        "inbound_schema_validation_not_claimed",
+        "inbound_signature_verification_not_implemented",
+        "inbound_persistence_not_implemented",
+        "inbound_public_processing_disabled",
+        "inbound_official_test_set_not_loaded",
+        "inbound_lab_not_certification_evidence",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -70,6 +80,8 @@ class DGIIRreadinessReportTests(TestCase):
         for blocker in self.PHASE_026_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_027_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_028_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 

@@ -22,9 +22,11 @@ Related artifacts:
 
 - `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`
 - `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md` (Phase 027 — internal receiver contract; routes remain disabled)
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_XML_LAB.md` (Phase 028 — synthetic inbound XML lab; not certification evidence)
 - `.env.staging.example`
 - `python manage.py dgii_endpoint_plan`
 - `python manage.py dgii_receiver_contract`
+- `python manage.py dgii_inbound_xml_lab` (Phase 028 — synthetic fixtures only)
 
 ## 2. Planned host
 

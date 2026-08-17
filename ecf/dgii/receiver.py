@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import StrEnum
+from pathlib import Path
 from typing import Any
 
 from lxml import etree
@@ -151,6 +152,7 @@ def get_receiver_contract_metadata() -> dict[str, Any]:
     from django.conf import settings
 
     endpoints_enabled = bool(getattr(settings, "ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS", False))
+    fixture_dir = Path("tests/fixtures/dgii/inbound_lab")
     return {
         "public_endpoints_enabled": endpoints_enabled,
         "receiver_processing_enabled": False,
@@ -158,6 +160,11 @@ def get_receiver_contract_metadata() -> dict[str, Any]:
         "signature_verification": "NOT_IMPLEMENTED",
         "signature_verification_implemented": signature_verification_implemented(),
         "persistence": "NOT_IMPLEMENTED",
+        "schema_validation": "NOT_CLAIMED",
+        "inbound_xml_lab_available": True,
+        "lab_mode": "NON_PRODUCTION_ONLY",
+        "synthetic_fixtures_available": fixture_dir.is_dir(),
+        "certification_evidence": False,
         "compliance_status": "NOT_DGII_COMPLIANT",
         "dgii_submission_allowed": False,
         "track_id_creation": "DISABLED",

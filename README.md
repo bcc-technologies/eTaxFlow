@@ -287,6 +287,23 @@ python manage.py dgii_receiver_contract --json
 
 Next: **Phase 028 — Non-production inbound XML lab** (controlled synthetic XML internally; no public network; no DGII).
 
+## Non-production inbound XML lab (Phase 028)
+
+Phase 028 adds a **controlled local lab** for synthetic ECF / ARECF / ACECF XML. Internal classification, SHA-256 hashing, and reporting only — no persistence, no signature verification, no DGII calls.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_XML_LAB.md`
+- Fixtures: `tests/fixtures/dgii/inbound_lab/` (`NON_OFFICIAL_SYNTHETIC_SAMPLE` — do not submit to DGII)
+- Module: `ecf/dgii/inbound_lab.py`
+- Public `/fe/...` routes remain **503 DISABLED**
+
+```bash
+python manage.py dgii_inbound_xml_lab
+python manage.py dgii_inbound_xml_lab --json
+python manage.py dgii_inbound_xml_lab --path tests/fixtures/dgii/inbound_lab/synthetic_ecf_unsigned.xml --json
+```
+
+Next: **Phase 029 — Local inbound schema validation lab** (offline XSD for ECF/ARECF/ACECF; still no certification claim).
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.
