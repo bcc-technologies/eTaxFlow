@@ -228,3 +228,6 @@ docs/dgii/sources/**/*.xlsx
 docs/dgii/sources/**/*.zip
 docs/dgii/sources/**/*.rar
 
+
+# Local generated media artifacts
+media/
