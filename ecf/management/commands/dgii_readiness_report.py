@@ -97,6 +97,55 @@ def build_readiness_report() -> dict:
             "Live DGII transport, production signing, certificate custody, and authorization controls are unavailable.",
             blocker=True,
         ),
+        # Phase 024 — source intake and human authorization gate blockers
+        _check(
+            "official_source_inventory_reviewed",
+            "MANUAL_REQUIRED",
+            "Phase 024 inventory collected locally; human review of DGII_ECF_DOCUMENT_INVENTORY and authorization gate is not confirmed.",
+            blocker=True,
+        ),
+        _check(
+            "usuario_administrador_ecf_not_confirmed",
+            "MANUAL_REQUIRED",
+            "Usuario Administrador e-CF must be assigned before DGII authorization request; no owner recorded in repo.",
+            blocker=True,
+        ),
+        _check(
+            "representative_certificate_owner_not_confirmed",
+            "MANUAL_REQUIRED",
+            "Representative linked to RNC and certificate owner are not confirmed.",
+            blocker=True,
+        ),
+        _check(
+            "production_signing_architecture_not_approved",
+            "BLOCKED",
+            "Production XMLDSig architecture and key custody are not approved; only test sandbox and placeholder exist.",
+            blocker=True,
+        ),
+        _check(
+            "official_encf_authorization_ranges_not_confirmed",
+            "MANUAL_REQUIRED",
+            "Authorized Alta NCF/eNCF ranges are not confirmed; local demo/XSD-facet sequences are non-authorized.",
+            blocker=True,
+        ),
+        _check(
+            "public_urls_not_deployed",
+            "BLOCKED",
+            "URL Recepción, URL Aprobación Comercial, and URL Autenticación are not deployed.",
+            blocker=True,
+        ),
+        _check(
+            "acuse_aprobacion_services_not_live",
+            "NOT_IMPLEMENTED",
+            "Signed Acuse de Recibo (ARECF) and Aprobación Comercial (ACECF) receiver services are not live.",
+            blocker=True,
+        ),
+        _check(
+            "contingency_process_not_approved",
+            "NOT_IMPLEMENTED",
+            "Contingency process is not approved or implemented per Instructivo Contingencia FE.",
+            blocker=True,
+        ),
     ]
     endpoint_checks = {
         "url_recepcion": _check(
@@ -144,16 +193,22 @@ def build_readiness_report() -> dict:
         "remaining_dgii_documentation_missing": missing_docs,
         "source_inventory": inventory,
         "manual_decisions_required": [
+            "Choose internal own software vs certified FE provider route (Phase 024 gate).",
+            "Assign Usuario Administrador e-CF before any DGII authorization request.",
             "Confirm OFV enrollment and access owner.",
             "Confirm authorized Alta NCF/eNCF process and ranges.",
+            "Confirm representative linked to RNC and certificate owner.",
             "Choose production certificate custody and approved signer backend.",
-            "Collect and review missing DGII/legal/certification source documents.",
+            "Review Phase 024 official source inventory and authorization gate.",
+            "Collect and review missing DGII/legal source documents (Norma/Ley/Decreto).",
             "Approve staging backup, retention, contingency, and incident-response policies.",
+            "Approve and deploy public URLs (Recepción, Aprobación Comercial, Autenticación) when ready.",
         ],
         "not_certification_evidence": True,
         "notes": [
             "Read-only local report; no data mutation or network call occurred.",
             "MOCK service contracts and TEST_ONLY signing do not establish DGII readiness.",
+            "Phase 024 source intake does not authorize live DGII calls or compliance.",
             f"Existing ECFDocument rows: {ECFDocument.objects.count()} (not approval evidence).",
         ],
     }

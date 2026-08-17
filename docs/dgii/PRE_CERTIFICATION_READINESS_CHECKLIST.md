@@ -10,33 +10,50 @@ is an operational gap report, not certification evidence. Run:
 .venv/bin/python manage.py dgii_readiness_report --json
 ```
 
+Phase 024 added source-backed checklist items from newly collected DGII PDFs.
+See also:
+- `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
+- `docs/dgii/governance/PHASE_024_DGII_AUTHORIZATION_GATE.md`
+
 ## Checklist
 
 | Area | Current status | Required human/engineering action |
 |---|---|---|
-| Software name/version/type | READY (local metadata) | Confirm final registration metadata. |
-| URL Recepción | BLOCKED | Obtain and approve environment-specific endpoint. |
-| URL Aprobación Comercial | BLOCKED | Obtain and approve environment-specific endpoint. |
-| URL Autenticación | BLOCKED | Obtain and approve environment-specific endpoint. |
-| RNC readiness | PARTIAL | Verify issuer RNC and taxpayer records with the owner. |
-| OFV readiness | MANUAL_REQUIRED | Confirm OFV enrollment, access, and responsible operator. |
-| Alta NCF | MANUAL_REQUIRED | Confirm authorized NCF/eNCF range workflow and records. |
-| Certificate readiness | BLOCKED | Select custody, certificate, rotation, and revocation process. |
-| Signing readiness | BLOCKED | Complete approved XMLDSig architecture and signer integration. |
-| XML validation | PARTIAL | Resolve source/stub limitations and perform authoritative review. |
-| Printed representation | PARTIAL | Review official representation requirements and source-backed QR/security data. |
-| Contingency | NOT_IMPLEMENTED | Design and test contingency/regularization/reconciliation workflow. |
+| Official source inventory reviewed | MANUAL_REQUIRED | Human review of Phase 024 inventory matrix; mark gate in authorization doc. |
+| Software name/version/type | READY (local metadata) | Confirm final registration metadata for DGII solicitud. |
+| URL Recepción | BLOCKED | Obtain and approve environment-specific HTTPS endpoint (internet-accessible). |
+| URL Aprobación Comercial | BLOCKED | Obtain and approve environment-specific HTTPS endpoint. |
+| URL Autenticación | BLOCKED | Obtain and approve environment-specific HTTPS endpoint. |
+| RNC registered | PARTIAL | Verify issuer RNC and taxpayer records with tax owner (not demo synthetic). |
+| OFV access | MANUAL_REQUIRED | Confirm OFV enrollment, access, and responsible operator. |
+| Alta NCF / authorized eNCF | MANUAL_REQUIRED | Confirm authorized NCF/eNCF range workflow; local demo/XSD-facet ranges are not authorization. |
+| Usuario Administrador e-CF | MANUAL_REQUIRED | Assign before authorization request; maintain RNC, OFV, certificado tributario. |
+| Representative linked to RNC | MANUAL_REQUIRED | Confirm legal/tax representative and certificate linkage. |
+| Certificate digital (procedimiento tributario) | BLOCKED | Select custody, certificate, rotation, and revocation process. |
+| Internal software vs certified provider route | MANUAL_REQUIRED | Choose route A (own software) or B (certified provider) in authorization gate. |
+| Signing readiness (SHA-256 XMLDSig) | BLOCKED | Approve production XMLDSig architecture; enveloping, `Reference URI=""`, X509 KeyInfo. |
+| Acuse de Recibo (ARECF) support | NOT_IMPLEMENTED | Signed receipt-ack service; requires live endpoint + production signing. |
+| Aprobación Comercial (ACECF) support | NOT_IMPLEMENTED | Signed commercial-approval service; requires live endpoint + production signing. |
+| XML validation | PARTIAL | Resolve source/stub limitations; no empty tags; XML naming per emitter technical doc. |
+| SSL + internet-accessible receiver services | BLOCKED | Required when live; design in Phase 025, deploy later with human approval. |
+| Contingency policy | NOT_IMPLEMENTED | Approve and implement contingency per Instructivo Contingencia FE. |
+| Printed representation policy | PARTIAL | Review official RI models; local PDF remains NON_PRODUCTION_DRAFT. |
 | Logs/audit retention | PARTIAL | Define retention, export, monitoring, and review controls. |
 | Backups | NOT_IMPLEMENTED | Implement encrypted backups, restore tests, and recovery ownership. |
-| Secrets handling | PARTIAL | Integrate a deployment secret manager and redaction controls. |
+| Secrets handling | PARTIAL | Integrate deployment secret manager; no private keys in repo. |
 | Security blockers | BLOCKED | Close live transport, signing, certificate, authorization, and access-control gaps. |
 
 ## Remaining documentation
 
 The command reads `docs/dgii/DGII_ECF_DOCUMENT_INVENTORY.md` through the local
-inventory helper. Missing legal/service/certification sources remain blocked
-until a human provides and reviews authoritative copies. Official certification
-test cases must not be invented.
+inventory helper. Missing legal sources remain blocked until a human provides
+authoritative copies:
+
+- `Norma_General_01-2020.pdf`
+- `Ley_32-23.pdf`
+- `Decreto_587-24.pdf`
+
+Official certification test cases must not be invented.
 
 ## Explicit non-claims
 
@@ -44,3 +61,4 @@ test cases must not be invented.
 - No TrackId is created.
 - Local mock contracts and test-only signatures do not satisfy certification.
 - A local XSD or PDF result does not establish DGII approval.
+- Phase 024 source intake does not change `NOT_DGII_COMPLIANT`.
