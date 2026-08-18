@@ -304,6 +304,24 @@ python manage.py dgii_inbound_xml_lab --path tests/fixtures/dgii/inbound_lab/syn
 
 Next: **Phase 029 — Local inbound schema validation lab** (offline XSD for ECF/ARECF/ACECF; still no certification claim).
 
+## Local inbound schema validation lab (Phase 029)
+
+Phase 029 adds **local/offline XSD validation** for synthetic inbound fixtures. A local XSD pass is **not** DGII acceptance, certification, or compliance.
+
+- Lab doc: `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md`
+- Module: `ecf/dgii/inbound_schema_lab.py`
+- Mapping: ECF → `e-CF_31_v1.0.xsd` (Tipo 31 lab only); ARECF → `ARECF_v1.0.xsd`; ACECF → `ACECF_v1.0.xsd`
+- `dgii_inbound_xml_lab` remains classification-only (`schema_validation_status=NOT_RUN_BY_DEFAULT`)
+- Public `/fe/...` routes remain **503 DISABLED**
+
+```bash
+python manage.py dgii_inbound_schema_lab
+python manage.py dgii_inbound_schema_lab --json
+python manage.py dgii_inbound_schema_lab --path tests/fixtures/dgii/inbound_lab/synthetic_ecf_unsigned.xml --json
+```
+
+Synthetic fixtures are deliberately minimal and may be locally XSD-invalid. That is expected.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

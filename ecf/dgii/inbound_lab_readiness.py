@@ -18,7 +18,7 @@ def build_inbound_lab_readiness_checks() -> list[dict[str, Any]]:
         _check(
             "inbound_schema_validation_not_claimed",
             "NOT_CLAIMED",
-            "Lab does not claim XSD/schema compliance; local schema validation is a future phase.",
+            "Lab XSD results are LOCAL_OFFLINE_ONLY and are not DGII schema-compliance evidence.",
         ),
         _check(
             "inbound_signature_verification_not_implemented",

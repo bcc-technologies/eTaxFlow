@@ -59,6 +59,12 @@ class Command(BaseCommand):
             self.stdout.write(f"not_certification_evidence: {report['not_certification_evidence']}")
             self.stdout.write(f"fixture_count: {report['fixture_count']}")
             self.stdout.write(f"error_count: {report['error_count']}")
+            self.stdout.write(
+                f"schema_validation_status: {report['schema_validation_status']}"
+            )
+            self.stdout.write(
+                f"schema_validation_command: {report['schema_validation_command']}"
+            )
             self.stdout.write("")
             for item in report["results"]:
                 self.stdout.write(

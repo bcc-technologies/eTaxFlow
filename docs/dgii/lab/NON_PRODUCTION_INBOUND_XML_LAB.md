@@ -80,7 +80,7 @@ Each analyzed fixture produces:
 - Safe XML parser: entity expansion disabled, no external entity resolution, no network fetch during parse
 - Do not log full XML bodies in production (future logging policy)
 - Body size limits — future phase
-- Persistence — future phase (Phase 029+ schema lab, later storage)
+- Persistence — not implemented; Phase 029 adds local XSD validation only, still no DB writes
 
 ## 7. Exit criteria
 
@@ -92,9 +92,13 @@ Each analyzed fixture produces:
 ## Related artifacts
 
 - `ecf/dgii/inbound_lab.py` — lab analysis functions
+- `ecf/dgii/inbound_schema_lab.py` — Phase 029 local/offline XSD validation
+- `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md`
 - `ecf/dgii/receiver.py` — classification helpers
 - `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md`
 
+`dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Use `dgii_inbound_schema_lab` for local XSD results. A local XSD pass is not DGII acceptance.
+
 ## Next phase
 
-**Phase 029 — Local inbound schema validation lab** — connect synthetic fixtures to local XSD offline; still no certification claim.
+**Phase 030 — Local inbound signature verification lab** — still non-production, no live DGII, no TrackId.

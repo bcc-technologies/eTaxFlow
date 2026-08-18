@@ -15,6 +15,7 @@ Phase 025 adds endpoint design metadata (`dgii_endpoint_plan`) — URLs remain B
 Phase 026 adds staging DNS/SSL deployment checklist and hardened disabled route stubs — still no live DGII, no production signing.
 Phase 027 adds internal receiver endpoint contract (ECF/ARECF/ACECF classification skeleton) — public routes remain disabled; no persistence or signature verification.
 Phase 028 adds non-production inbound XML lab with synthetic fixtures — internal command only; not certification evidence.
+Phase 029 adds local/offline inbound XSD validation (`dgii_inbound_schema_lab`) — LOCAL_OFFLINE_ONLY; local valid is not DGII acceptance.
 
 See also:
 - `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
@@ -23,6 +24,7 @@ See also:
 - `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md` (Phase 026 — staging DNS/SSL checklist)
 - `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md` (Phase 027 — receiver contract)
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_XML_LAB.md` (Phase 028 — synthetic inbound XML lab)
+- `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md` (Phase 029 — local/offline XSD lab)
 - `.env.staging.example` (Phase 026 — staging env placeholders only)
 
 ## Checklist

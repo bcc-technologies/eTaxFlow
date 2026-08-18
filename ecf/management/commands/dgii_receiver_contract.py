@@ -27,6 +27,15 @@ class Command(BaseCommand):
         self.stdout.write(f"supported_roots: {', '.join(meta['supported_roots'])}")
         self.stdout.write(f"signature_verification: {meta['signature_verification']}")
         self.stdout.write(f"schema_validation: {meta['schema_validation']}")
+        self.stdout.write(
+            f"local_inbound_schema_lab_available: {meta['local_inbound_schema_lab_available']}"
+        )
+        self.stdout.write(f"schema_validation_scope: {meta['schema_validation_scope']}")
+        self.stdout.write(f"schema_validation_command: {meta['schema_validation_command']}")
+        self.stdout.write(
+            f"schema_validation_certification_evidence: {meta['schema_validation_certification_evidence']}"
+        )
+        self.stdout.write(f"supported_schema_roots: {', '.join(meta['supported_schema_roots'])}")
         self.stdout.write(f"inbound_xml_lab_available: {meta['inbound_xml_lab_available']}")
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
