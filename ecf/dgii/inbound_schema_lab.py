@@ -322,5 +322,8 @@ def build_schema_lab_report(results: list[InboundSchemaLabResult]) -> dict[str, 
         "xsd_mapping": {
             doc_type: filename for doc_type, filename in DEFAULT_XSD_BY_DOCUMENT_TYPE.items()
         },
+        "signature_verification_available": True,
+        "signature_verification_command": "dgii_inbound_signature_lab",
+        "signature_verification_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }

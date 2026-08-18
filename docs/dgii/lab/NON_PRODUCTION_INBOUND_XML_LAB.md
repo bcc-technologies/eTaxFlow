@@ -97,8 +97,8 @@ Each analyzed fixture produces:
 - `ecf/dgii/receiver.py` — classification helpers
 - `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md`
 
-`dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Use `dgii_inbound_schema_lab` for local XSD results. A local XSD pass is not DGII acceptance.
+`dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Use `dgii_inbound_schema_lab` for local XSD results. A local XSD pass is not DGII acceptance. Signature verification is a separate command: `dgii_inbound_signature_lab` (Phase 030, LOCAL_OFFLINE_TEST_ONLY; presence ≠ valid).
 
 ## Next phase
 
-**Phase 030 — Local inbound signature verification lab** — still non-production, no live DGII, no TrackId.
+**Phase 031 — Non-production inbound persistence lab** — still no public endpoints, no DGII live, no TrackId.

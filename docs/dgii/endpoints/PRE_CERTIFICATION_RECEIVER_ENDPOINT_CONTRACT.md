@@ -148,9 +148,11 @@ Do **not** enable public receiver processing until:
 - `ecf/management/commands/dgii_inbound_xml_lab.py` — lab command
 - `ecf/dgii/inbound_schema_lab.py` — local/offline XSD validation (Phase 029)
 - `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md` — schema lab documentation
+- `ecf/dgii/inbound_signature_lab.py` — local/offline XMLDSig inspection (Phase 030)
+- `docs/dgii/lab/LOCAL_INBOUND_SIGNATURE_VERIFICATION_LAB.md` — signature lab documentation
 
-Local XSD validation is **LOCAL_OFFLINE_ONLY**. Synthetic samples may be locally invalid. Local valid ≠ DGII acceptance. Public routes remain disabled. No persistence, no signature verification, no DGII calls.
+Local XSD validation is **LOCAL_OFFLINE_ONLY**. Signature lab is **LOCAL_OFFLINE_TEST_ONLY**: presence ≠ valid; cryptographic XMLDSig is NOT_IMPLEMENTED. No production certs, no private keys. Public routes remain disabled. No persistence. No DGII calls.
 
 ## Next phase
 
-**Phase 030 — Local inbound signature verification lab** — still non-production, no live DGII, no TrackId.
+**Phase 031 — Non-production inbound persistence lab** — still no public endpoints, no DGII live, no TrackId.

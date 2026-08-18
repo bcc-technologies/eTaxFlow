@@ -322,6 +322,23 @@ python manage.py dgii_inbound_schema_lab --path tests/fixtures/dgii/inbound_lab/
 
 Synthetic fixtures are deliberately minimal and may be locally XSD-invalid. That is expected.
 
+## Local inbound signature verification lab (Phase 030)
+
+Phase 030 adds **local/offline XMLDSig inspection** for synthetic inbound fixtures. Signature present ≠ valid. Cryptographic verification is **NOT_IMPLEMENTED** (no `signxml`, no production certs, no private keys).
+
+- Lab doc: `docs/dgii/lab/LOCAL_INBOUND_SIGNATURE_VERIFICATION_LAB.md`
+- Module: `ecf/dgii/inbound_signature_lab.py`
+- Placeholder signatures classify as `PLACEHOLDER_ONLY`, never `TEST_ONLY_VALID`
+- `dgii_inbound_xml_lab` / `dgii_inbound_schema_lab` do not run signature verification by default
+- Public `/fe/...` routes remain **503 DISABLED**
+
+```bash
+python manage.py dgii_inbound_signature_lab
+python manage.py dgii_inbound_signature_lab --json
+python manage.py dgii_inbound_signature_lab --path tests/fixtures/dgii/inbound_lab/synthetic_ecf_signed_placeholder.xml --json
+```
+
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

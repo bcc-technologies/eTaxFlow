@@ -97,5 +97,8 @@ def build_lab_report(results: list[InboundLabResult]) -> dict[str, Any]:
         "schema_validation_available": True,
         "schema_validation_command": "dgii_inbound_schema_lab",
         "schema_validation_status": "NOT_RUN_BY_DEFAULT",
+        "signature_verification_available": True,
+        "signature_verification_command": "dgii_inbound_signature_lab",
+        "signature_verification_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }

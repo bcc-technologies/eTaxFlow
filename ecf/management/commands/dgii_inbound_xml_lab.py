@@ -65,6 +65,12 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"schema_validation_command: {report['schema_validation_command']}"
             )
+            self.stdout.write(
+                f"signature_verification_status: {report['signature_verification_status']}"
+            )
+            self.stdout.write(
+                f"signature_verification_command: {report['signature_verification_command']}"
+            )
             self.stdout.write("")
             for item in report["results"]:
                 self.stdout.write(

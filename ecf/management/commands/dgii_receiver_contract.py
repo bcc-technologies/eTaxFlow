@@ -30,6 +30,12 @@ class Command(BaseCommand):
         self.stdout.write(
             f"local_inbound_schema_lab_available: {meta['local_inbound_schema_lab_available']}"
         )
+        self.stdout.write(
+            f"local_inbound_signature_lab_available: {meta['local_inbound_signature_lab_available']}"
+        )
+        self.stdout.write(f"signature_verification_scope: {meta['signature_verification_scope']}")
+        self.stdout.write(f"signature_verification_command: {meta['signature_verification_command']}")
+        self.stdout.write(f"production_signature_ready: {meta['production_signature_ready']}")
         self.stdout.write(f"schema_validation_scope: {meta['schema_validation_scope']}")
         self.stdout.write(f"schema_validation_command: {meta['schema_validation_command']}")
         self.stdout.write(

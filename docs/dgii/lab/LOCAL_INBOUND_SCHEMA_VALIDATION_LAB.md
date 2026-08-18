@@ -110,8 +110,11 @@ Tests verify **honest reporting**, not fake validity.
 - `ecf/dgii/inbound_schema_lab.py`
 - `ecf/management/commands/dgii_inbound_schema_lab.py`
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_XML_LAB.md`
+- `docs/dgii/lab/LOCAL_INBOUND_SIGNATURE_VERIFICATION_LAB.md` (Phase 030 — inspection only; presence ≠ valid)
 - `tests/fixtures/dgii/inbound_lab/`
+
+Signature verification is **not** run by `dgii_inbound_schema_lab` (`signature_verification_status=NOT_RUN_BY_DEFAULT`).
 
 ## Next phase
 
-**Phase 030 — Local inbound signature verification lab** — still non-production, no live DGII, no TrackId.
+**Phase 031 — Non-production inbound persistence lab** — still no public endpoints, no DGII live, no TrackId.

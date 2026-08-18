@@ -69,6 +69,9 @@ class Command(BaseCommand):
             self.stdout.write(f"fixture_count: {report['fixture_count']}")
             self.stdout.write(f"local_xsd_invalid_count: {report['local_xsd_invalid_count']}")
             self.stdout.write(f"xsd_mapping: {report['xsd_mapping']}")
+            self.stdout.write(
+                f"signature_verification_status: {report['signature_verification_status']}"
+            )
             if not options.get("summary_only"):
                 self.stdout.write("")
                 for item in report["results"]:

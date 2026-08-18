@@ -72,6 +72,18 @@ class DGIIRreadinessReportTests(TestCase):
         "inbound_persistence_still_not_implemented",
     )
 
+    PHASE_030_BLOCKERS = (
+        "local_inbound_signature_lab_only",
+        "signature_presence_not_signature_validity",
+        "production_signature_verification_not_implemented",
+        "certificate_trust_chain_validation_not_implemented",
+        "revocation_check_not_implemented",
+        "official_certificate_policy_not_approved",
+        "inbound_signature_results_not_certification_evidence",
+        "inbound_public_processing_still_disabled",
+        "inbound_persistence_still_not_implemented",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -95,6 +107,8 @@ class DGIIRreadinessReportTests(TestCase):
         for blocker in self.PHASE_028_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_029_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_030_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 
