@@ -112,9 +112,10 @@ Tests verify **honest reporting**, not fake validity.
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_XML_LAB.md`
 - `docs/dgii/lab/LOCAL_INBOUND_SIGNATURE_VERIFICATION_LAB.md` (Phase 030 — inspection only; presence ≠ valid)
 - `tests/fixtures/dgii/inbound_lab/`
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_PERSISTENCE_LAB.md` (Phase 031 — lab-only persistence)
 
-Signature verification is **not** run by `dgii_inbound_schema_lab` (`signature_verification_status=NOT_RUN_BY_DEFAULT`).
+Signature verification is **not** run by `dgii_inbound_schema_lab` (`signature_verification_status=NOT_RUN_BY_DEFAULT`). Persistence is a separate command (`persistence_status=NOT_RUN_BY_DEFAULT`).
 
 ## Next phase
 
-**Phase 031 — Non-production inbound persistence lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 032 — Non-production inbound workflow routing lab** — still no public endpoints, no DGII live, no TrackId.

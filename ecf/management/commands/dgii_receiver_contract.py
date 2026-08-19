@@ -43,6 +43,16 @@ class Command(BaseCommand):
         )
         self.stdout.write(f"supported_schema_roots: {', '.join(meta['supported_schema_roots'])}")
         self.stdout.write(f"inbound_xml_lab_available: {meta['inbound_xml_lab_available']}")
+        self.stdout.write(
+            f"non_production_inbound_persistence_lab_available: {meta['non_production_inbound_persistence_lab_available']}"
+        )
+        self.stdout.write(f"persistence_scope: {meta['persistence_scope']}")
+        self.stdout.write(f"persistence_command: {meta['persistence_command']}")
+        self.stdout.write(f"production_persistence_ready: {meta['production_persistence_ready']}")
+        self.stdout.write(
+            f"public_route_persistence_enabled: {meta['public_route_persistence_enabled']}"
+        )
+        self.stdout.write(f"raw_xml_storage_default: {meta['raw_xml_storage_default']}")
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

@@ -338,6 +338,19 @@ python manage.py dgii_inbound_signature_lab --json
 python manage.py dgii_inbound_signature_lab --path tests/fixtures/dgii/inbound_lab/synthetic_ecf_signed_placeholder.xml --json
 ```
 
+## Non-production inbound persistence lab (Phase 031)
+
+Phase 031 adds **lab-only** `InboundXMLLabRecord` rows for synthetic analysis. Default is dry-run. `--persist-lab-records` writes lab rows only. Raw XML is off unless `--store-raw-lab-xml`. These rows are **not** fiscal documents.
+
+```bash
+python manage.py dgii_inbound_persistence_lab
+python manage.py dgii_inbound_persistence_lab --json
+python manage.py dgii_inbound_persistence_lab --persist-lab-records --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED** and must not persist. Lab rows are not fiscal documents, not DGII acceptance, and not certification evidence. No TrackId.
+
+Next: **Phase 032 — Non-production inbound workflow routing lab**.
 
 ## Warnings
 

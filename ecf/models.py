@@ -83,3 +83,47 @@ class ECFDocument(models.Model):
     def has_real_signed_artifact(self) -> bool:
         """True only when a signed XML file exists — never set by placeholder flow."""
         return bool(self.xml_signed_file)
+
+
+class InboundXMLLabRecord(models.Model):
+    """NON_PRODUCTION_LAB_ONLY analysis row. Not a fiscal document. Not DGII evidence."""
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    source_path = models.CharField(max_length=512, blank=True)
+    filename = models.CharField(max_length=255, blank=True)
+    raw_sha256 = models.CharField(max_length=64, unique=True, db_index=True)
+    raw_size_bytes = models.PositiveIntegerField(default=0)
+    root_tag = models.CharField(max_length=64, blank=True, db_index=True)
+    document_type = models.CharField(max_length=32, db_index=True)
+    classification_status = models.CharField(max_length=64, blank=True)
+    signature_present = models.BooleanField(default=False)
+    signature_verification_status = models.CharField(max_length=64, blank=True)
+    signature_verified = models.BooleanField(default=False)
+    production_signature_ready = models.BooleanField(default=False)
+    schema_validation_scope = models.CharField(max_length=64, blank=True)
+    xsd_path = models.CharField(max_length=512, blank=True)
+    xsd_available = models.BooleanField(default=False)
+    xsd_compiled = models.BooleanField(default=False)
+    local_xsd_valid = models.BooleanField(null=True, blank=True)
+    xsd_error_count = models.PositiveIntegerField(default=0)
+    errors_json = models.JSONField(default=list)
+    persisted_raw_xml = models.BooleanField(default=False)
+    raw_xml_text = models.TextField(blank=True, default="")
+    compliance_status = models.CharField(max_length=32, default="NOT_DGII_COMPLIANT")
+    dgii_submission_allowed = models.BooleanField(default=False)
+    certification_evidence = models.BooleanField(default=False)
+    track_id = models.CharField(max_length=255, null=True, blank=True, default=None)
+    dgii_call_made = models.BooleanField(default=False)
+    lab_mode = models.CharField(max_length=40, default="NON_PRODUCTION_LAB_ONLY")
+
+    class Meta:
+        verbose_name = "Inbound XML lab record (NON_PRODUCTION_LAB_ONLY)"
+        verbose_name_plural = "Inbound XML lab records (NON_PRODUCTION_LAB_ONLY)"
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["document_type", "root_tag"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Lab {self.document_type} {self.filename or self.raw_sha256[:12]}"

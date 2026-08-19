@@ -279,7 +279,7 @@ def analyze_inbound_xml_with_local_xsd(
             xsd_compiled=False,
             local_xsd_valid=False,
             xsd_error_count=1,
-            xsd_errors=("xsd_unavailable" if mapping.status == "MISSING" else "xsd_unmapped"),
+            xsd_errors=("xsd_unavailable" if mapping.status == "MISSING" else "xsd_unmapped",),
         )
         return _merge_lab_and_xsd(lab, xsd)
     xsd = validate_xml_against_local_xsd(xml_bytes, mapping.xsd_path)
@@ -325,5 +325,8 @@ def build_schema_lab_report(results: list[InboundSchemaLabResult]) -> dict[str, 
         "signature_verification_available": True,
         "signature_verification_command": "dgii_inbound_signature_lab",
         "signature_verification_status": "NOT_RUN_BY_DEFAULT",
+        "persistence_lab_available": True,
+        "persistence_command": "dgii_inbound_persistence_lab",
+        "persistence_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }

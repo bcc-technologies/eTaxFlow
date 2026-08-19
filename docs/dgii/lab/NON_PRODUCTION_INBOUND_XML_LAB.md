@@ -80,7 +80,7 @@ Each analyzed fixture produces:
 - Safe XML parser: entity expansion disabled, no external entity resolution, no network fetch during parse
 - Do not log full XML bodies in production (future logging policy)
 - Body size limits — future phase
-- Persistence — not implemented; Phase 029 adds local XSD validation only, still no DB writes
+- Persistence — this command does not write the database (`persistence_status=NOT_RUN_BY_DEFAULT`). Phase 031 adds `dgii_inbound_persistence_lab` (dry-run default; lab-only model).
 
 ## 7. Exit criteria
 
@@ -94,11 +94,12 @@ Each analyzed fixture produces:
 - `ecf/dgii/inbound_lab.py` — lab analysis functions
 - `ecf/dgii/inbound_schema_lab.py` — Phase 029 local/offline XSD validation
 - `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md`
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_PERSISTENCE_LAB.md` — Phase 031 lab-only persistence
 - `ecf/dgii/receiver.py` — classification helpers
 - `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md`
 
-`dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Use `dgii_inbound_schema_lab` for local XSD results. A local XSD pass is not DGII acceptance. Signature verification is a separate command: `dgii_inbound_signature_lab` (Phase 030, LOCAL_OFFLINE_TEST_ONLY; presence ≠ valid).
+`dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Persistence is a separate command: `dgii_inbound_persistence_lab` (Phase 031, dry-run default).
 
 ## Next phase
 
-**Phase 031 — Non-production inbound persistence lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 032 — Non-production inbound workflow routing lab** — still no public endpoints, no DGII live, no TrackId.

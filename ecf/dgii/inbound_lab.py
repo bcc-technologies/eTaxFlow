@@ -100,5 +100,8 @@ def build_lab_report(results: list[InboundLabResult]) -> dict[str, Any]:
         "signature_verification_available": True,
         "signature_verification_command": "dgii_inbound_signature_lab",
         "signature_verification_status": "NOT_RUN_BY_DEFAULT",
+        "persistence_lab_available": True,
+        "persistence_command": "dgii_inbound_persistence_lab",
+        "persistence_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }

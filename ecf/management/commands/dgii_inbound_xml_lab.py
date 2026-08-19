@@ -71,6 +71,9 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"signature_verification_command: {report['signature_verification_command']}"
             )
+            self.stdout.write(f"persistence_lab_available: {report['persistence_lab_available']}")
+            self.stdout.write(f"persistence_command: {report['persistence_command']}")
+            self.stdout.write(f"persistence_status: {report['persistence_status']}")
             self.stdout.write("")
             for item in report["results"]:
                 self.stdout.write(
