@@ -380,5 +380,8 @@ def build_audit_retention_lab_report(
         "result_count": len(results),
         "applied_count": sum(1 for item in results if item.get("applied")),
         "retention_decision_counts": decision_counts,
+        "security_policy_lab_available": True,
+        "security_policy_command": "dgii_inbound_security_policy_lab",
+        "security_policy_status": "NOT_RUN_BY_DEFAULT",
         "results": results,
     }

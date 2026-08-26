@@ -145,6 +145,9 @@ class Command(BaseCommand):
         self.stdout.write(f"result_count: {report['result_count']}")
         self.stdout.write(f"applied_count: {report['applied_count']}")
         self.stdout.write(f"retention_decision_counts: {report['retention_decision_counts']}")
+        self.stdout.write(f"security_policy_lab_available: {report['security_policy_lab_available']}")
+        self.stdout.write(f"security_policy_command: {report['security_policy_command']}")
+        self.stdout.write(f"security_policy_status: {report['security_policy_status']}")
         if export_path_written:
             self.stdout.write(f"export_path: {export_path_written}")
         if not options.get("summary_only"):

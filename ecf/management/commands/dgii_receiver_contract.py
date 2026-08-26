@@ -77,6 +77,26 @@ class Command(BaseCommand):
             f"destructive_retention_actions_enabled: {meta['destructive_retention_actions_enabled']}"
         )
         self.stdout.write(f"export_manifest_scope: {meta['export_manifest_scope']}")
+        self.stdout.write(
+            f"inbound_security_policy_lab_available: {meta['inbound_security_policy_lab_available']}"
+        )
+        self.stdout.write(f"security_policy_scope: {meta['security_policy_scope']}")
+        self.stdout.write(f"security_policy_command: {meta['security_policy_command']}")
+        self.stdout.write(f"security_policy_decision: {meta['security_policy_decision']}")
+        self.stdout.write(f"production_security_ready: {meta['production_security_ready']}")
+        self.stdout.write(
+            f"public_endpoint_security_controls_enforced: {meta['public_endpoint_security_controls_enforced']}"
+        )
+        self.stdout.write(f"body_size_limit_enforced: {meta['body_size_limit_enforced']}")
+        self.stdout.write(
+            f"content_type_allowlist_enforced: {meta['content_type_allowlist_enforced']}"
+        )
+        self.stdout.write(f"rate_limiting_enforced: {meta['rate_limiting_enforced']}")
+        self.stdout.write(f"logging_redaction_approved: {meta['logging_redaction_approved']}")
+        self.stdout.write(
+            f"trust_chain_validation_ready: {meta['trust_chain_validation_ready']}"
+        )
+        self.stdout.write(f"revocation_check_ready: {meta['revocation_check_ready']}")
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

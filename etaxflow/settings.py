@@ -142,4 +142,26 @@ ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS = os.getenv(
     "ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS", "false"
 ).lower() in {"1", "true", "yes", "on"}
 
+# Phase 034 — inbound security policy placeholders (CONFIGURED_PLACEHOLDER ≠ ENFORCED).
+# Public views do not enforce these yet; security policy lab reports them honestly.
+ETAXFLOW_DGII_INBOUND_MAX_BODY_BYTES = int(
+    os.getenv("ETAXFLOW_DGII_INBOUND_MAX_BODY_BYTES", "1048576")
+)
+ETAXFLOW_DGII_INBOUND_ALLOWED_CONTENT_TYPES = os.getenv(
+    "ETAXFLOW_DGII_INBOUND_ALLOWED_CONTENT_TYPES",
+    "application/xml,text/xml",
+)
+ETAXFLOW_DGII_INBOUND_RATE_LIMIT_POLICY = os.getenv(
+    "ETAXFLOW_DGII_INBOUND_RATE_LIMIT_POLICY", "NOT_IMPLEMENTED"
+)
+ETAXFLOW_DGII_LOG_RAW_XML = os.getenv("ETAXFLOW_DGII_LOG_RAW_XML", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+ETAXFLOW_DGII_STORE_RAW_XML_DEFAULT = os.getenv(
+    "ETAXFLOW_DGII_STORE_RAW_XML_DEFAULT", "false"
+).lower() in {"1", "true", "yes", "on"}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

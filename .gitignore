@@ -235,3 +235,7 @@ media/
 # Phase 033 lab export artifacts (metadata only; never commit payloads)
 runtime/dgii_lab_exports/*
 !runtime/dgii_lab_exports/.gitkeep
+
+# Phase 034 security policy reports (metadata only)
+runtime/dgii_security_reports/*
+!runtime/dgii_security_reports/.gitkeep

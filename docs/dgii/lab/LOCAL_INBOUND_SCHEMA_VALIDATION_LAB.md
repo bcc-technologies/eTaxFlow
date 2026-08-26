@@ -117,7 +117,8 @@ Tests verify **honest reporting**, not fake validity.
 Signature verification is **not** run by `dgii_inbound_schema_lab` (`signature_verification_status=NOT_RUN_BY_DEFAULT`). Persistence is a separate command (`persistence_status=NOT_RUN_BY_DEFAULT`). Workflow routing is a separate command (`workflow_status=NOT_RUN_BY_DEFAULT`).
 
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md` (Phase 033)
+- `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md` (Phase 034)
 
 ## Next phase
 
-**Phase 034** — inbound security controls / policy review — still no public endpoints, no DGII live, no TrackId.
+**Phase 035** — security-owner sign-off / staging rehearsal checklist — still no public endpoints, no DGII live, no TrackId.

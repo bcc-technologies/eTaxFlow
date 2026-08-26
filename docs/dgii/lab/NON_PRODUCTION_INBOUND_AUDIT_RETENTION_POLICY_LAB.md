@@ -108,4 +108,4 @@ python manage.py dgii_inbound_audit_retention_lab --from-lab-records --export-ma
 
 ## Next phase
 
-**Phase 034** — typically non-production inbound security controls / rate-limit / body-size policy lab, or human policy review of audit retention — still no public endpoints, no DGII live, no TrackId.
+**Phase 035** — security-owner sign-off / staging rehearsal checklist — still no public endpoints, no DGII live, no TrackId.

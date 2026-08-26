@@ -20,6 +20,7 @@ Phase 030 adds local/offline XMLDSig inspection (`dgii_inbound_signature_lab`) �
 Phase 031 adds lab-only inbound persistence (`dgii_inbound_persistence_lab`) — NON_PRODUCTION_LAB_ONLY; dry-run default; not fiscal documents.
 Phase 032 adds lab-only inbound workflow routing (`dgii_inbound_workflow_lab`) — NON_PRODUCTION_LAB_ONLY; dry-run default; not fiscal acceptance.
 Phase 033 adds lab-only inbound audit/retention (`dgii_inbound_audit_retention_lab`) — NON_PRODUCTION_LAB_ONLY; dry-run default; no deletes; metadata export only.
+Phase 034 adds inbound security controls policy review (`dgii_inbound_security_policy_lab`) — NON_PRODUCTION_LAB_ONLY; SECURITY_POLICY_BLOCKED; placeholders ≠ enforced.
 
 See also:
 - `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
@@ -33,6 +34,7 @@ See also:
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_PERSISTENCE_LAB.md` (Phase 031 — lab-only persistence)
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_WORKFLOW_ROUTING_LAB.md` (Phase 032 — lab-only workflow routing)
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md` (Phase 033 — lab-only audit/retention)
+- `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md` (Phase 034 — security policy lab)
 - `.env.staging.example` (Phase 026 — staging env placeholders only)
 
 ## Checklist
@@ -90,3 +92,4 @@ Official certification test cases must not be invented.
 - Phase 031 `InboundXMLLabRecord` rows are not fiscal documents, DGII acceptance, or certification evidence.
 - Phase 032 workflow routes are not fiscal acceptance, acuse, or aprobación generation.
 - Phase 033 lab audit events are not a DGII audit trail; retention decisions are not legal retention policy.
+- Phase 034 security policy lab is not production security approval; CONFIGURED_PLACEHOLDER ≠ ENFORCED.

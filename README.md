@@ -382,7 +382,24 @@ python manage.py dgii_inbound_audit_retention_lab --from-lab-records --export-ma
 
 Public `/fe/...` routes remain **503 DISABLED**. Lab audit ≠ DGII audit trail. Export ≠ certification evidence.
 
-Next: **Phase 034** — typically inbound security controls / policy review (still no public endpoints, no DGII live).
+## Inbound security controls policy review lab (Phase 034)
+
+Phase 034 adds a **lab-only security controls / policy review** for inbound DGII-facing receiver design. Report-only; no DB writes; does **not** enable public endpoints. Placeholders like body size / content-type are **CONFIGURED_PLACEHOLDER**, not **ENFORCED**.
+
+- Policy doc: `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md`
+- Module: `ecf/dgii/inbound_security_policy_lab.py`
+- Decision: `SECURITY_POLICY_BLOCKED`
+
+```bash
+python manage.py dgii_inbound_security_policy_lab
+python manage.py dgii_inbound_security_policy_lab --json
+python manage.py dgii_inbound_security_policy_lab --summary-only
+python manage.py dgii_inbound_security_policy_lab --export-report --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED**. Policy lab ≠ production security approval. No DGII calls. No TrackId.
+
+Next: **Phase 035** — typically security-owner sign-off / staging rehearsal checklist (still no public endpoints unless explicitly authorized).
 
 ## Warnings
 

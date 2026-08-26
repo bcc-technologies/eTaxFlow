@@ -117,6 +117,22 @@ class DGIIRreadinessReportTests(TestCase):
         "audit_retention_policy_not_legal_reviewed",
     )
 
+    PHASE_034_BLOCKERS = (
+        "inbound_security_policy_lab_only",
+        "public_endpoint_security_controls_not_enforced",
+        "body_size_limit_not_enforced",
+        "content_type_allowlist_not_enforced",
+        "rate_limiting_not_implemented",
+        "logging_redaction_policy_not_approved",
+        "certificate_trust_chain_not_implemented",
+        "revocation_check_not_implemented",
+        "security_owner_review_not_completed",
+        "incident_response_policy_not_approved",
+        "environment_separation_not_verified",
+        "dns_tls_not_verified_for_public_receiver",
+        "phase_024_human_gate_not_signed_off",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -148,6 +164,8 @@ class DGIIRreadinessReportTests(TestCase):
         for blocker in self.PHASE_032_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_033_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_034_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 

@@ -311,5 +311,8 @@ def build_signature_lab_report(results: list[InboundSignatureLabResult]) -> dict
         "audit_retention_lab_available": True,
         "audit_retention_command": "dgii_inbound_audit_retention_lab",
         "audit_retention_status": "NOT_RUN_BY_DEFAULT",
+        "security_policy_lab_available": True,
+        "security_policy_command": "dgii_inbound_security_policy_lab",
+        "security_policy_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }

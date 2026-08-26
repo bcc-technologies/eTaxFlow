@@ -123,7 +123,8 @@ python manage.py dgii_inbound_signature_lab --summary-only
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_WORKFLOW_ROUTING_LAB.md`
 
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md` (Phase 033)
+- `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md` (Phase 034)
 
 ## Next phase
 
-**Phase 034** — inbound security controls / policy review — still no public endpoints, no DGII live, no TrackId.
+**Phase 035** — security-owner sign-off / staging rehearsal checklist — still no public endpoints, no DGII live, no TrackId.
