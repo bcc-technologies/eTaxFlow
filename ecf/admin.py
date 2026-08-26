@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from .models import ECFDocument, InboundXMLLabRecord, InboundXMLLabWorkflowEvent
+from .models import (
+    ECFDocument,
+    InboundXMLLabAuditEvent,
+    InboundXMLLabRecord,
+    InboundXMLLabWorkflowEvent,
+)
 
 
 @admin.register(ECFDocument)
@@ -232,6 +237,89 @@ class InboundXMLLabWorkflowEventAdmin(admin.ModelAdmin):
                     "status",
                     "reason",
                     "rule_version",
+                    "input_summary_json",
+                    "output_summary_json",
+                    "created_at",
+                    "updated_at",
+                ),
+            },
+        ),
+    )
+    actions = None
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(InboundXMLLabAuditEvent)
+class InboundXMLLabAuditEventAdmin(admin.ModelAdmin):
+    """Read-only lab audit events. No submit/approve/delete/purge/TrackId actions."""
+
+    list_display = (
+        "id",
+        "lab_record",
+        "event_type",
+        "retention_decision",
+        "severity",
+        "lab_mode",
+        "compliance_status",
+        "created_at",
+    )
+    search_fields = (
+        "event_type",
+        "retention_decision",
+        "severity",
+        "lab_record__raw_sha256",
+        "lab_record__filename",
+    )
+    list_filter = ("event_type", "retention_decision", "severity", "lab_mode")
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "lab_record",
+        "workflow_event",
+        "event_type",
+        "retention_decision",
+        "severity",
+        "reason",
+        "policy_version",
+        "input_summary_json",
+        "output_summary_json",
+        "compliance_status",
+        "dgii_submission_allowed",
+        "certification_evidence",
+        "track_id",
+        "dgii_call_made",
+        "lab_mode",
+    )
+    fieldsets = (
+        (
+            "NON_PRODUCTION_LAB_ONLY — not DGII audit trail, not legal retention",
+            {
+                "description": (
+                    "Lab audit/retention events only. No submit, approve, certify, "
+                    "send, sign, delete, purge, or TrackId actions exist."
+                ),
+                "fields": (
+                    "lab_mode",
+                    "compliance_status",
+                    "dgii_submission_allowed",
+                    "certification_evidence",
+                    "track_id",
+                    "dgii_call_made",
+                    "lab_record",
+                    "workflow_event",
+                    "event_type",
+                    "retention_decision",
+                    "severity",
+                    "reason",
+                    "policy_version",
                     "input_summary_json",
                     "output_summary_json",
                     "created_at",

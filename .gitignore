@@ -231,3 +231,7 @@ docs/dgii/sources/**/*.rar
 
 # Local generated media artifacts
 media/
+
+# Phase 033 lab export artifacts (metadata only; never commit payloads)
+runtime/dgii_lab_exports/*
+!runtime/dgii_lab_exports/.gitkeep

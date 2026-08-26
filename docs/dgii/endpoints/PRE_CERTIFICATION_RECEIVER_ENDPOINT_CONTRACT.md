@@ -157,6 +157,11 @@ Do **not** enable public receiver processing until:
 
 Local XSD validation is **LOCAL_OFFLINE_ONLY**. Signature lab is **LOCAL_OFFLINE_TEST_ONLY**. Persistence is **NON_PRODUCTION_LAB_ONLY** (dry-run default; no public-route writes). Workflow routing is **NON_PRODUCTION_LAB_ONLY** (dry-run default; no fiscal acceptance). Public routes remain disabled. No DGII calls. No TrackId.
 
+- `ecf/dgii/inbound_audit_retention_lab.py` — lab-only audit/retention (Phase 033)
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md`
+
+Audit/retention is **NON_PRODUCTION_LAB_ONLY** (dry-run default; no deletes; metadata-only export).
+
 ## Next phase
 
-**Phase 033 — Non-production inbound audit and retention policy lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 034** — inbound security controls / policy review lab — still no public endpoints, no DGII live, no TrackId.

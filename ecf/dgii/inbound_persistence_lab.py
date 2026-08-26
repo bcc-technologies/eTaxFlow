@@ -199,5 +199,8 @@ def build_persistence_lab_report(
         "workflow_lab_available": True,
         "workflow_command": "dgii_inbound_workflow_lab",
         "workflow_status": "NOT_RUN_BY_DEFAULT",
+        "audit_retention_lab_available": True,
+        "audit_retention_command": "dgii_inbound_audit_retention_lab",
+        "audit_retention_status": "NOT_RUN_BY_DEFAULT",
         "results": results,
     }

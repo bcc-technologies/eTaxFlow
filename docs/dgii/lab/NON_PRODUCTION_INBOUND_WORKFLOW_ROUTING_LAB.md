@@ -107,4 +107,4 @@ python manage.py dgii_inbound_workflow_lab --record-id 1 --json
 
 ## Next phase
 
-**Phase 033 — Non-production inbound audit and retention policy lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 033 — Non-production inbound audit and retention policy lab** — audit/retention dry-run; still no public endpoints, no DGII live, no TrackId.

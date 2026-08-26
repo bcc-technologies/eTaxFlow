@@ -100,6 +100,8 @@ Each analyzed fixture produces:
 
 `dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Persistence is a separate command: `dgii_inbound_persistence_lab` (Phase 031, dry-run default). Workflow routing is a separate command: `dgii_inbound_workflow_lab` (Phase 032, dry-run default).
 
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md` (Phase 033)
+
 ## Next phase
 
-**Phase 033 — Non-production inbound audit and retention policy lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 034** — inbound security controls / policy review — still no public endpoints, no DGII live, no TrackId.

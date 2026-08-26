@@ -65,6 +65,18 @@ class Command(BaseCommand):
         self.stdout.write(
             f"fiscal_acceptance_workflow_enabled: {meta['fiscal_acceptance_workflow_enabled']}"
         )
+        self.stdout.write(
+            f"non_production_inbound_audit_retention_lab_available: {meta['non_production_inbound_audit_retention_lab_available']}"
+        )
+        self.stdout.write(f"audit_retention_scope: {meta['audit_retention_scope']}")
+        self.stdout.write(f"audit_retention_command: {meta['audit_retention_command']}")
+        self.stdout.write(f"production_audit_ready: {meta['production_audit_ready']}")
+        self.stdout.write(f"production_retention_ready: {meta['production_retention_ready']}")
+        self.stdout.write(f"public_route_audit_enabled: {meta['public_route_audit_enabled']}")
+        self.stdout.write(
+            f"destructive_retention_actions_enabled: {meta['destructive_retention_actions_enabled']}"
+        )
+        self.stdout.write(f"export_manifest_scope: {meta['export_manifest_scope']}")
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

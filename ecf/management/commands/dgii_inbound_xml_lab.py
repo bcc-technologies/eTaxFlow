@@ -77,6 +77,9 @@ class Command(BaseCommand):
             self.stdout.write(f"workflow_lab_available: {report['workflow_lab_available']}")
             self.stdout.write(f"workflow_command: {report['workflow_command']}")
             self.stdout.write(f"workflow_status: {report['workflow_status']}")
+            self.stdout.write(f"audit_retention_lab_available: {report['audit_retention_lab_available']}")
+            self.stdout.write(f"audit_retention_command: {report['audit_retention_command']}")
+            self.stdout.write(f"audit_retention_status: {report['audit_retention_status']}")
             self.stdout.write("")
             for item in report["results"]:
                 self.stdout.write(

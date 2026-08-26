@@ -366,7 +366,23 @@ python manage.py dgii_inbound_workflow_lab --from-lab-records --json
 
 Public `/fe/...` routes remain **503 DISABLED** and must not run workflow routing.
 
-Next: **Phase 033 — Non-production inbound audit and retention policy lab**.
+## Non-production inbound audit and retention policy lab (Phase 033)
+
+Phase 033 adds **lab-only audit/retention review** for synthetic inbound lab records. Default is dry-run. `--apply-lab-audit` writes `InboundXMLLabAuditEvent` rows only. `--export-manifest` writes metadata-only JSON under `runtime/dgii_lab_exports/`. **No deletes** in this phase.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md`
+- Module: `ecf/dgii/inbound_audit_retention_lab.py`
+
+```bash
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records --json
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records --apply-lab-audit --json
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records --export-manifest --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED**. Lab audit ≠ DGII audit trail. Export ≠ certification evidence.
+
+Next: **Phase 034** — typically inbound security controls / policy review (still no public endpoints, no DGII live).
 
 ## Warnings
 

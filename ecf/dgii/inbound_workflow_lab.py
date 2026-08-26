@@ -288,5 +288,8 @@ def build_workflow_lab_report(
         "result_count": len(results),
         "applied_count": sum(1 for item in results if item.get("applied")),
         "route_counts": route_counts,
+        "audit_retention_lab_available": True,
+        "audit_retention_command": "dgii_inbound_audit_retention_lab",
+        "audit_retention_status": "NOT_RUN_BY_DEFAULT",
         "results": results,
     }

@@ -163,3 +163,49 @@ class InboundXMLLabWorkflowEvent(models.Model):
 
     def __str__(self) -> str:
         return f"LabWorkflow {self.route} record={self.lab_record_id}"
+
+
+class InboundXMLLabAuditEvent(models.Model):
+    """NON_PRODUCTION_LAB_ONLY audit/retention event. Not a DGII audit trail."""
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    lab_record = models.ForeignKey(
+        InboundXMLLabRecord,
+        on_delete=models.CASCADE,
+        related_name="lab_audit_events",
+        null=True,
+        blank=True,
+    )
+    workflow_event = models.ForeignKey(
+        InboundXMLLabWorkflowEvent,
+        on_delete=models.CASCADE,
+        related_name="lab_audit_events",
+        null=True,
+        blank=True,
+    )
+    event_type = models.CharField(max_length=64, db_index=True)
+    retention_decision = models.CharField(max_length=64, blank=True, db_index=True)
+    severity = models.CharField(max_length=16, default="INFO", db_index=True)
+    reason = models.CharField(max_length=128, blank=True)
+    policy_version = models.CharField(max_length=32, default="phase-033-v1")
+    input_summary_json = models.JSONField(default=dict)
+    output_summary_json = models.JSONField(default=dict)
+    compliance_status = models.CharField(max_length=32, default="NOT_DGII_COMPLIANT")
+    dgii_submission_allowed = models.BooleanField(default=False)
+    certification_evidence = models.BooleanField(default=False)
+    track_id = models.CharField(max_length=255, null=True, blank=True, default=None)
+    dgii_call_made = models.BooleanField(default=False)
+    lab_mode = models.CharField(max_length=40, default="NON_PRODUCTION_LAB_ONLY")
+
+    class Meta:
+        verbose_name = "Inbound XML lab audit event (NON_PRODUCTION_LAB_ONLY)"
+        verbose_name_plural = "Inbound XML lab audit events (NON_PRODUCTION_LAB_ONLY)"
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["event_type", "retention_decision"]),
+            models.Index(fields=["lab_record", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"LabAudit {self.event_type} record={self.lab_record_id}"
