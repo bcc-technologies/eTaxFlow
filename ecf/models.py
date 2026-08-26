@@ -127,3 +127,39 @@ class InboundXMLLabRecord(models.Model):
 
     def __str__(self) -> str:
         return f"Lab {self.document_type} {self.filename or self.raw_sha256[:12]}"
+
+
+class InboundXMLLabWorkflowEvent(models.Model):
+    """NON_PRODUCTION_LAB_ONLY workflow routing event. Not fiscal acceptance."""
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    lab_record = models.ForeignKey(
+        InboundXMLLabRecord,
+        on_delete=models.CASCADE,
+        related_name="lab_workflow_events",
+    )
+    route = models.CharField(max_length=64, db_index=True)
+    status = models.CharField(max_length=32, db_index=True)
+    reason = models.CharField(max_length=128, blank=True)
+    rule_version = models.CharField(max_length=32, default="phase-032-v1")
+    input_summary_json = models.JSONField(default=dict)
+    output_summary_json = models.JSONField(default=dict)
+    compliance_status = models.CharField(max_length=32, default="NOT_DGII_COMPLIANT")
+    dgii_submission_allowed = models.BooleanField(default=False)
+    certification_evidence = models.BooleanField(default=False)
+    track_id = models.CharField(max_length=255, null=True, blank=True, default=None)
+    dgii_call_made = models.BooleanField(default=False)
+    lab_mode = models.CharField(max_length=40, default="NON_PRODUCTION_LAB_ONLY")
+
+    class Meta:
+        verbose_name = "Inbound XML lab workflow event (NON_PRODUCTION_LAB_ONLY)"
+        verbose_name_plural = "Inbound XML lab workflow events (NON_PRODUCTION_LAB_ONLY)"
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["route", "status"]),
+            models.Index(fields=["lab_record", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"LabWorkflow {self.route} record={self.lab_record_id}"

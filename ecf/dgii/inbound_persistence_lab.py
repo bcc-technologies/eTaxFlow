@@ -196,5 +196,8 @@ def build_persistence_lab_report(
         "result_count": len(results),
         "created_count": sum(1 for item in results if item.get("created")),
         "updated_count": sum(1 for item in results if item.get("updated")),
+        "workflow_lab_available": True,
+        "workflow_command": "dgii_inbound_workflow_lab",
+        "workflow_status": "NOT_RUN_BY_DEFAULT",
         "results": results,
     }

@@ -53,6 +53,18 @@ class Command(BaseCommand):
             f"public_route_persistence_enabled: {meta['public_route_persistence_enabled']}"
         )
         self.stdout.write(f"raw_xml_storage_default: {meta['raw_xml_storage_default']}")
+        self.stdout.write(
+            f"non_production_inbound_workflow_lab_available: {meta['non_production_inbound_workflow_lab_available']}"
+        )
+        self.stdout.write(f"workflow_scope: {meta['workflow_scope']}")
+        self.stdout.write(f"workflow_command: {meta['workflow_command']}")
+        self.stdout.write(f"production_workflow_ready: {meta['production_workflow_ready']}")
+        self.stdout.write(
+            f"public_route_workflow_enabled: {meta['public_route_workflow_enabled']}"
+        )
+        self.stdout.write(
+            f"fiscal_acceptance_workflow_enabled: {meta['fiscal_acceptance_workflow_enabled']}"
+        )
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

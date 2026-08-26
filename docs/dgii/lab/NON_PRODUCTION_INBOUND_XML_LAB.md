@@ -98,8 +98,8 @@ Each analyzed fixture produces:
 - `ecf/dgii/receiver.py` — classification helpers
 - `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md`
 
-`dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Persistence is a separate command: `dgii_inbound_persistence_lab` (Phase 031, dry-run default).
+`dgii_inbound_xml_lab` does **not** run XSD validation by default (`schema_validation_status=NOT_RUN_BY_DEFAULT`). Persistence is a separate command: `dgii_inbound_persistence_lab` (Phase 031, dry-run default). Workflow routing is a separate command: `dgii_inbound_workflow_lab` (Phase 032, dry-run default).
 
 ## Next phase
 
-**Phase 032 — Non-production inbound workflow routing lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 033 — Non-production inbound audit and retention policy lab** — still no public endpoints, no DGII live, no TrackId.

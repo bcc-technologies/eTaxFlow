@@ -99,6 +99,9 @@ class Command(BaseCommand):
         self.stdout.write(f"result_count: {report['result_count']}")
         self.stdout.write(f"created_count: {report['created_count']}")
         self.stdout.write(f"updated_count: {report['updated_count']}")
+        self.stdout.write(f"workflow_lab_available: {report['workflow_lab_available']}")
+        self.stdout.write(f"workflow_command: {report['workflow_command']}")
+        self.stdout.write(f"workflow_status: {report['workflow_status']}")
         if not options.get("summary_only"):
             self.stdout.write("")
             for item in report["results"]:

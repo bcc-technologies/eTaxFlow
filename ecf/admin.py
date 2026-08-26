@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ECFDocument, InboundXMLLabRecord
+from .models import ECFDocument, InboundXMLLabRecord, InboundXMLLabWorkflowEvent
 
 
 @admin.register(ECFDocument)
@@ -161,6 +161,79 @@ class InboundXMLLabRecordAdmin(admin.ModelAdmin):
                     "errors_json",
                     "persisted_raw_xml",
                     "raw_xml_text",
+                    "created_at",
+                    "updated_at",
+                ),
+            },
+        ),
+    )
+    actions = None
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(InboundXMLLabWorkflowEvent)
+class InboundXMLLabWorkflowEventAdmin(admin.ModelAdmin):
+    """Read-only lab workflow events. No submit/approve/TrackId actions."""
+
+    list_display = (
+        "id",
+        "lab_record",
+        "route",
+        "status",
+        "reason",
+        "lab_mode",
+        "compliance_status",
+        "created_at",
+    )
+    search_fields = ("route", "status", "lab_record__raw_sha256", "lab_record__filename")
+    list_filter = ("route", "status", "lab_mode")
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "lab_record",
+        "route",
+        "status",
+        "reason",
+        "rule_version",
+        "input_summary_json",
+        "output_summary_json",
+        "compliance_status",
+        "dgii_submission_allowed",
+        "certification_evidence",
+        "track_id",
+        "dgii_call_made",
+        "lab_mode",
+    )
+    fieldsets = (
+        (
+            "NON_PRODUCTION_LAB_ONLY — not fiscal acceptance, not DGII evidence",
+            {
+                "description": (
+                    "Lab workflow routing events only. No submit, approve, certify, "
+                    "send, sign, or TrackId actions exist."
+                ),
+                "fields": (
+                    "lab_mode",
+                    "compliance_status",
+                    "dgii_submission_allowed",
+                    "certification_evidence",
+                    "track_id",
+                    "dgii_call_made",
+                    "lab_record",
+                    "route",
+                    "status",
+                    "reason",
+                    "rule_version",
+                    "input_summary_json",
+                    "output_summary_json",
                     "created_at",
                     "updated_at",
                 ),

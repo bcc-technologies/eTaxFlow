@@ -11,6 +11,7 @@ from ecf.dgii.inbound_lab_readiness import build_inbound_lab_readiness_checks
 from ecf.dgii.inbound_persistence_lab_readiness import build_inbound_persistence_lab_readiness_checks
 from ecf.dgii.inbound_schema_lab_readiness import build_inbound_schema_lab_readiness_checks
 from ecf.dgii.inbound_signature_lab_readiness import build_inbound_signature_lab_readiness_checks
+from ecf.dgii.inbound_workflow_lab_readiness import build_inbound_workflow_lab_readiness_checks
 from ecf.dgii.receiver import get_receiver_contract_metadata
 from ecf.dgii.receiver_readiness import build_receiver_readiness_checks
 from ecf.models import ECFDocument
@@ -36,6 +37,7 @@ def build_readiness_report() -> dict:
     inbound_schema_lab_blocker_checks = build_inbound_schema_lab_readiness_checks()
     inbound_signature_lab_blocker_checks = build_inbound_signature_lab_readiness_checks()
     inbound_persistence_lab_blocker_checks = build_inbound_persistence_lab_readiness_checks()
+    inbound_workflow_lab_blocker_checks = build_inbound_workflow_lab_readiness_checks()
     configured_rnc_count = Organization.objects.exclude(rnc="").count()
     default_issuer_count = Organization.objects.filter(is_default_issuer=True).count()
     xsd_present = Path("docs/dgii/sources/e-CF_31_v1.0.xsd").is_file()
@@ -171,6 +173,7 @@ def build_readiness_report() -> dict:
         *inbound_schema_lab_blocker_checks,
         *inbound_signature_lab_blocker_checks,
         *inbound_persistence_lab_blocker_checks,
+        *inbound_workflow_lab_blocker_checks,
     ]
     blockers = [item["name"] for item in checks if item["blocker"]]
     blockers.extend(name for name, item in endpoint_checks.items() if item["blocker"])
@@ -226,6 +229,7 @@ def build_readiness_report() -> dict:
             "Phase 029 local inbound XSD validation is LOCAL_OFFLINE_ONLY; a local pass is not DGII acceptance.",
             "Phase 030 inbound signature lab is LOCAL_OFFLINE_TEST_ONLY; presence is not validity.",
             "Phase 031 inbound persistence lab writes InboundXMLLabRecord only; not fiscal documents.",
+            "Phase 032 inbound workflow lab routes lab records only; not fiscal acceptance.",
             f"Existing ECFDocument rows: {ECFDocument.objects.count()} (not approval evidence).",
         ],
     }

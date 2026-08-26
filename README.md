@@ -350,7 +350,23 @@ python manage.py dgii_inbound_persistence_lab --persist-lab-records --json
 
 Public `/fe/...` routes remain **503 DISABLED** and must not persist. Lab rows are not fiscal documents, not DGII acceptance, and not certification evidence. No TrackId.
 
-Next: **Phase 032 — Non-production inbound workflow routing lab**.
+## Non-production inbound workflow routing lab (Phase 032)
+
+Phase 032 adds **lab-only workflow routing** for synthetic inbound lab records. Default is dry-run. `--apply-lab-workflow` writes `InboundXMLLabWorkflowEvent` rows only. Routes do **not** imply fiscal acceptance, acuse, or aprobación.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_WORKFLOW_ROUTING_LAB.md`
+- Module: `ecf/dgii/inbound_workflow_lab.py`
+
+```bash
+python manage.py dgii_inbound_workflow_lab --path tests/fixtures/dgii/inbound_lab/
+python manage.py dgii_inbound_workflow_lab --path tests/fixtures/dgii/inbound_lab/ --json
+python manage.py dgii_inbound_workflow_lab --path tests/fixtures/dgii/inbound_lab/ --apply-lab-workflow --json
+python manage.py dgii_inbound_workflow_lab --from-lab-records --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED** and must not run workflow routing.
+
+Next: **Phase 033 — Non-production inbound audit and retention policy lab**.
 
 ## Warnings
 

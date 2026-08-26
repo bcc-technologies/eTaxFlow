@@ -74,6 +74,9 @@ class Command(BaseCommand):
             self.stdout.write(f"persistence_lab_available: {report['persistence_lab_available']}")
             self.stdout.write(f"persistence_command: {report['persistence_command']}")
             self.stdout.write(f"persistence_status: {report['persistence_status']}")
+            self.stdout.write(f"workflow_lab_available: {report['workflow_lab_available']}")
+            self.stdout.write(f"workflow_command: {report['workflow_command']}")
+            self.stdout.write(f"workflow_status: {report['workflow_status']}")
             self.stdout.write("")
             for item in report["results"]:
                 self.stdout.write(

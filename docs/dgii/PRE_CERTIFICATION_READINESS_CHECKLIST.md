@@ -18,6 +18,7 @@ Phase 028 adds non-production inbound XML lab with synthetic fixtures — intern
 Phase 029 adds local/offline inbound XSD validation (`dgii_inbound_schema_lab`) — LOCAL_OFFLINE_ONLY; local valid is not DGII acceptance.
 Phase 030 adds local/offline XMLDSig inspection (`dgii_inbound_signature_lab`) — LOCAL_OFFLINE_TEST_ONLY; presence is not validity; cryptographic verification is NOT_IMPLEMENTED.
 Phase 031 adds lab-only inbound persistence (`dgii_inbound_persistence_lab`) — NON_PRODUCTION_LAB_ONLY; dry-run default; not fiscal documents.
+Phase 032 adds lab-only inbound workflow routing (`dgii_inbound_workflow_lab`) — NON_PRODUCTION_LAB_ONLY; dry-run default; not fiscal acceptance.
 
 See also:
 - `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
@@ -29,6 +30,7 @@ See also:
 - `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md` (Phase 029 — local/offline XSD lab)
 - `docs/dgii/lab/LOCAL_INBOUND_SIGNATURE_VERIFICATION_LAB.md` (Phase 030 — signature inspection lab)
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_PERSISTENCE_LAB.md` (Phase 031 — lab-only persistence)
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_WORKFLOW_ROUTING_LAB.md` (Phase 032 — lab-only workflow routing)
 - `.env.staging.example` (Phase 026 — staging env placeholders only)
 
 ## Checklist
@@ -84,3 +86,4 @@ Official certification test cases must not be invented.
 - A local XSD or PDF result does not establish DGII approval.
 - Phase 024 source intake does not change `NOT_DGII_COMPLIANT`.
 - Phase 031 `InboundXMLLabRecord` rows are not fiscal documents, DGII acceptance, or certification evidence.
+- Phase 032 workflow routes are not fiscal acceptance, acuse, or aprobación generation.

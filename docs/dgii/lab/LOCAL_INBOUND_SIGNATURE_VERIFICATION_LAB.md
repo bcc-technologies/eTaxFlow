@@ -120,7 +120,8 @@ python manage.py dgii_inbound_signature_lab --summary-only
 - `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md`
 
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_PERSISTENCE_LAB.md`
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_WORKFLOW_ROUTING_LAB.md`
 
 ## Next phase
 
-**Phase 032 — Non-production inbound workflow routing lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 033 — Non-production inbound audit and retention policy lab** — still no public endpoints, no DGII live, no TrackId.

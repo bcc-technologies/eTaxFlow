@@ -95,6 +95,17 @@ class DGIIRreadinessReportTests(TestCase):
         "inbound_audit_policy_not_approved",
     )
 
+    PHASE_032_BLOCKERS = (
+        "inbound_workflow_lab_only",
+        "production_inbound_workflow_not_implemented",
+        "public_route_workflow_disabled",
+        "fiscal_acceptance_workflow_not_implemented",
+        "acuse_generation_not_implemented",
+        "aprobacion_comercial_generation_not_implemented",
+        "workflow_policy_not_approved",
+        "inbound_workflow_not_certification_evidence",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -122,6 +133,8 @@ class DGIIRreadinessReportTests(TestCase):
         for blocker in self.PHASE_030_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_031_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_032_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 

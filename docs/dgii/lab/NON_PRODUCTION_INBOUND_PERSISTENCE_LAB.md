@@ -109,4 +109,4 @@ python manage.py dgii_inbound_persistence_lab --path tests/fixtures/dgii/inbound
 
 ## Next phase
 
-**Phase 032 — Non-production inbound workflow routing lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 033 — Non-production inbound audit and retention policy lab** — still no public endpoints, no DGII live, no TrackId.

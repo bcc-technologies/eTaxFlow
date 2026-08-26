@@ -328,5 +328,8 @@ def build_schema_lab_report(results: list[InboundSchemaLabResult]) -> dict[str, 
         "persistence_lab_available": True,
         "persistence_command": "dgii_inbound_persistence_lab",
         "persistence_status": "NOT_RUN_BY_DEFAULT",
+        "workflow_lab_available": True,
+        "workflow_command": "dgii_inbound_workflow_lab",
+        "workflow_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }
