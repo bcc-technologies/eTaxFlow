@@ -66,6 +66,15 @@ class Command(BaseCommand):
         self.stdout.write(
             f"public_base_url_externally_verified: {meta['public_base_url_externally_verified']}"
         )
+        self.stdout.write(
+            f"final_go_no_go_lab_available: {meta['final_go_no_go_lab_available']}"
+        )
+        self.stdout.write(f"final_go_no_go_command: {meta['final_go_no_go_command']}")
+        self.stdout.write(f"final_review_scope: {meta['final_review_scope']}")
+        self.stdout.write(f"final_decision: {meta['final_decision']}")
+        self.stdout.write(
+            f"endpoint_activation_allowed: {meta['endpoint_activation_allowed']}"
+        )
         self.stdout.write(f"compliance_status: {meta['compliance_status']}")
         self.stdout.write(f"dgii_submission_allowed: {meta['dgii_submission_allowed']}")
         self.stdout.write("")

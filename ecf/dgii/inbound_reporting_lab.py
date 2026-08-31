@@ -242,6 +242,9 @@ def build_json_report(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "certification_package_lab_available": True,
         "certification_package_command": "dgii_certification_package_lab",
         "certification_package_status": "NOT_RUN_BY_DEFAULT",
+        "final_go_no_go_lab_available": True,
+        "final_go_no_go_command": "dgii_final_go_no_go_lab",
+        "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
         "warnings": [
             "Metadata-only report. Raw XML is not exported.",
             "Not DGII certification evidence.",
@@ -424,6 +427,9 @@ def write_report_bundle(
     report["certification_package_lab_available"] = True
     report["certification_package_command"] = "dgii_certification_package_lab"
     report["certification_package_status"] = "NOT_RUN_BY_DEFAULT"
+    report["final_go_no_go_lab_available"] = True
+    report["final_go_no_go_command"] = "dgii_final_go_no_go_lab"
+    report["final_go_no_go_status"] = "NOT_RUN_BY_DEFAULT"
     return report
 
 
@@ -445,4 +451,7 @@ def build_reporting_lab_report(
     report["certification_package_lab_available"] = True
     report["certification_package_command"] = "dgii_certification_package_lab"
     report["certification_package_status"] = "NOT_RUN_BY_DEFAULT"
+    report["final_go_no_go_lab_available"] = True
+    report["final_go_no_go_command"] = "dgii_final_go_no_go_lab"
+    report["final_go_no_go_status"] = "NOT_RUN_BY_DEFAULT"
     return report

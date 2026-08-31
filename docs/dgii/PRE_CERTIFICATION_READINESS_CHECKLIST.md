@@ -24,6 +24,7 @@ Phase 034 adds inbound security controls policy review (`dgii_inbound_security_p
 Phase 035 adds inbound reporting export lab (`dgii_inbound_reporting_lab`) — NON_PRODUCTION_LAB_ONLY metadata-only JSON/CSV/Markdown/bundle; no raw XML; no production dashboard.
 Phase 036 adds staging deployment evidence collector (`dgii_staging_evidence_lab`) — offline/manual evidence only; no network checks; STAGING_EVIDENCE_BLOCKED.
 Phase 037 adds certification portal package draft (`dgii_certification_package_lab`) — DRAFT_ONLY; PACKAGE_BLOCKED; no portal submission.
+Phase 038 adds final pre-cert go/no-go review (`dgii_final_go_no_go_lab`) — FINAL_REVIEW_LAB_ONLY; FINAL_DECISION_BLOCKED.
 
 See also:
 - `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
@@ -41,6 +42,7 @@ See also:
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md` (Phase 035 — reporting export lab)
 - `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md` (Phase 036 — staging evidence lab)
 - `docs/dgii/certification/CERTIFICATION_PORTAL_SUBMISSION_PACKAGE_DRAFT.md` (Phase 037 — package draft)
+- `docs/dgii/certification/FINAL_NON_PRODUCTION_PRE_CERT_GO_NO_GO_REVIEW.md` (Phase 038 — final go/no-go)
 - `.env.staging.example` (Phase 026 — staging env placeholders only)
 
 ## Checklist

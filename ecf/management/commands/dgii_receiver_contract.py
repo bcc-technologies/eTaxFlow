@@ -135,6 +135,15 @@ class Command(BaseCommand):
         self.stdout.write(
             f"package_requires_human_review: {meta['package_requires_human_review']}"
         )
+        self.stdout.write(
+            f"final_go_no_go_lab_available: {meta['final_go_no_go_lab_available']}"
+        )
+        self.stdout.write(f"final_go_no_go_command: {meta['final_go_no_go_command']}")
+        self.stdout.write(f"final_review_scope: {meta['final_review_scope']}")
+        self.stdout.write(f"final_decision: {meta['final_decision']}")
+        self.stdout.write(
+            f"endpoint_activation_allowed: {meta['endpoint_activation_allowed']}"
+        )
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

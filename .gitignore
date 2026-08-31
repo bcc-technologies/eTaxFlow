@@ -251,3 +251,7 @@ runtime/dgii_staging_evidence/*
 # Phase 037 certification package drafts (DRAFT_ONLY; never commit payloads)
 runtime/dgii_certification_package_drafts/*
 !runtime/dgii_certification_package_drafts/.gitkeep
+
+# Phase 038 final go/no-go reviews (FINAL_REVIEW_LAB_ONLY)
+runtime/dgii_final_reviews/*
+!runtime/dgii_final_reviews/.gitkeep

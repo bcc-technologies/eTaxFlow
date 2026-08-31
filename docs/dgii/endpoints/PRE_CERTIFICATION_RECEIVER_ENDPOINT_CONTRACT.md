@@ -167,13 +167,16 @@ Local XSD validation is **LOCAL_OFFLINE_ONLY**. Signature lab is **LOCAL_OFFLINE
 - `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md`
 - `ecf/dgii/certification_package_lab.py` — certification package draft lab (Phase 037)
 - `docs/dgii/certification/CERTIFICATION_PORTAL_SUBMISSION_PACKAGE_DRAFT.md`
+- `ecf/dgii/final_go_no_go_lab.py` — final go/no-go review lab (Phase 038)
+- `docs/dgii/certification/FINAL_NON_PRODUCTION_PRE_CERT_GO_NO_GO_REVIEW.md`
 
 Audit/retention is **NON_PRODUCTION_LAB_ONLY** (dry-run default; no deletes; metadata-only export).
 Security policy is **NON_PRODUCTION_LAB_ONLY** / `SECURITY_POLICY_BLOCKED` (report-only; placeholders ≠ enforced).
 Reporting is **NON_PRODUCTION_LAB_ONLY** metadata-only (no raw XML by default; no production dashboard).
 Staging evidence is **NON_PRODUCTION_LAB_ONLY** offline/manual (no network checks; no staging approval claim).
 Certification package is **DRAFT_ONLY** / `PACKAGE_BLOCKED` (no portal submission; no signed XML).
+Final go/no-go is **FINAL_REVIEW_LAB_ONLY** / `FINAL_DECISION_BLOCKED` (no endpoint activation; no DGII calls).
 
 ## Next phase
 
-**Phase 038** — Final non-production pre-cert go/no-go review — still no public endpoints, no DGII live, no TrackId.
+**Phase 039** — Final inbound lab audit report — still no public endpoints, no DGII live, no TrackId.

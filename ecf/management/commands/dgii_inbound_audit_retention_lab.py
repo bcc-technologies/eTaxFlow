@@ -157,6 +157,9 @@ class Command(BaseCommand):
         self.stdout.write(f"certification_package_lab_available: {report['certification_package_lab_available']}")
         self.stdout.write(f"certification_package_command: {report['certification_package_command']}")
         self.stdout.write(f"certification_package_status: {report['certification_package_status']}")
+        self.stdout.write(f"final_go_no_go_lab_available: {report['final_go_no_go_lab_available']}")
+        self.stdout.write(f"final_go_no_go_command: {report['final_go_no_go_command']}")
+        self.stdout.write(f"final_go_no_go_status: {report['final_go_no_go_status']}")
         if export_path_written:
             self.stdout.write(f"export_path: {export_path_written}")
         if not options.get("summary_only"):

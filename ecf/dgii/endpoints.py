@@ -112,4 +112,9 @@ def get_software_registration_metadata() -> dict[str, Any]:
         "portal_submission_allowed": False,
         "planned_portal_urls_available": True,
         "public_base_url_externally_verified": False,
+        "final_go_no_go_lab_available": True,
+        "final_go_no_go_command": "dgii_final_go_no_go_lab",
+        "final_review_scope": "FINAL_REVIEW_LAB_ONLY",
+        "final_decision": "FINAL_DECISION_BLOCKED",
+        "endpoint_activation_allowed": False,
     }

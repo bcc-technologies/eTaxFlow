@@ -392,5 +392,8 @@ def build_audit_retention_lab_report(
         "certification_package_lab_available": True,
         "certification_package_command": "dgii_certification_package_lab",
         "certification_package_status": "NOT_RUN_BY_DEFAULT",
+        "final_go_no_go_lab_available": True,
+        "final_go_no_go_command": "dgii_final_go_no_go_lab",
+        "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
         "results": results,
     }

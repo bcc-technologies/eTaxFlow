@@ -173,6 +173,22 @@ class DGIIRreadinessReportTests(TestCase):
         "certification_package_not_human_approved",
     )
 
+    PHASE_038_BLOCKERS = (
+        "final_go_no_go_lab_only",
+        "final_decision_blocked",
+        "final_human_review_not_completed",
+        "final_security_owner_approval_missing",
+        "final_tax_compliance_approval_missing",
+        "final_dgii_authorization_missing",
+        "final_public_endpoint_activation_forbidden",
+        "final_portal_submission_forbidden",
+        "final_dgii_submission_forbidden",
+        "final_production_signing_not_approved",
+        "final_production_signature_verification_not_ready",
+        "final_staging_evidence_not_approved",
+        "final_certification_package_blocked",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -213,8 +229,12 @@ class DGIIRreadinessReportTests(TestCase):
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_037_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_038_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
         self.assertFalse(report["production_staging_ready"])
         self.assertFalse(report["portal_submission_allowed"])
+        self.assertFalse(report["production_signature_verification_ready"])
+        self.assertEqual(report["final_decision"], "FINAL_DECISION_BLOCKED")
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 
     def test_human_report_runs_without_mutation(self):

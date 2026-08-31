@@ -418,6 +418,9 @@ def validate_evidence_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
         "certification_package_lab_available": True,
         "certification_package_command": "dgii_certification_package_lab",
         "certification_package_status": "NOT_RUN_BY_DEFAULT",
+        "final_go_no_go_lab_available": True,
+        "final_go_no_go_command": "dgii_final_go_no_go_lab",
+        "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
         "warnings": [
             "Offline/manual evidence only. No network checks performed.",
             "Evidence does not equal staging approval or DGII certification.",
@@ -533,6 +536,9 @@ def build_staging_evidence_lab_report(
         "certification_package_lab_available": True,
         "certification_package_command": "dgii_certification_package_lab",
         "certification_package_status": "NOT_RUN_BY_DEFAULT",
+        "final_go_no_go_lab_available": True,
+        "final_go_no_go_command": "dgii_final_go_no_go_lab",
+        "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
         "staging_evidence_status": "RUN",
     }
     return report

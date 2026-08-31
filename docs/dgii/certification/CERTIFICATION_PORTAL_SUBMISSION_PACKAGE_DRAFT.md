@@ -95,6 +95,8 @@ python manage.py dgii_certification_package_lab --export-package --json
 - `ecf/dgii/certification_package_lab.py`
 - `ecf/management/commands/dgii_certification_package_lab.py`
 
+- `docs/dgii/certification/FINAL_NON_PRODUCTION_PRE_CERT_GO_NO_GO_REVIEW.md` (Phase 038)
+
 ## Next phase
 
-**Phase 038 — Final non-production pre-cert go/no-go review** — still no public endpoints, no DGII live, no TrackId.
+**Phase 039** — Final inbound lab audit report — still no public endpoints, no DGII live, no TrackId.

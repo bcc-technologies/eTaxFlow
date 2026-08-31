@@ -444,7 +444,21 @@ python manage.py dgii_certification_package_lab --summary-only
 python manage.py dgii_certification_package_lab --export-package --json
 ```
 
-Next: **Phase 038** — Final non-production pre-cert go/no-go review (still no public endpoints unless explicitly authorized).
+## Final pre-cert go/no-go review lab (Phase 038)
+
+Phase 038 adds a **FINAL_REVIEW_LAB_ONLY** go/no-go aggregator. Expected decision: `FINAL_DECISION_BLOCKED`. Export under `runtime/dgii_final_reviews/`. **No portal submission**. No endpoint activation. No DGII calls. No TrackId. No production signing. Not certification evidence.
+
+- Doc: `docs/dgii/certification/FINAL_NON_PRODUCTION_PRE_CERT_GO_NO_GO_REVIEW.md`
+- Module: `ecf/dgii/final_go_no_go_lab.py`
+
+```bash
+python manage.py dgii_final_go_no_go_lab
+python manage.py dgii_final_go_no_go_lab --json
+python manage.py dgii_final_go_no_go_lab --summary-only
+python manage.py dgii_final_go_no_go_lab --export-review --json
+```
+
+Next: **Phase 039** — Final inbound lab audit report (still no public endpoints unless explicitly authorized).
 
 ## Warnings
 

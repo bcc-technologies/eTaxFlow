@@ -303,6 +303,9 @@ def build_certification_package_draft(
         ],
         "certification_package_lab_available": True,
         "certification_package_command": "dgii_certification_package_lab",
+        "final_go_no_go_lab_available": True,
+        "final_go_no_go_command": "dgii_final_go_no_go_lab",
+        "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
     }
 
 
@@ -442,5 +445,8 @@ def write_certification_package(
         "files_exported": written,
         "output_dir": str(target),
         "certification_package_status": "RUN",
+        "final_go_no_go_lab_available": True,
+        "final_go_no_go_command": "dgii_final_go_no_go_lab",
+        "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
     }
     return draft
