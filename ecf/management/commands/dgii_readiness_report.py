@@ -18,6 +18,9 @@ from ecf.dgii.inbound_audit_retention_lab_readiness import (
 from ecf.dgii.inbound_security_policy_lab_readiness import (
     build_inbound_security_policy_lab_readiness_checks,
 )
+from ecf.dgii.inbound_reporting_lab_readiness import (
+    build_inbound_reporting_lab_readiness_checks,
+)
 from ecf.dgii.receiver import get_receiver_contract_metadata
 from ecf.dgii.receiver_readiness import build_receiver_readiness_checks
 from ecf.models import ECFDocument
@@ -46,6 +49,7 @@ def build_readiness_report() -> dict:
     inbound_workflow_lab_blocker_checks = build_inbound_workflow_lab_readiness_checks()
     inbound_audit_retention_lab_blocker_checks = build_inbound_audit_retention_lab_readiness_checks()
     inbound_security_policy_lab_blocker_checks = build_inbound_security_policy_lab_readiness_checks()
+    inbound_reporting_lab_blocker_checks = build_inbound_reporting_lab_readiness_checks()
     configured_rnc_count = Organization.objects.exclude(rnc="").count()
     default_issuer_count = Organization.objects.filter(is_default_issuer=True).count()
     xsd_present = Path("docs/dgii/sources/e-CF_31_v1.0.xsd").is_file()
@@ -184,6 +188,7 @@ def build_readiness_report() -> dict:
         *inbound_workflow_lab_blocker_checks,
         *inbound_audit_retention_lab_blocker_checks,
         *inbound_security_policy_lab_blocker_checks,
+        *inbound_reporting_lab_blocker_checks,
     ]
     blockers = [item["name"] for item in checks if item["blocker"]]
     blockers.extend(name for name, item in endpoint_checks.items() if item["blocker"])

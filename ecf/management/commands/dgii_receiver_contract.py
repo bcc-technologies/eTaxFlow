@@ -97,6 +97,19 @@ class Command(BaseCommand):
             f"trust_chain_validation_ready: {meta['trust_chain_validation_ready']}"
         )
         self.stdout.write(f"revocation_check_ready: {meta['revocation_check_ready']}")
+        self.stdout.write(
+            f"inbound_reporting_lab_available: {meta['inbound_reporting_lab_available']}"
+        )
+        self.stdout.write(f"reporting_scope: {meta['reporting_scope']}")
+        self.stdout.write(f"reporting_command: {meta['reporting_command']}")
+        self.stdout.write(
+            f"report_exports_metadata_only: {meta['report_exports_metadata_only']}"
+        )
+        self.stdout.write(f"raw_xml_export_enabled: {meta['raw_xml_export_enabled']}")
+        self.stdout.write(f"production_dashboard_ready: {meta['production_dashboard_ready']}")
+        self.stdout.write(
+            f"public_endpoint_reporting_enabled: {meta['public_endpoint_reporting_enabled']}"
+        )
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

@@ -102,7 +102,8 @@ Each analyzed fixture produces:
 
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md` (Phase 033)
 - `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md` (Phase 034)
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md` (Phase 035)
 
 ## Next phase
 
-**Phase 035** — security-owner sign-off / staging rehearsal checklist — still no public endpoints, no DGII live, no TrackId.
+**Phase 036** — Staging deployment evidence collector lab — still no public endpoints, no DGII live, no TrackId.

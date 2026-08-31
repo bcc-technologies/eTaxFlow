@@ -239,3 +239,7 @@ runtime/dgii_lab_exports/*
 # Phase 034 security policy reports (metadata only)
 runtime/dgii_security_reports/*
 !runtime/dgii_security_reports/.gitkeep
+
+# Phase 035 inbound lab report exports (metadata only; never commit payloads)
+runtime/dgii_lab_reports/*
+!runtime/dgii_lab_reports/.gitkeep

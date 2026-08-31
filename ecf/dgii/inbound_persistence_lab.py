@@ -205,5 +205,8 @@ def build_persistence_lab_report(
         "security_policy_lab_available": True,
         "security_policy_command": "dgii_inbound_security_policy_lab",
         "security_policy_status": "NOT_RUN_BY_DEFAULT",
+        "reporting_lab_available": True,
+        "reporting_command": "dgii_inbound_reporting_lab",
+        "reporting_status": "NOT_RUN_BY_DEFAULT",
         "results": results,
     }

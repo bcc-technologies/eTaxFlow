@@ -118,6 +118,9 @@ class Command(BaseCommand):
         self.stdout.write(f"security_policy_lab_available: {report['security_policy_lab_available']}")
         self.stdout.write(f"security_policy_command: {report['security_policy_command']}")
         self.stdout.write(f"security_policy_status: {report['security_policy_status']}")
+        self.stdout.write(f"reporting_lab_available: {report['reporting_lab_available']}")
+        self.stdout.write(f"reporting_command: {report['reporting_command']}")
+        self.stdout.write(f"reporting_status: {report['reporting_status']}")
         if not options.get("summary_only"):
             self.stdout.write("")
             for item in report["results"]:

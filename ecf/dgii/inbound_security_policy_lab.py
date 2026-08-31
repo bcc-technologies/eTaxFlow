@@ -362,6 +362,9 @@ def build_security_policy_report() -> dict[str, Any]:
         "warnings": evaluation["warnings"],
         "security_policy_lab_available": True,
         "security_policy_command": "dgii_inbound_security_policy_lab",
+        "reporting_lab_available": True,
+        "reporting_command": "dgii_inbound_reporting_lab",
+        "reporting_status": "NOT_RUN_BY_DEFAULT",
     }
 
 

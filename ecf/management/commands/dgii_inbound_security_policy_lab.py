@@ -64,6 +64,9 @@ class Command(BaseCommand):
         self.stdout.write("dgii_submission_allowed=false")
         self.stdout.write(f"public_endpoints_enabled={str(report['public_endpoints_enabled']).lower()}")
         self.stdout.write("production_security_ready=false")
+        self.stdout.write(f"reporting_lab_available: {report['reporting_lab_available']}")
+        self.stdout.write(f"reporting_command: {report['reporting_command']}")
+        self.stdout.write(f"reporting_status: {report['reporting_status']}")
         self.stdout.write("track_id=null")
         self.stdout.write("dgii_call_made=false")
         summary = report["summary"]

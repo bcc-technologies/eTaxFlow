@@ -111,6 +111,8 @@ python manage.py dgii_inbound_security_policy_lab --export-report --json
 - `ecf/management/commands/dgii_inbound_security_policy_lab.py`
 - `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md`
 
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md` (Phase 035)
+
 ## Next phase
 
-**Phase 035** — typically staging/integration rehearsal or human security-owner sign-off checklist — still no public endpoints, no DGII live, no TrackId unless explicitly authorized later.
+**Phase 036** — Staging deployment evidence collector lab — still no public endpoints, no DGII live, no TrackId.

@@ -133,6 +133,16 @@ class DGIIRreadinessReportTests(TestCase):
         "phase_024_human_gate_not_signed_off",
     )
 
+    PHASE_035_BLOCKERS = (
+        "inbound_reporting_lab_only",
+        "reports_not_certification_evidence",
+        "reports_metadata_only",
+        "production_dashboard_not_implemented",
+        "public_endpoint_reporting_disabled",
+        "report_review_not_human_approved",
+        "raw_xml_reporting_policy_not_approved",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -166,6 +176,8 @@ class DGIIRreadinessReportTests(TestCase):
         for blocker in self.PHASE_033_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_034_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_035_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 

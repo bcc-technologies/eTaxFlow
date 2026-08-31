@@ -106,6 +106,8 @@ python manage.py dgii_inbound_audit_retention_lab --from-lab-records --export-ma
 - `ecf/dgii/inbound_audit_retention_lab.py`
 - `ecf/management/commands/dgii_inbound_audit_retention_lab.py`
 
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md` (Phase 035)
+
 ## Next phase
 
-**Phase 035** — security-owner sign-off / staging rehearsal checklist — still no public endpoints, no DGII live, no TrackId.
+**Phase 036** — Staging deployment evidence collector lab — still no public endpoints, no DGII live, no TrackId.

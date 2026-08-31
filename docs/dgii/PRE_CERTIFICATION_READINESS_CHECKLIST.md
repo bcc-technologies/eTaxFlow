@@ -21,6 +21,7 @@ Phase 031 adds lab-only inbound persistence (`dgii_inbound_persistence_lab`) —
 Phase 032 adds lab-only inbound workflow routing (`dgii_inbound_workflow_lab`) — NON_PRODUCTION_LAB_ONLY; dry-run default; not fiscal acceptance.
 Phase 033 adds lab-only inbound audit/retention (`dgii_inbound_audit_retention_lab`) — NON_PRODUCTION_LAB_ONLY; dry-run default; no deletes; metadata export only.
 Phase 034 adds inbound security controls policy review (`dgii_inbound_security_policy_lab`) — NON_PRODUCTION_LAB_ONLY; SECURITY_POLICY_BLOCKED; placeholders ≠ enforced.
+Phase 035 adds inbound reporting export lab (`dgii_inbound_reporting_lab`) — NON_PRODUCTION_LAB_ONLY metadata-only JSON/CSV/Markdown/bundle; no raw XML; no production dashboard.
 
 See also:
 - `docs/dgii/source_intake/PHASE_024_SOURCE_REVIEW_SUMMARY.md`
@@ -35,6 +36,7 @@ See also:
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_WORKFLOW_ROUTING_LAB.md` (Phase 032 — lab-only workflow routing)
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md` (Phase 033 — lab-only audit/retention)
 - `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md` (Phase 034 — security policy lab)
+- `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md` (Phase 035 — reporting export lab)
 - `.env.staging.example` (Phase 026 — staging env placeholders only)
 
 ## Checklist

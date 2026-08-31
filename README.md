@@ -399,7 +399,21 @@ python manage.py dgii_inbound_security_policy_lab --export-report --json
 
 Public `/fe/...` routes remain **503 DISABLED**. Policy lab ≠ production security approval. No DGII calls. No TrackId.
 
-Next: **Phase 035** — typically security-owner sign-off / staging rehearsal checklist (still no public endpoints unless explicitly authorized).
+## Inbound reporting export lab (Phase 035)
+
+Phase 035 adds a **metadata-only** consolidated inbound lab report/export (JSON/CSV/Markdown/bundle under `runtime/dgii_lab_reports/`). No production dashboard. **No raw XML** by default. No public endpoint activation. No DGII calls. No TrackId. Not certification evidence.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md`
+- Module: `ecf/dgii/inbound_reporting_lab.py`
+
+```bash
+python manage.py dgii_inbound_reporting_lab
+python manage.py dgii_inbound_reporting_lab --json
+python manage.py dgii_inbound_reporting_lab --summary-only
+python manage.py dgii_inbound_reporting_lab --export-bundle --json
+```
+
+Next: **Phase 036** — Staging deployment evidence collector lab (still no public endpoints unless explicitly authorized).
 
 ## Warnings
 
