@@ -110,6 +110,20 @@ class Command(BaseCommand):
         self.stdout.write(
             f"public_endpoint_reporting_enabled: {meta['public_endpoint_reporting_enabled']}"
         )
+        self.stdout.write(
+            f"staging_evidence_lab_available: {meta['staging_evidence_lab_available']}"
+        )
+        self.stdout.write(f"staging_evidence_command: {meta['staging_evidence_command']}")
+        self.stdout.write(f"staging_evidence_scope: {meta['staging_evidence_scope']}")
+        self.stdout.write(f"staging_evidence_decision: {meta['staging_evidence_decision']}")
+        self.stdout.write(f"production_staging_ready: {meta['production_staging_ready']}")
+        self.stdout.write(
+            f"public_endpoint_external_verification_ready: {meta['public_endpoint_external_verification_ready']}"
+        )
+        self.stdout.write(f"dns_tls_evidence_ready: {meta['dns_tls_evidence_ready']}")
+        self.stdout.write(
+            f"manual_staging_review_required: {meta['manual_staging_review_required']}"
+        )
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

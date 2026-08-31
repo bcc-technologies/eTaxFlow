@@ -133,6 +133,9 @@ class Command(BaseCommand):
         self.stdout.write(f"workflow_event_count: {report['workflow_event_count']}")
         self.stdout.write(f"audit_event_count: {report['audit_event_count']}")
         self.stdout.write(f"blocker_count: {report['blocker_count']}")
+        self.stdout.write(f"staging_evidence_lab_available: {report['staging_evidence_lab_available']}")
+        self.stdout.write(f"staging_evidence_command: {report['staging_evidence_command']}")
+        self.stdout.write(f"staging_evidence_status: {report.get('staging_evidence_status', 'NOT_RUN_BY_DEFAULT')}")
         if output_dir:
             self.stdout.write(f"output_dir: {output_dir}")
         if files_exported:

@@ -163,11 +163,14 @@ Local XSD validation is **LOCAL_OFFLINE_ONLY**. Signature lab is **LOCAL_OFFLINE
 - `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md`
 - `ecf/dgii/inbound_reporting_lab.py` — inbound reporting export lab (Phase 035)
 - `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md`
+- `ecf/dgii/staging_evidence_lab.py` — staging evidence collector lab (Phase 036)
+- `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md`
 
 Audit/retention is **NON_PRODUCTION_LAB_ONLY** (dry-run default; no deletes; metadata-only export).
 Security policy is **NON_PRODUCTION_LAB_ONLY** / `SECURITY_POLICY_BLOCKED` (report-only; placeholders ≠ enforced).
 Reporting is **NON_PRODUCTION_LAB_ONLY** metadata-only (no raw XML by default; no production dashboard).
+Staging evidence is **NON_PRODUCTION_LAB_ONLY** offline/manual (no network checks; no staging approval claim).
 
 ## Next phase
 
-**Phase 036** — Staging deployment evidence collector lab — still no public endpoints, no DGII live, no TrackId.
+**Phase 037** — Certification portal submission package draft — still no public endpoints, no DGII live, no TrackId.

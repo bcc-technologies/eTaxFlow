@@ -27,6 +27,8 @@ Related artifacts:
 - `python manage.py dgii_endpoint_plan`
 - `python manage.py dgii_receiver_contract`
 - `python manage.py dgii_inbound_xml_lab` (Phase 028 — synthetic fixtures only)
+- `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md` (Phase 036 — offline evidence collector; no network checks)
+- `python manage.py dgii_staging_evidence_lab` (Phase 036 — template/validate/report only)
 
 ## 2. Planned host
 
@@ -164,3 +166,13 @@ Mark each command result in the deployment ticket when executed.
 ## 10. Next phase
 
 **Phase 027 — Pre-certification receiver endpoint implementation plan** (internal contract + tests for ARECF/ACECF/ECF received — still no DGII live).
+
+## Phase 036 evidence collector
+
+Use `dgii_staging_evidence_lab` for **offline/manual** evidence templates and validation under `runtime/dgii_staging_evidence/`.
+
+- Does **not** perform DNS/TLS/HTTPS/network checks
+- Does **not** enable public endpoints
+- Does **not** call DGII or create TrackId
+- Does **not** claim staging approval or certification evidence
+- Default decision: `STAGING_EVIDENCE_BLOCKED`

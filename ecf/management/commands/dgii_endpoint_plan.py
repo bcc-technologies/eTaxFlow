@@ -37,6 +37,22 @@ class Command(BaseCommand):
         )
         self.stdout.write(f"endpoint_routes_status: {meta['endpoint_routes_status']}")
         self.stdout.write(f"manual_verification_required: {meta['manual_verification_required']}")
+        self.stdout.write(
+            f"staging_evidence_lab_available: {meta['staging_evidence_lab_available']}"
+        )
+        self.stdout.write(f"staging_evidence_command: {meta['staging_evidence_command']}")
+        self.stdout.write(f"staging_evidence_scope: {meta['staging_evidence_scope']}")
+        self.stdout.write(f"staging_evidence_decision: {meta['staging_evidence_decision']}")
+        self.stdout.write(f"production_staging_ready: {meta['production_staging_ready']}")
+        self.stdout.write(f"external_dns_verified: {meta['external_dns_verified']}")
+        self.stdout.write(f"external_tls_verified: {meta['external_tls_verified']}")
+        self.stdout.write(
+            f"external_disabled_routes_verified: {meta['external_disabled_routes_verified']}"
+        )
+        self.stdout.write(
+            f"staging_manual_evidence_required: {meta['staging_manual_evidence_required']}"
+        )
+        self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")
         self.stdout.write(f"compliance_status: {meta['compliance_status']}")
         self.stdout.write(f"dgii_submission_allowed: {meta['dgii_submission_allowed']}")
         self.stdout.write("")

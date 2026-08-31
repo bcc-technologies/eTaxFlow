@@ -365,6 +365,9 @@ def build_security_policy_report() -> dict[str, Any]:
         "reporting_lab_available": True,
         "reporting_command": "dgii_inbound_reporting_lab",
         "reporting_status": "NOT_RUN_BY_DEFAULT",
+        "staging_evidence_lab_available": True,
+        "staging_evidence_command": "dgii_staging_evidence_lab",
+        "staging_evidence_status": "NOT_RUN_BY_DEFAULT",
     }
 
 

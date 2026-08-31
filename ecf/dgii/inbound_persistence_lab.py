@@ -208,5 +208,8 @@ def build_persistence_lab_report(
         "reporting_lab_available": True,
         "reporting_command": "dgii_inbound_reporting_lab",
         "reporting_status": "NOT_RUN_BY_DEFAULT",
+        "staging_evidence_lab_available": True,
+        "staging_evidence_command": "dgii_staging_evidence_lab",
+        "staging_evidence_status": "NOT_RUN_BY_DEFAULT",
         "results": results,
     }

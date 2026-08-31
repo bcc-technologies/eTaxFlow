@@ -236,6 +236,9 @@ def build_json_report(data: dict[str, Any] | None = None) -> dict[str, Any]:
         },
         "reporting_lab_available": True,
         "reporting_command": "dgii_inbound_reporting_lab",
+        "staging_evidence_lab_available": True,
+        "staging_evidence_command": "dgii_staging_evidence_lab",
+        "staging_evidence_status": "NOT_RUN_BY_DEFAULT",
         "warnings": [
             "Metadata-only report. Raw XML is not exported.",
             "Not DGII certification evidence.",
@@ -412,6 +415,9 @@ def write_report_bundle(
     report["files_exported"] = written
     report["output_dir"] = str(target)
     report["reporting_status"] = "RUN"
+    report["staging_evidence_lab_available"] = True
+    report["staging_evidence_command"] = "dgii_staging_evidence_lab"
+    report["staging_evidence_status"] = "NOT_RUN_BY_DEFAULT"
     return report
 
 
@@ -427,4 +433,7 @@ def build_reporting_lab_report(
     report["reporting_lab_available"] = True
     report["reporting_command"] = "dgii_inbound_reporting_lab"
     report["reporting_status"] = "RUN"
+    report["staging_evidence_lab_available"] = True
+    report["staging_evidence_command"] = "dgii_staging_evidence_lab"
+    report["staging_evidence_status"] = "NOT_RUN_BY_DEFAULT"
     return report

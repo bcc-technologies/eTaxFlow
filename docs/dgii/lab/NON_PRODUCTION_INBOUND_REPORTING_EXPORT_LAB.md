@@ -82,6 +82,8 @@ python manage.py dgii_inbound_reporting_lab --export-bundle --json
 - `ecf/dgii/inbound_reporting_lab.py`
 - `ecf/management/commands/dgii_inbound_reporting_lab.py`
 
+- `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md` (Phase 036)
+
 ## Next phase
 
-**Phase 036 — Staging deployment evidence collector lab** — still no public endpoints, no DGII live, no TrackId.
+**Phase 037** — Certification portal submission package draft — still no public endpoints, no DGII live, no TrackId.

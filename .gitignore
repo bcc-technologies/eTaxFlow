@@ -243,3 +243,7 @@ runtime/dgii_security_reports/*
 # Phase 035 inbound lab report exports (metadata only; never commit payloads)
 runtime/dgii_lab_reports/*
 !runtime/dgii_lab_reports/.gitkeep
+
+# Phase 036 staging evidence lab artifacts (manual metadata only)
+runtime/dgii_staging_evidence/*
+!runtime/dgii_staging_evidence/.gitkeep

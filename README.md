@@ -413,7 +413,23 @@ python manage.py dgii_inbound_reporting_lab --summary-only
 python manage.py dgii_inbound_reporting_lab --export-bundle --json
 ```
 
-Next: **Phase 036** — Staging deployment evidence collector lab (still no public endpoints unless explicitly authorized).
+## Staging deployment evidence collector lab (Phase 036)
+
+Phase 036 adds an **offline/manual staging evidence collector**. Template, validate, and metadata report only under `runtime/dgii_staging_evidence/`. **No network checks**. No deployment. No public endpoint activation. No DGII calls. No TrackId. Not staging approval. Not certification evidence.
+
+- Doc: `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md`
+- Module: `ecf/dgii/staging_evidence_lab.py`
+- Decision default: `STAGING_EVIDENCE_BLOCKED`
+
+```bash
+python manage.py dgii_staging_evidence_lab
+python manage.py dgii_staging_evidence_lab --json
+python manage.py dgii_staging_evidence_lab --summary-only
+python manage.py dgii_staging_evidence_lab --write-template --json
+python manage.py dgii_staging_evidence_lab --export-report --json
+```
+
+Next: **Phase 037** — Certification portal submission package draft (still no public endpoints unless explicitly authorized).
 
 ## Warnings
 

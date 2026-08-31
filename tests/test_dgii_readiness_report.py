@@ -143,6 +143,21 @@ class DGIIRreadinessReportTests(TestCase):
         "raw_xml_reporting_policy_not_approved",
     )
 
+    PHASE_036_BLOCKERS = (
+        "staging_evidence_lab_only",
+        "dns_tls_evidence_not_uploaded",
+        "external_disabled_endpoint_evidence_not_uploaded",
+        "external_post_disabled_evidence_not_uploaded",
+        "staging_environment_evidence_not_reviewed",
+        "staging_db_separation_not_verified",
+        "secrets_policy_not_reviewed",
+        "public_base_url_not_verified",
+        "logging_redaction_evidence_not_reviewed",
+        "security_owner_staging_review_not_completed",
+        "tax_compliance_staging_review_not_completed",
+        "phase_024_authorization_gate_not_signed_off_for_staging",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -179,6 +194,9 @@ class DGIIRreadinessReportTests(TestCase):
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_035_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_036_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
+        self.assertFalse(report["production_staging_ready"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 
     def test_human_report_runs_without_mutation(self):
