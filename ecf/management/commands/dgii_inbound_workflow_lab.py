@@ -124,6 +124,9 @@ class Command(BaseCommand):
         self.stdout.write(f"staging_evidence_lab_available: {report['staging_evidence_lab_available']}")
         self.stdout.write(f"staging_evidence_command: {report['staging_evidence_command']}")
         self.stdout.write(f"staging_evidence_status: {report['staging_evidence_status']}")
+        self.stdout.write(f"certification_package_lab_available: {report['certification_package_lab_available']}")
+        self.stdout.write(f"certification_package_command: {report['certification_package_command']}")
+        self.stdout.write(f"certification_package_status: {report['certification_package_status']}")
         if not options.get("summary_only"):
             self.stdout.write("")
             for item in report["results"]:

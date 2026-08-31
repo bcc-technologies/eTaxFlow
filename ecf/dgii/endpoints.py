@@ -105,4 +105,11 @@ def get_software_registration_metadata() -> dict[str, Any]:
         "external_disabled_routes_verified": False,
         "staging_manual_evidence_required": True,
         "certification_evidence": False,
+        "certification_package_lab_available": True,
+        "certification_package_command": "dgii_certification_package_lab",
+        "certification_package_scope": "DRAFT_ONLY",
+        "certification_package_status": "PACKAGE_BLOCKED",
+        "portal_submission_allowed": False,
+        "planned_portal_urls_available": True,
+        "public_base_url_externally_verified": False,
     }

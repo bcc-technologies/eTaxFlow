@@ -247,3 +247,7 @@ runtime/dgii_lab_reports/*
 # Phase 036 staging evidence lab artifacts (manual metadata only)
 runtime/dgii_staging_evidence/*
 !runtime/dgii_staging_evidence/.gitkeep
+
+# Phase 037 certification package drafts (DRAFT_ONLY; never commit payloads)
+runtime/dgii_certification_package_drafts/*
+!runtime/dgii_certification_package_drafts/.gitkeep

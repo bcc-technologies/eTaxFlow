@@ -53,6 +53,19 @@ class Command(BaseCommand):
             f"staging_manual_evidence_required: {meta['staging_manual_evidence_required']}"
         )
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")
+        self.stdout.write(
+            f"certification_package_lab_available: {meta['certification_package_lab_available']}"
+        )
+        self.stdout.write(f"certification_package_command: {meta['certification_package_command']}")
+        self.stdout.write(f"certification_package_scope: {meta['certification_package_scope']}")
+        self.stdout.write(f"certification_package_status: {meta['certification_package_status']}")
+        self.stdout.write(f"portal_submission_allowed: {meta['portal_submission_allowed']}")
+        self.stdout.write(
+            f"planned_portal_urls_available: {meta['planned_portal_urls_available']}"
+        )
+        self.stdout.write(
+            f"public_base_url_externally_verified: {meta['public_base_url_externally_verified']}"
+        )
         self.stdout.write(f"compliance_status: {meta['compliance_status']}")
         self.stdout.write(f"dgii_submission_allowed: {meta['dgii_submission_allowed']}")
         self.stdout.write("")

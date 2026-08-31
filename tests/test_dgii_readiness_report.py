@@ -158,6 +158,21 @@ class DGIIRreadinessReportTests(TestCase):
         "phase_024_authorization_gate_not_signed_off_for_staging",
     )
 
+    PHASE_037_BLOCKERS = (
+        "certification_package_draft_only",
+        "portal_submission_not_allowed",
+        "portal_submission_ready_false",
+        "public_base_url_not_verified",
+        "endpoint_external_evidence_missing",
+        "security_owner_review_missing",
+        "tax_compliance_owner_review_missing",
+        "phase_024_gate_not_signed_off",
+        "production_signing_architecture_not_approved",
+        "production_signature_verification_not_implemented",
+        "certification_portal_credentials_not_confirmed",
+        "certification_package_not_human_approved",
+    )
+
     def test_json_report_is_parseable_and_reports_blockers(self):
         with captured_stdout() as out:
             call_command("dgii_readiness_report", json_flag=True)
@@ -196,7 +211,10 @@ class DGIIRreadinessReportTests(TestCase):
             self.assertIn(blocker, report["blockers"])
         for blocker in self.PHASE_036_BLOCKERS:
             self.assertIn(blocker, report["blockers"])
+        for blocker in self.PHASE_037_BLOCKERS:
+            self.assertIn(blocker, report["blockers"])
         self.assertFalse(report["production_staging_ready"])
+        self.assertFalse(report["portal_submission_allowed"])
         self.assertTrue(report["remaining_dgii_documentation_missing"])
 
     def test_human_report_runs_without_mutation(self):

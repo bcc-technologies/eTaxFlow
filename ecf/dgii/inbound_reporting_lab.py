@@ -239,6 +239,9 @@ def build_json_report(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "staging_evidence_lab_available": True,
         "staging_evidence_command": "dgii_staging_evidence_lab",
         "staging_evidence_status": "NOT_RUN_BY_DEFAULT",
+        "certification_package_lab_available": True,
+        "certification_package_command": "dgii_certification_package_lab",
+        "certification_package_status": "NOT_RUN_BY_DEFAULT",
         "warnings": [
             "Metadata-only report. Raw XML is not exported.",
             "Not DGII certification evidence.",
@@ -418,6 +421,9 @@ def write_report_bundle(
     report["staging_evidence_lab_available"] = True
     report["staging_evidence_command"] = "dgii_staging_evidence_lab"
     report["staging_evidence_status"] = "NOT_RUN_BY_DEFAULT"
+    report["certification_package_lab_available"] = True
+    report["certification_package_command"] = "dgii_certification_package_lab"
+    report["certification_package_status"] = "NOT_RUN_BY_DEFAULT"
     return report
 
 
@@ -436,4 +442,7 @@ def build_reporting_lab_report(
     report["staging_evidence_lab_available"] = True
     report["staging_evidence_command"] = "dgii_staging_evidence_lab"
     report["staging_evidence_status"] = "NOT_RUN_BY_DEFAULT"
+    report["certification_package_lab_available"] = True
+    report["certification_package_command"] = "dgii_certification_package_lab"
+    report["certification_package_status"] = "NOT_RUN_BY_DEFAULT"
     return report

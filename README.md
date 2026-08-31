@@ -429,7 +429,22 @@ python manage.py dgii_staging_evidence_lab --write-template --json
 python manage.py dgii_staging_evidence_lab --export-report --json
 ```
 
-Next: **Phase 037** — Certification portal submission package draft (still no public endpoints unless explicitly authorized).
+## Certification portal package draft lab (Phase 037)
+
+Phase 037 adds a **DRAFT_ONLY** certification portal software postulation package. Planned fields/URLs and supporting lab summaries under `runtime/dgii_certification_package_drafts/`. **No portal submission**. No signed XML. No DGII calls. No TrackId. Not certification evidence.
+
+- Doc: `docs/dgii/certification/CERTIFICATION_PORTAL_SUBMISSION_PACKAGE_DRAFT.md`
+- Module: `ecf/dgii/certification_package_lab.py`
+- Default status: `PACKAGE_BLOCKED`
+
+```bash
+python manage.py dgii_certification_package_lab
+python manage.py dgii_certification_package_lab --json
+python manage.py dgii_certification_package_lab --summary-only
+python manage.py dgii_certification_package_lab --export-package --json
+```
+
+Next: **Phase 038** — Final non-production pre-cert go/no-go review (still no public endpoints unless explicitly authorized).
 
 ## Warnings
 

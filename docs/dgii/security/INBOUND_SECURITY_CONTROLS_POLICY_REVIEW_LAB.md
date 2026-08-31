@@ -115,6 +115,8 @@ python manage.py dgii_inbound_security_policy_lab --export-report --json
 
 - `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md` (Phase 036)
 
+- `docs/dgii/certification/CERTIFICATION_PORTAL_SUBMISSION_PACKAGE_DRAFT.md` (Phase 037)
+
 ## Next phase
 
-**Phase 037** — Certification portal submission package draft — still no public endpoints, no DGII live, no TrackId.
+**Phase 038** — Final non-production pre-cert go/no-go review — still no public endpoints, no DGII live, no TrackId.

@@ -320,5 +320,8 @@ def build_signature_lab_report(results: list[InboundSignatureLabResult]) -> dict
         "staging_evidence_lab_available": True,
         "staging_evidence_command": "dgii_staging_evidence_lab",
         "staging_evidence_status": "NOT_RUN_BY_DEFAULT",
+        "certification_package_lab_available": True,
+        "certification_package_command": "dgii_certification_package_lab",
+        "certification_package_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }

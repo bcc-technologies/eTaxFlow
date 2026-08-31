@@ -116,6 +116,8 @@ python manage.py dgii_staging_evidence_lab --evidence-file runtime/dgii_staging_
 - `ecf/management/commands/dgii_staging_evidence_lab.py`
 - `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md` (Phase 026)
 
+- `docs/dgii/certification/CERTIFICATION_PORTAL_SUBMISSION_PACKAGE_DRAFT.md` (Phase 037)
+
 ## Next phase
 
-**Phase 037 — Certification portal submission package draft** — still no public endpoints, no DGII live, no TrackId.
+**Phase 038** — Final non-production pre-cert go/no-go review — still no public endpoints, no DGII live, no TrackId.

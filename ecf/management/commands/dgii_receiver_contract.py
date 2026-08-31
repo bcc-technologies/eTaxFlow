@@ -124,6 +124,17 @@ class Command(BaseCommand):
         self.stdout.write(
             f"manual_staging_review_required: {meta['manual_staging_review_required']}"
         )
+        self.stdout.write(
+            f"certification_package_lab_available: {meta['certification_package_lab_available']}"
+        )
+        self.stdout.write(f"certification_package_command: {meta['certification_package_command']}")
+        self.stdout.write(f"certification_package_scope: {meta['certification_package_scope']}")
+        self.stdout.write(f"certification_package_status: {meta['certification_package_status']}")
+        self.stdout.write(f"portal_submission_allowed: {meta['portal_submission_allowed']}")
+        self.stdout.write(f"portal_submission_ready: {meta['portal_submission_ready']}")
+        self.stdout.write(
+            f"package_requires_human_review: {meta['package_requires_human_review']}"
+        )
         self.stdout.write(f"lab_mode: {meta['lab_mode']}")
         self.stdout.write(f"synthetic_fixtures_available: {meta['synthetic_fixtures_available']}")
         self.stdout.write(f"certification_evidence: {meta['certification_evidence']}")

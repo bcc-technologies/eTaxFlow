@@ -136,6 +136,9 @@ class Command(BaseCommand):
         self.stdout.write(f"staging_evidence_lab_available: {report['staging_evidence_lab_available']}")
         self.stdout.write(f"staging_evidence_command: {report['staging_evidence_command']}")
         self.stdout.write(f"staging_evidence_status: {report.get('staging_evidence_status', 'NOT_RUN_BY_DEFAULT')}")
+        self.stdout.write(f"certification_package_lab_available: {report.get('certification_package_lab_available', True)}")
+        self.stdout.write(f"certification_package_command: {report.get('certification_package_command', 'dgii_certification_package_lab')}")
+        self.stdout.write(f"certification_package_status: {report.get('certification_package_status', 'NOT_RUN_BY_DEFAULT')}")
         if output_dir:
             self.stdout.write(f"output_dir: {output_dir}")
         if files_exported:
