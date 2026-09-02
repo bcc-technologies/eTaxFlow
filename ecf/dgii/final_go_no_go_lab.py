@@ -434,4 +434,7 @@ def write_final_go_no_go_review(
         "files_exported": written,
         "output_dir": str(target),
         "final_go_no_go_status": "RUN",
+        "final_inbound_audit_lab_available": True,
+        "final_inbound_audit_command": "dgii_final_inbound_audit_lab",
+        "final_inbound_audit_status": "NOT_RUN_BY_DEFAULT",
     }

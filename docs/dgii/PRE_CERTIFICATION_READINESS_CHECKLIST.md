@@ -101,3 +101,14 @@ Official certification test cases must not be invented.
 - Phase 032 workflow routes are not fiscal acceptance, acuse, or aprobación generation.
 - Phase 033 lab audit events are not a DGII audit trail; retention decisions are not legal retention policy.
 - Phase 034 security policy lab is not production security approval; CONFIGURED_PLACEHOLDER ≠ ENFORCED.
+
+## Phase 039 — Final inbound lab audit report
+
+- Command: `python manage.py dgii_final_inbound_audit_lab` (`--json`, `--summary-only`, `--export-markdown`, `--export-json`)
+- Scope: `FINAL_AUDIT_LAB_ONLY` — consolidated audit for Phase 024–039
+- Export: `runtime/dgii_final_audit_reports/`
+- Doc: `docs/dgii/audit/FINAL_INBOUND_LAB_AUDIT_REPORT.md`
+- `final_decision=FINAL_DECISION_BLOCKED` · `NOT_DGII_COMPLIANT`
+- No portal submission · no endpoint activation · no DGII calls · no TrackId · no production signing · not certification evidence
+- Human decisions still required before staging evidence or production cutover
+

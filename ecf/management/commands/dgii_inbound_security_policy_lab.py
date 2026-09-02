@@ -76,6 +76,9 @@ class Command(BaseCommand):
         self.stdout.write(f"final_go_no_go_lab_available: {report['final_go_no_go_lab_available']}")
         self.stdout.write(f"final_go_no_go_command: {report['final_go_no_go_command']}")
         self.stdout.write(f"final_go_no_go_status: {report['final_go_no_go_status']}")
+        self.stdout.write(f"final_inbound_audit_lab_available: {report.get('final_inbound_audit_lab_available', True)}")
+        self.stdout.write("final_inbound_audit_command: dgii_final_inbound_audit_lab")
+        self.stdout.write(f"final_inbound_audit_status: {report.get('final_inbound_audit_status', 'NOT_RUN_BY_DEFAULT')}")
         self.stdout.write("track_id=null")
         self.stdout.write("dgii_call_made=false")
         summary = report["summary"]

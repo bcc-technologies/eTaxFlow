@@ -255,3 +255,7 @@ runtime/dgii_certification_package_drafts/*
 # Phase 038 final go/no-go reviews (FINAL_REVIEW_LAB_ONLY)
 runtime/dgii_final_reviews/*
 !runtime/dgii_final_reviews/.gitkeep
+
+# DGII final inbound audit lab exports (Phase 039)
+runtime/dgii_final_audit_reports/*
+!runtime/dgii_final_audit_reports/.gitkeep

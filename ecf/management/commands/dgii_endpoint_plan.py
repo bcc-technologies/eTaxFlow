@@ -70,6 +70,9 @@ class Command(BaseCommand):
             f"final_go_no_go_lab_available: {meta['final_go_no_go_lab_available']}"
         )
         self.stdout.write(f"final_go_no_go_command: {meta['final_go_no_go_command']}")
+        self.stdout.write(f"final_inbound_audit_lab_available: {meta['final_inbound_audit_lab_available']}")
+        self.stdout.write(f"final_inbound_audit_command: {meta['final_inbound_audit_command']}")
+        self.stdout.write(f"final_audit_scope: {meta['final_audit_scope']}")
         self.stdout.write(f"final_review_scope: {meta['final_review_scope']}")
         self.stdout.write(f"final_decision: {meta['final_decision']}")
         self.stdout.write(

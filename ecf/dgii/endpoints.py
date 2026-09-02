@@ -117,4 +117,7 @@ def get_software_registration_metadata() -> dict[str, Any]:
         "final_review_scope": "FINAL_REVIEW_LAB_ONLY",
         "final_decision": "FINAL_DECISION_BLOCKED",
         "endpoint_activation_allowed": False,
+        "final_inbound_audit_lab_available": True,
+        "final_inbound_audit_command": "dgii_final_inbound_audit_lab",
+        "final_audit_scope": "FINAL_AUDIT_LAB_ONLY",
     }

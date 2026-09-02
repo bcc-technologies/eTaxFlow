@@ -349,5 +349,8 @@ def build_schema_lab_report(results: list[InboundSchemaLabResult]) -> dict[str, 
         "final_go_no_go_lab_available": True,
         "final_go_no_go_command": "dgii_final_go_no_go_lab",
         "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
+        "final_inbound_audit_lab_available": True,
+        "final_inbound_audit_command": "dgii_final_inbound_audit_lab",
+        "final_inbound_audit_status": "NOT_RUN_BY_DEFAULT",
         "results": [item.to_dict() for item in results],
     }

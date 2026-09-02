@@ -245,6 +245,9 @@ def build_json_report(data: dict[str, Any] | None = None) -> dict[str, Any]:
         "final_go_no_go_lab_available": True,
         "final_go_no_go_command": "dgii_final_go_no_go_lab",
         "final_go_no_go_status": "NOT_RUN_BY_DEFAULT",
+        "final_inbound_audit_lab_available": True,
+        "final_inbound_audit_command": "dgii_final_inbound_audit_lab",
+        "final_inbound_audit_status": "NOT_RUN_BY_DEFAULT",
         "warnings": [
             "Metadata-only report. Raw XML is not exported.",
             "Not DGII certification evidence.",
@@ -430,6 +433,9 @@ def write_report_bundle(
     report["final_go_no_go_lab_available"] = True
     report["final_go_no_go_command"] = "dgii_final_go_no_go_lab"
     report["final_go_no_go_status"] = "NOT_RUN_BY_DEFAULT"
+    report["final_inbound_audit_lab_available"] = True
+    report["final_inbound_audit_command"] = "dgii_final_inbound_audit_lab"
+    report["final_inbound_audit_status"] = "NOT_RUN_BY_DEFAULT"
     return report
 
 
@@ -454,4 +460,7 @@ def build_reporting_lab_report(
     report["final_go_no_go_lab_available"] = True
     report["final_go_no_go_command"] = "dgii_final_go_no_go_lab"
     report["final_go_no_go_status"] = "NOT_RUN_BY_DEFAULT"
+    report["final_inbound_audit_lab_available"] = True
+    report["final_inbound_audit_command"] = "dgii_final_inbound_audit_lab"
+    report["final_inbound_audit_status"] = "NOT_RUN_BY_DEFAULT"
     return report

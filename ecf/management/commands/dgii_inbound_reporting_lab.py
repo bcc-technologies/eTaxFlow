@@ -142,6 +142,9 @@ class Command(BaseCommand):
         self.stdout.write(f"final_go_no_go_lab_available: {report.get('final_go_no_go_lab_available', True)}")
         self.stdout.write(f"final_go_no_go_command: {report.get('final_go_no_go_command', 'dgii_final_go_no_go_lab')}")
         self.stdout.write(f"final_go_no_go_status: {report.get('final_go_no_go_status', 'NOT_RUN_BY_DEFAULT')}")
+        self.stdout.write(f"final_inbound_audit_lab_available: {report.get('final_inbound_audit_lab_available', True)}")
+        self.stdout.write("final_inbound_audit_command: dgii_final_inbound_audit_lab")
+        self.stdout.write(f"final_inbound_audit_status: {report.get('final_inbound_audit_status', 'NOT_RUN_BY_DEFAULT')}")
         if output_dir:
             self.stdout.write(f"output_dir: {output_dir}")
         if files_exported:

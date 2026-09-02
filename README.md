@@ -458,7 +458,21 @@ python manage.py dgii_final_go_no_go_lab --summary-only
 python manage.py dgii_final_go_no_go_lab --export-review --json
 ```
 
-Next: **Phase 039** — Final inbound lab audit report (still no public endpoints unless explicitly authorized).
+## Final inbound lab audit report (Phase 039)
+
+Phase 039 adds a **FINAL_AUDIT_LAB_ONLY** consolidated audit report for inbound lab work (Phase 024–039). Expected decision: `FINAL_DECISION_BLOCKED`. Export under `runtime/dgii_final_audit_reports/`. **No portal submission**. No endpoint activation. No DGII calls. No TrackId. No production signing. Not certification evidence. Human decisions still required.
+
+- Doc: `docs/dgii/audit/FINAL_INBOUND_LAB_AUDIT_REPORT.md`
+- Module: `ecf/dgii/final_inbound_audit_lab.py`
+
+```bash
+python manage.py dgii_final_inbound_audit_lab
+python manage.py dgii_final_inbound_audit_lab --json
+python manage.py dgii_final_inbound_audit_lab --summary-only
+python manage.py dgii_final_inbound_audit_lab --export-markdown --export-json --json
+```
+
+Next: human review of final audit report; decide on real staging evidence collection — **do not** enable endpoints or submit to DGII without explicit approval.
 
 ## Warnings
 

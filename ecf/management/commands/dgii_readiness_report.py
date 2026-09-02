@@ -30,6 +30,9 @@ from ecf.dgii.certification_package_lab_readiness import (
 from ecf.dgii.final_go_no_go_lab_readiness import (
     build_final_go_no_go_lab_readiness_checks,
 )
+from ecf.dgii.final_inbound_audit_lab_readiness import (
+    build_final_inbound_audit_lab_readiness_checks,
+)
 from ecf.dgii.receiver import get_receiver_contract_metadata
 from ecf.dgii.receiver_readiness import build_receiver_readiness_checks
 from ecf.models import ECFDocument
@@ -62,6 +65,7 @@ def build_readiness_report() -> dict:
     staging_evidence_lab_blocker_checks = build_staging_evidence_lab_readiness_checks()
     certification_package_lab_blocker_checks = build_certification_package_lab_readiness_checks()
     final_go_no_go_lab_blocker_checks = build_final_go_no_go_lab_readiness_checks()
+    final_inbound_audit_lab_blocker_checks = build_final_inbound_audit_lab_readiness_checks()
     configured_rnc_count = Organization.objects.exclude(rnc="").count()
     default_issuer_count = Organization.objects.filter(is_default_issuer=True).count()
     xsd_present = Path("docs/dgii/sources/e-CF_31_v1.0.xsd").is_file()
@@ -204,6 +208,7 @@ def build_readiness_report() -> dict:
         *staging_evidence_lab_blocker_checks,
         *certification_package_lab_blocker_checks,
         *final_go_no_go_lab_blocker_checks,
+        *final_inbound_audit_lab_blocker_checks,
     ]
     blockers = [item["name"] for item in checks if item["blocker"]]
     blockers.extend(name for name, item in endpoint_checks.items() if item["blocker"])
@@ -223,6 +228,7 @@ def build_readiness_report() -> dict:
         "production_security_ready": False,
         "production_staging_ready": False,
         "portal_submission_allowed": False,
+        "endpoint_activation_allowed": False,
         "final_decision": "FINAL_DECISION_BLOCKED",
         "software": {
             "name": endpoint_meta["software_name"],
@@ -267,6 +273,7 @@ def build_readiness_report() -> dict:
             "Phase 032 inbound workflow lab routes lab records only; not fiscal acceptance.",
             "Phase 033 inbound audit/retention lab is metadata-only; not legal retention or DGII audit.",
             "Phase 034 inbound security policy lab is LAB_ONLY; SECURITY_POLICY_BLOCKED; not production approval.",
+            "Phase 039 final inbound audit report is FINAL_AUDIT_LAB_ONLY; not certification evidence.",
             f"Existing ECFDocument rows: {ECFDocument.objects.count()} (not approval evidence).",
         ],
     }
