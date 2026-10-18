@@ -10,7 +10,7 @@ from ecf.services.signing_placeholder import attempt_real_signing
 class SigningSecurityDesignTests(SimpleTestCase):
     def test_signing_defaults_are_disabled_and_test_safe(self):
         self.assertEqual(settings.SIGNING_MODE, "DISABLED")
-        self.assertEqual(settings.SIGNING_BACKEND, "NONE")
+        self.assertEqual(settings.ETAXFLOW_SIGNING_BACKEND, "NONE")
         self.assertFalse(settings.SIGNING_ENABLED)
         self.assertFalse(settings.SIGNING_ALLOW_TEST_ONLY)
         self.assertEqual(settings.SIGNING_CERT_PATH, "")

@@ -7,11 +7,17 @@ These variables describe deployment configuration. Values must be supplied by th
 | Variable | Staging guidance |
 | --- | --- |
 | `DEBUG` | Set `false`. |
-| `ALLOWED_HOSTS` | Comma-separated exact staging hosts; never `*`. |
-| `DATABASE_URL` | Secret-manager reference or injected credential for the dedicated staging database. |
+| `ALLOWED_HOSTS` | Comma-separated exact staging hosts (Render hostname + approved custom domain); never `*`. |
+| `DATABASE_URL` | Required when `DEBUG=false`. Use the Render Postgres Internal Database URL. No SQLite fallback in staging. |
+| `DATABASE_SSL_REQUIRE` | `true` on Render Postgres. |
 | `MEDIA_ROOT` | Private, dedicated staging storage path. |
-| `SECRET_KEY` | Inject a unique random staging value; never use a repository example value. |
-| `CSRF_TRUSTED_ORIGINS` | Exact `https://` staging origins only. |
+| `SECRET_KEY` | Inject a unique random staging value; never use a repository example value. Required when `DEBUG=false`. |
+| `CSRF_TRUSTED_ORIGINS` | Exact `https://` staging origins only (comma-separated). |
+| `SECURE_SSL_REDIRECT` | `true` behind Render TLS. |
+| `SESSION_COOKIE_SECURE` / `CSRF_COOKIE_SECURE` | `true` in staging. |
+| `SECURE_HSTS_SECONDS` | `0` until security owner approves. |
+
+Render field mapping, build/start commands, and migration strategy: `docs/deployment/RENDER_STAGING_DEPLOYMENT.md`.
 
 ## DGII contract layer
 
@@ -31,7 +37,7 @@ These variables describe deployment configuration. Values must be supplied by th
 | Variable | Safe repository/staging value |
 | --- | --- |
 | `SIGNING_MODE` | `DISABLED` |
-| `SIGNING_BACKEND` | `NONE` |
+| `SIGNING_BACKEND` | `NONE` (maps to `ETAXFLOW_SIGNING_BACKEND`; must not override Django cookie `SIGNING_BACKEND`) |
 | `SIGNING_ENABLED` | `false` |
 | `SIGNING_ALLOW_TEST_ONLY` | `false` by default; enable only inside a disposable test job. |
 | `SIGNING_CERT_PATH` | Blank. Do not point at a committed or shared certificate. |

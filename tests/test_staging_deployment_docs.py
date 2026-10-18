@@ -12,6 +12,7 @@ class StagingDeploymentDocumentationTests(SimpleTestCase):
             "docs/deployment/STAGING_DEPLOYMENT_PLAN.md",
             "docs/deployment/ENVIRONMENT_VARIABLES.md",
             "docs/deployment/SECURITY_BASELINE.md",
+            "docs/deployment/RENDER_STAGING_DEPLOYMENT.md",
             ".env.staging.example",
         ):
             self.assertTrue((ROOT / relative_path).is_file(), relative_path)
