@@ -19,3 +19,8 @@ Phase 005 package for mapping normalized eTaxFlow `Invoice` data to **future** D
 - Claim compliance
 
 See `docs/dgii/DGII_ECF_DOCUMENT_INVENTORY.md` for official source documents that must be collected before compliance work.
+
+## Where official PDFs / XSDs go
+
+Official DGII binaries belong in **`docs/dgii/sources/`** (gitignored), not in this Python package.
+Use snake_case local names from `docs/dgii/sources/README.md`.

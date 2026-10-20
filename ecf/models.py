@@ -83,3 +83,129 @@ class ECFDocument(models.Model):
     def has_real_signed_artifact(self) -> bool:
         """True only when a signed XML file exists — never set by placeholder flow."""
         return bool(self.xml_signed_file)
+
+
+class InboundXMLLabRecord(models.Model):
+    """NON_PRODUCTION_LAB_ONLY analysis row. Not a fiscal document. Not DGII evidence."""
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    source_path = models.CharField(max_length=512, blank=True)
+    filename = models.CharField(max_length=255, blank=True)
+    raw_sha256 = models.CharField(max_length=64, unique=True, db_index=True)
+    raw_size_bytes = models.PositiveIntegerField(default=0)
+    root_tag = models.CharField(max_length=64, blank=True, db_index=True)
+    document_type = models.CharField(max_length=32, db_index=True)
+    classification_status = models.CharField(max_length=64, blank=True)
+    signature_present = models.BooleanField(default=False)
+    signature_verification_status = models.CharField(max_length=64, blank=True)
+    signature_verified = models.BooleanField(default=False)
+    production_signature_ready = models.BooleanField(default=False)
+    schema_validation_scope = models.CharField(max_length=64, blank=True)
+    xsd_path = models.CharField(max_length=512, blank=True)
+    xsd_available = models.BooleanField(default=False)
+    xsd_compiled = models.BooleanField(default=False)
+    local_xsd_valid = models.BooleanField(null=True, blank=True)
+    xsd_error_count = models.PositiveIntegerField(default=0)
+    errors_json = models.JSONField(default=list)
+    persisted_raw_xml = models.BooleanField(default=False)
+    raw_xml_text = models.TextField(blank=True, default="")
+    compliance_status = models.CharField(max_length=32, default="NOT_DGII_COMPLIANT")
+    dgii_submission_allowed = models.BooleanField(default=False)
+    certification_evidence = models.BooleanField(default=False)
+    track_id = models.CharField(max_length=255, null=True, blank=True, default=None)
+    dgii_call_made = models.BooleanField(default=False)
+    lab_mode = models.CharField(max_length=40, default="NON_PRODUCTION_LAB_ONLY")
+
+    class Meta:
+        verbose_name = "Inbound XML lab record (NON_PRODUCTION_LAB_ONLY)"
+        verbose_name_plural = "Inbound XML lab records (NON_PRODUCTION_LAB_ONLY)"
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["document_type", "root_tag"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Lab {self.document_type} {self.filename or self.raw_sha256[:12]}"
+
+
+class InboundXMLLabWorkflowEvent(models.Model):
+    """NON_PRODUCTION_LAB_ONLY workflow routing event. Not fiscal acceptance."""
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    lab_record = models.ForeignKey(
+        InboundXMLLabRecord,
+        on_delete=models.CASCADE,
+        related_name="lab_workflow_events",
+    )
+    route = models.CharField(max_length=64, db_index=True)
+    status = models.CharField(max_length=32, db_index=True)
+    reason = models.CharField(max_length=128, blank=True)
+    rule_version = models.CharField(max_length=32, default="phase-032-v1")
+    input_summary_json = models.JSONField(default=dict)
+    output_summary_json = models.JSONField(default=dict)
+    compliance_status = models.CharField(max_length=32, default="NOT_DGII_COMPLIANT")
+    dgii_submission_allowed = models.BooleanField(default=False)
+    certification_evidence = models.BooleanField(default=False)
+    track_id = models.CharField(max_length=255, null=True, blank=True, default=None)
+    dgii_call_made = models.BooleanField(default=False)
+    lab_mode = models.CharField(max_length=40, default="NON_PRODUCTION_LAB_ONLY")
+
+    class Meta:
+        verbose_name = "Inbound XML lab workflow event (NON_PRODUCTION_LAB_ONLY)"
+        verbose_name_plural = "Inbound XML lab workflow events (NON_PRODUCTION_LAB_ONLY)"
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["route", "status"]),
+            models.Index(fields=["lab_record", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"LabWorkflow {self.route} record={self.lab_record_id}"
+
+
+class InboundXMLLabAuditEvent(models.Model):
+    """NON_PRODUCTION_LAB_ONLY audit/retention event. Not a DGII audit trail."""
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    lab_record = models.ForeignKey(
+        InboundXMLLabRecord,
+        on_delete=models.CASCADE,
+        related_name="lab_audit_events",
+        null=True,
+        blank=True,
+    )
+    workflow_event = models.ForeignKey(
+        InboundXMLLabWorkflowEvent,
+        on_delete=models.CASCADE,
+        related_name="lab_audit_events",
+        null=True,
+        blank=True,
+    )
+    event_type = models.CharField(max_length=64, db_index=True)
+    retention_decision = models.CharField(max_length=64, blank=True, db_index=True)
+    severity = models.CharField(max_length=16, default="INFO", db_index=True)
+    reason = models.CharField(max_length=128, blank=True)
+    policy_version = models.CharField(max_length=32, default="phase-033-v1")
+    input_summary_json = models.JSONField(default=dict)
+    output_summary_json = models.JSONField(default=dict)
+    compliance_status = models.CharField(max_length=32, default="NOT_DGII_COMPLIANT")
+    dgii_submission_allowed = models.BooleanField(default=False)
+    certification_evidence = models.BooleanField(default=False)
+    track_id = models.CharField(max_length=255, null=True, blank=True, default=None)
+    dgii_call_made = models.BooleanField(default=False)
+    lab_mode = models.CharField(max_length=40, default="NON_PRODUCTION_LAB_ONLY")
+
+    class Meta:
+        verbose_name = "Inbound XML lab audit event (NON_PRODUCTION_LAB_ONLY)"
+        verbose_name_plural = "Inbound XML lab audit events (NON_PRODUCTION_LAB_ONLY)"
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["event_type", "retention_decision"]),
+            models.Index(fields=["lab_record", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"LabAudit {self.event_type} record={self.lab_record_id}"

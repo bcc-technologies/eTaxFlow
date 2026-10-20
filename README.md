@@ -243,6 +243,237 @@ python manage.py validate_tipo31_unsigned_draft --internal-code BCC-AR-2026-0000
 
 Validation reports group errors (`signature_missing_expected`, `demo_facet_mismatch`, `local_xsd_stub_required`, etc.). After facet-safe seed/allocation, `avoidable_demo_facet_error_count` should drop; Signature remains intentionally missing and status stays `NOT_DGII_COMPLIANT`.
 
+## Pre-certification endpoint design (Phase 025)
+
+Phase 025 defines **design-only** DGII portal URL metadata for software registration. No live endpoints, no DGII calls, no compliance claim.
+
+Planned host example (not configured by default): `etaxflow.bcctechnologies.com.do`
+
+```bash
+python manage.py dgii_endpoint_plan
+python manage.py dgii_endpoint_plan --json
+python manage.py dgii_readiness_report --json
+```
+
+Default settings (`ETAXFLOW_*`) keep `ETAXFLOW_PUBLIC_BASE_URL` blank and `ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`. Route stubs at `/fe/recepcion/api/ecf`, `/fe/aprobacioncomercial/api/ecf`, and `/fe/autenticacion/api/{semilla,validacioncertificado}` return **503 DISABLED** JSON — not live DGII integration.
+
+**Do not submit portal URLs to DGII** until DNS, HTTPS, internet accessibility, roles, certificate, and authorization gate are human-approved. See `docs/dgii/endpoints/PRE_CERTIFICATION_ENDPOINT_DESIGN.md`.
+
+## Staging DNS/SSL deployment checklist (Phase 026)
+
+Phase 026 adds a **checklist-only** staging/pre-certification deployment guide. No deploy, no live DGII calls, no production signing, no compliance claim.
+
+- Checklist: `docs/deployment/DGII_STAGING_DNS_SSL_CHECKLIST.md`
+- Staging env template: `.env.staging.example` (placeholders only — do not commit real `.env`)
+- Route stubs remain **503 DISABLED** by default (`ETAXFLOW_ENABLE_PUBLIC_DGII_ENDPOINTS=false`)
+- `dgii_endpoint_plan --json` reports `deployment_readiness_status: BLOCKED`, staging DNS/SSL/reachability `UNVERIFIED`, and `manual_verification_required: true`
+
+**Do not submit URLs to DGII** until DNS, SSL, external reachability, and human sign-off (security, tax/compliance, staging owner) are complete.
+
+## Pre-certification receiver endpoint contract (Phase 027)
+
+Phase 027 defines the **internal receiver contract** for future ECF / ARECF / ACECF handling. No live processing, no persistence, no signature verification, no DGII calls.
+
+- Contract: `docs/dgii/endpoints/PRE_CERTIFICATION_RECEIVER_ENDPOINT_CONTRACT.md`
+- Internal module: `ecf/dgii/receiver.py` (classification helpers for contract/testing only)
+- Command: `python manage.py dgii_receiver_contract` / `--json`
+
+Public `/fe/...` routes remain **503 DISABLED**. Classification functions are not invoked from disabled public views.
+
+```bash
+python manage.py dgii_receiver_contract
+python manage.py dgii_receiver_contract --json
+```
+
+Next: **Phase 028 — Non-production inbound XML lab** (controlled synthetic XML internally; no public network; no DGII).
+
+## Non-production inbound XML lab (Phase 028)
+
+Phase 028 adds a **controlled local lab** for synthetic ECF / ARECF / ACECF XML. Internal classification, SHA-256 hashing, and reporting only — no persistence, no signature verification, no DGII calls.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_XML_LAB.md`
+- Fixtures: `tests/fixtures/dgii/inbound_lab/` (`NON_OFFICIAL_SYNTHETIC_SAMPLE` — do not submit to DGII)
+- Module: `ecf/dgii/inbound_lab.py`
+- Public `/fe/...` routes remain **503 DISABLED**
+
+```bash
+python manage.py dgii_inbound_xml_lab
+python manage.py dgii_inbound_xml_lab --json
+python manage.py dgii_inbound_xml_lab --path tests/fixtures/dgii/inbound_lab/synthetic_ecf_unsigned.xml --json
+```
+
+Next: **Phase 029 — Local inbound schema validation lab** (offline XSD for ECF/ARECF/ACECF; still no certification claim).
+
+## Local inbound schema validation lab (Phase 029)
+
+Phase 029 adds **local/offline XSD validation** for synthetic inbound fixtures. A local XSD pass is **not** DGII acceptance, certification, or compliance.
+
+- Lab doc: `docs/dgii/lab/LOCAL_INBOUND_SCHEMA_VALIDATION_LAB.md`
+- Module: `ecf/dgii/inbound_schema_lab.py`
+- Mapping: ECF → `e-CF_31_v1.0.xsd` (Tipo 31 lab only); ARECF → `ARECF_v1.0.xsd`; ACECF → `ACECF_v1.0.xsd`
+- `dgii_inbound_xml_lab` remains classification-only (`schema_validation_status=NOT_RUN_BY_DEFAULT`)
+- Public `/fe/...` routes remain **503 DISABLED**
+
+```bash
+python manage.py dgii_inbound_schema_lab
+python manage.py dgii_inbound_schema_lab --json
+python manage.py dgii_inbound_schema_lab --path tests/fixtures/dgii/inbound_lab/synthetic_ecf_unsigned.xml --json
+```
+
+Synthetic fixtures are deliberately minimal and may be locally XSD-invalid. That is expected.
+
+## Local inbound signature verification lab (Phase 030)
+
+Phase 030 adds **local/offline XMLDSig inspection** for synthetic inbound fixtures. Signature present ≠ valid. Cryptographic verification is **NOT_IMPLEMENTED** (no `signxml`, no production certs, no private keys).
+
+- Lab doc: `docs/dgii/lab/LOCAL_INBOUND_SIGNATURE_VERIFICATION_LAB.md`
+- Module: `ecf/dgii/inbound_signature_lab.py`
+- Placeholder signatures classify as `PLACEHOLDER_ONLY`, never `TEST_ONLY_VALID`
+- `dgii_inbound_xml_lab` / `dgii_inbound_schema_lab` do not run signature verification by default
+- Public `/fe/...` routes remain **503 DISABLED**
+
+```bash
+python manage.py dgii_inbound_signature_lab
+python manage.py dgii_inbound_signature_lab --json
+python manage.py dgii_inbound_signature_lab --path tests/fixtures/dgii/inbound_lab/synthetic_ecf_signed_placeholder.xml --json
+```
+
+## Non-production inbound persistence lab (Phase 031)
+
+Phase 031 adds **lab-only** `InboundXMLLabRecord` rows for synthetic analysis. Default is dry-run. `--persist-lab-records` writes lab rows only. Raw XML is off unless `--store-raw-lab-xml`. These rows are **not** fiscal documents.
+
+```bash
+python manage.py dgii_inbound_persistence_lab
+python manage.py dgii_inbound_persistence_lab --json
+python manage.py dgii_inbound_persistence_lab --persist-lab-records --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED** and must not persist. Lab rows are not fiscal documents, not DGII acceptance, and not certification evidence. No TrackId.
+
+## Non-production inbound workflow routing lab (Phase 032)
+
+Phase 032 adds **lab-only workflow routing** for synthetic inbound lab records. Default is dry-run. `--apply-lab-workflow` writes `InboundXMLLabWorkflowEvent` rows only. Routes do **not** imply fiscal acceptance, acuse, or aprobación.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_WORKFLOW_ROUTING_LAB.md`
+- Module: `ecf/dgii/inbound_workflow_lab.py`
+
+```bash
+python manage.py dgii_inbound_workflow_lab --path tests/fixtures/dgii/inbound_lab/
+python manage.py dgii_inbound_workflow_lab --path tests/fixtures/dgii/inbound_lab/ --json
+python manage.py dgii_inbound_workflow_lab --path tests/fixtures/dgii/inbound_lab/ --apply-lab-workflow --json
+python manage.py dgii_inbound_workflow_lab --from-lab-records --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED** and must not run workflow routing.
+
+## Non-production inbound audit and retention policy lab (Phase 033)
+
+Phase 033 adds **lab-only audit/retention review** for synthetic inbound lab records. Default is dry-run. `--apply-lab-audit` writes `InboundXMLLabAuditEvent` rows only. `--export-manifest` writes metadata-only JSON under `runtime/dgii_lab_exports/`. **No deletes** in this phase.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_AUDIT_RETENTION_POLICY_LAB.md`
+- Module: `ecf/dgii/inbound_audit_retention_lab.py`
+
+```bash
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records --json
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records --apply-lab-audit --json
+python manage.py dgii_inbound_audit_retention_lab --from-lab-records --export-manifest --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED**. Lab audit ≠ DGII audit trail. Export ≠ certification evidence.
+
+## Inbound security controls policy review lab (Phase 034)
+
+Phase 034 adds a **lab-only security controls / policy review** for inbound DGII-facing receiver design. Report-only; no DB writes; does **not** enable public endpoints. Placeholders like body size / content-type are **CONFIGURED_PLACEHOLDER**, not **ENFORCED**.
+
+- Policy doc: `docs/dgii/security/INBOUND_SECURITY_CONTROLS_POLICY_REVIEW_LAB.md`
+- Module: `ecf/dgii/inbound_security_policy_lab.py`
+- Decision: `SECURITY_POLICY_BLOCKED`
+
+```bash
+python manage.py dgii_inbound_security_policy_lab
+python manage.py dgii_inbound_security_policy_lab --json
+python manage.py dgii_inbound_security_policy_lab --summary-only
+python manage.py dgii_inbound_security_policy_lab --export-report --json
+```
+
+Public `/fe/...` routes remain **503 DISABLED**. Policy lab ≠ production security approval. No DGII calls. No TrackId.
+
+## Inbound reporting export lab (Phase 035)
+
+Phase 035 adds a **metadata-only** consolidated inbound lab report/export (JSON/CSV/Markdown/bundle under `runtime/dgii_lab_reports/`). No production dashboard. **No raw XML** by default. No public endpoint activation. No DGII calls. No TrackId. Not certification evidence.
+
+- Lab doc: `docs/dgii/lab/NON_PRODUCTION_INBOUND_REPORTING_EXPORT_LAB.md`
+- Module: `ecf/dgii/inbound_reporting_lab.py`
+
+```bash
+python manage.py dgii_inbound_reporting_lab
+python manage.py dgii_inbound_reporting_lab --json
+python manage.py dgii_inbound_reporting_lab --summary-only
+python manage.py dgii_inbound_reporting_lab --export-bundle --json
+```
+
+## Staging deployment evidence collector lab (Phase 036)
+
+Phase 036 adds an **offline/manual staging evidence collector**. Template, validate, and metadata report only under `runtime/dgii_staging_evidence/`. **No network checks**. No deployment. No public endpoint activation. No DGII calls. No TrackId. Not staging approval. Not certification evidence.
+
+- Doc: `docs/deployment/DGII_STAGING_DEPLOYMENT_EVIDENCE_COLLECTOR_LAB.md`
+- Module: `ecf/dgii/staging_evidence_lab.py`
+- Decision default: `STAGING_EVIDENCE_BLOCKED`
+
+```bash
+python manage.py dgii_staging_evidence_lab
+python manage.py dgii_staging_evidence_lab --json
+python manage.py dgii_staging_evidence_lab --summary-only
+python manage.py dgii_staging_evidence_lab --write-template --json
+python manage.py dgii_staging_evidence_lab --export-report --json
+```
+
+## Certification portal package draft lab (Phase 037)
+
+Phase 037 adds a **DRAFT_ONLY** certification portal software postulation package. Planned fields/URLs and supporting lab summaries under `runtime/dgii_certification_package_drafts/`. **No portal submission**. No signed XML. No DGII calls. No TrackId. Not certification evidence.
+
+- Doc: `docs/dgii/certification/CERTIFICATION_PORTAL_SUBMISSION_PACKAGE_DRAFT.md`
+- Module: `ecf/dgii/certification_package_lab.py`
+- Default status: `PACKAGE_BLOCKED`
+
+```bash
+python manage.py dgii_certification_package_lab
+python manage.py dgii_certification_package_lab --json
+python manage.py dgii_certification_package_lab --summary-only
+python manage.py dgii_certification_package_lab --export-package --json
+```
+
+## Final pre-cert go/no-go review lab (Phase 038)
+
+Phase 038 adds a **FINAL_REVIEW_LAB_ONLY** go/no-go aggregator. Expected decision: `FINAL_DECISION_BLOCKED`. Export under `runtime/dgii_final_reviews/`. **No portal submission**. No endpoint activation. No DGII calls. No TrackId. No production signing. Not certification evidence.
+
+- Doc: `docs/dgii/certification/FINAL_NON_PRODUCTION_PRE_CERT_GO_NO_GO_REVIEW.md`
+- Module: `ecf/dgii/final_go_no_go_lab.py`
+
+```bash
+python manage.py dgii_final_go_no_go_lab
+python manage.py dgii_final_go_no_go_lab --json
+python manage.py dgii_final_go_no_go_lab --summary-only
+python manage.py dgii_final_go_no_go_lab --export-review --json
+```
+
+## Final inbound lab audit report (Phase 039)
+
+Phase 039 adds a **FINAL_AUDIT_LAB_ONLY** consolidated audit report for inbound lab work (Phase 024–039). Expected decision: `FINAL_DECISION_BLOCKED`. Export under `runtime/dgii_final_audit_reports/`. **No portal submission**. No endpoint activation. No DGII calls. No TrackId. No production signing. Not certification evidence. Human decisions still required.
+
+- Doc: `docs/dgii/audit/FINAL_INBOUND_LAB_AUDIT_REPORT.md`
+- Module: `ecf/dgii/final_inbound_audit_lab.py`
+
+```bash
+python manage.py dgii_final_inbound_audit_lab
+python manage.py dgii_final_inbound_audit_lab --json
+python manage.py dgii_final_inbound_audit_lab --summary-only
+python manage.py dgii_final_inbound_audit_lab --export-markdown --export-json --json
+```
+
+Next: human review of final audit report; decide on real staging evidence collection — **do not** enable endpoints or submit to DGII without explicit approval.
+
 ## Warnings
 
 - `internal_code` is not the same as DGII official `NCF` or `e-NCF`.

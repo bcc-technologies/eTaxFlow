@@ -60,6 +60,7 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+staticfiles/
 
 # Flask stuff:
 instance/
@@ -231,3 +232,31 @@ docs/dgii/sources/**/*.rar
 
 # Local generated media artifacts
 media/
+
+# Phase 033 lab export artifacts (metadata only; never commit payloads)
+runtime/dgii_lab_exports/*
+!runtime/dgii_lab_exports/.gitkeep
+
+# Phase 034 security policy reports (metadata only)
+runtime/dgii_security_reports/*
+!runtime/dgii_security_reports/.gitkeep
+
+# Phase 035 inbound lab report exports (metadata only; never commit payloads)
+runtime/dgii_lab_reports/*
+!runtime/dgii_lab_reports/.gitkeep
+
+# Phase 036 staging evidence lab artifacts (manual metadata only)
+runtime/dgii_staging_evidence/*
+!runtime/dgii_staging_evidence/.gitkeep
+
+# Phase 037 certification package drafts (DRAFT_ONLY; never commit payloads)
+runtime/dgii_certification_package_drafts/*
+!runtime/dgii_certification_package_drafts/.gitkeep
+
+# Phase 038 final go/no-go reviews (FINAL_REVIEW_LAB_ONLY)
+runtime/dgii_final_reviews/*
+!runtime/dgii_final_reviews/.gitkeep
+
+# DGII final inbound audit lab exports (Phase 039)
+runtime/dgii_final_audit_reports/*
+!runtime/dgii_final_audit_reports/.gitkeep
